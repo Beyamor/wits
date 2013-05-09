@@ -1,0 +1,45 @@
+body {
+	background-color: #202638;
+	margin: 0px;
+	font-family: "Helvetica";
+	text-align: justify;
+background-image: url(http://upload.wikimedia.org/wikipedia/commons/9/94/Starry_Night_Over_the_Rhone.jpg); }
+
+a {
+text-decoration: none; }
+
+#navigation {
+	position: fixed;
+	left: 50px;
+	top: 0px;
+	color: white;
+	background-color: rgba(10, 10, 10, 0.9);
+	padding: 10px 30px 15px 30px;
+	border-radius: 0px 0px 5px 5px;
+font-size: x-large; }
+
+#page-content {
+	background-color: white;
+	padding: 40px;
+	width: 920px;
+	overflow-y: auto;
+	position: fixed;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+	border-style: solid;
+border-width: 0px 0px 0px 1px; }
+
+.blog .title {
+	display: block;
+font-size: xx-large; }
+.blog .date {
+	display: block;
+	font-size: small;
+color: #666666; }
+
+#side-graphic {
+	height: 100%;
+	position: fixed;
+	top: 0px;
+left: 0px; }

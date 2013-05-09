@@ -3,18 +3,13 @@
         hiccup.page
         [hiccup.middleware :only (wrap-base-url)])
   (:require [compojure.handler :as handler]
-            [compojure.route :as route]))
+            [compojure.route :as route]
+            [wits.blog.routes :as blog]
+            [ring.util.response :as ring-resp]))
 
 (defroutes all-routes
-           (GET "/" []
-                (html5
-                  [:head
-                   [:title (str "Words in the Sky")]]
-                  [:body
-                   [:div
-                     [:h1 "Hello world"]
-                     [:p "And how're you doing today?"]]
-                   (include-css "/css/hello-world.css")]))
+           (GET "/" [] (ring-resp/redirect "/blog"))
+           blog/all
            (route/resources "/")
            (route/not-found "Page not found"))
 
