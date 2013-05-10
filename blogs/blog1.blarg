@@ -1,6 +1,29 @@
 title: here's a blog
 date: 12-04-2013
 
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultrices feugiat felis at ornare. Maecenas sagittis sem vel elit tempus sagittis. Proin nibh sapien, elementum ultrices laoreet eget, pretium id sapien. Nullam adipiscing, dui eget semper faucibus, leo magna scelerisque ipsum, id rutrum dui nisi vitae tellus. Morbi nec justo et turpis lacinia bibendum nec ornare arcu. Proin quis eros odio, at consectetur mi. Sed congue congue lorem, ut pharetra urna vulputate eget. Donec in lorem id tortor consequat imperdiet. Quisque vulputate magna quis dui hendrerit suscipit. Quisque molestie leo sit amet massa ultrices vitae ultricies massa viverra.</p>
+# This is the best blog
 
-<p>Integer ac odio sed augue pulvinar blandit non vitae felis. In feugiat dolor at turpis pharetra ut iaculis nisi laoreet. Proin sit amet nisi vitae dolor varius condimentum. Integer in posuere eros. Suspendisse placerat mattis enim non consequat. Duis massa arcu, rutrum ac blandit ac, cursus quis eros. Integer nec urna eget nibh pellentesque faucibus...</p>
+## Well, it's alright
+
+Lorem ipsum dolor sit amet, *consectetur* _adipiscing_ **elit**. Quisque ultrices feugiat felis at ornare. Maecenas sagittis sem vel elit tempus sagittis. Proin nibh sapien, elementum ultrices laoreet eget, pretium id sapien. Nullam adipiscing, dui eget semper faucibus, leo magna scelerisque ipsum, id rutrum dui nisi vitae tellus.
+>Morbi nec justo et turpis lacinia bibendum nec ornare arcu. Proin quis eros odio, at consectetur mi. Sed congue congue lorem, ut pharetra urna vulputate eget. Donec in lorem id tortor consequat imperdiet. Quisque vulputate magna quis dui hendrerit suscipit. Quisque molestie leo sit amet massa ultrices vitae ultricies massa viverra.
+
+* foo
+* bar
+* baz
+
+Okay, now for the cool stuff. `1 + 2 = 2` Check out that code.
+
+```clojure
+; Aw yiss, this code
+(defn blog
+  "Creates a view of a blog whose contents are truncated."
+  [{:keys [title date content]}]
+  (sections
+    :blog (sections
+            :title title
+            :date date
+            :content (prepare-blog-content content))))
+```
+
+Integer ac odio sed augue pulvinar blandit non vitae felis. In feugiat dolor at turpis pharetra ut iaculis nisi laoreet. Proin sit amet nisi vitae dolor varius condimentum. Integer in posuere eros. Suspendisse placerat mattis enim non consequat. Duis massa arcu, rutrum ac blandit ac, cursus quis eros. Integer nec urna eget nibh pellentesque faucibus...

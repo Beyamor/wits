@@ -1,7 +1,9 @@
 (ns wits.blog.pages
   (:use hiccup.element
-        [hiccup.page :only [html5 include-css]]
-        [wits.blog.core :only [load-all-blogs]]))
+        [hiccup.util :only [escape-html]]
+        [hiccup.page :only [html5 include-css include-js]]
+        [wits.blog.core :only [load-all-blogs]])
+  (:require [markdown.core :as md]))
 
 (defn sections
   "Takes section-name/content pairs
@@ -11,14 +13,19 @@
   (for [[section-name content] (partition 2 args)]
     [:div {:class section-name} content]))
 
-(defn truncated-blog
+(defn prepare-blog-content
+  [content]
+  (-> content
+    md/md-to-html-string))
+
+(defn blog
   "Creates a view of a blog whose contents are truncated."
   [{:keys [title date content]}]
   (sections
     :blog (sections
             :title title
             :date date
-            :content content)))
+            :content (prepare-blog-content content))))
 
 (defn blog-roll
   []
@@ -29,5 +36,13 @@
      [:canvas {:id "side-graphic"}]
      (link-to {:id "navigation"} "/" "wits")
      [:div {:id "page-content"}
-      (map truncated-blog (load-all-blogs))]
-     (include-css "/css/blog.css")]))
+      (map blog (load-all-blogs))]
+     (map include-css
+          ["/css/blog.css"
+           "/css/lib/syntax-highlighter/shCore.css"
+           "/css/lib/syntax-highlighter/themes/witsTheme.css"])
+     (map include-js
+          ["/js/lib/syntax-highlighter/shCore.js"
+           "/js/lib/syntax-highlighter/brushes/shBrushClojure.js"])
+     (javascript-tag
+       "SyntaxHighlighter.all()")]))
