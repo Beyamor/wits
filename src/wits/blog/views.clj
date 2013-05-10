@@ -1,4 +1,4 @@
-(ns wits.blog.pages
+(ns wits.blog.views
   (:use hiccup.element
         [hiccup.util :only [escape-html]]
         [hiccup.page :only [html5 include-css include-js]]
