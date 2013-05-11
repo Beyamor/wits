@@ -46,3 +46,8 @@
   "Gets the tag of some Hiccp element."
   [el]
   (first el))
+
+(defn tagged?
+  "Returns true if the given Hiccup element has the provided tag."
+  [tag-to-match el]
+  (= tag-to-match (tag el)))
