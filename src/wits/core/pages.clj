@@ -5,7 +5,9 @@
 (def base-css
   ["/css/core.css"])
 
-(def base-js [])
+(def base-js
+  ["/js/lib/jquery-1.9.1.min.js"
+   "/js/lib/jquery.pjax.js"])
 
 (defn extend-base
   [& {:keys [title content css js script full-page?]}]
@@ -17,8 +19,12 @@
       [:body
        (when-not full-page? [:canvas#side-graphic])
        [:div#page
+         (link-to {:id "pjax-link"} "/blog/pjax" "pjax?")
          [:div#page-content content]]
        (link-to {:id "navigation"} "/" "wits")
        (map include-css css)
        (map include-js js)
-       (javascript-tag script)])))
+       (javascript-tag script)
+       (javascript-tag
+         "$(document).pjax('#pjax-link', '#page-content')")
+       ])))

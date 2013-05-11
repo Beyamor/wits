@@ -7,6 +7,7 @@
                            [compojure "1.1.5"]
                            [hiccup "1.0.0"]
                            [enlive "1.1.1"]
-                           [markdown-clj "0.9.21"]]
+                           [markdown-clj "0.9.21"]
+                           [clout "1.1.0"]]
             :plugins [[lein-ring "0.8.3"]]
             :ring {:handler wits.handler/app})
