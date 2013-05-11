@@ -1,5 +1,7 @@
 (ns wits.blog.core
-  (:use [clojure.string :only [blank? trim split-lines lower-case]])
+  (:use [clojure.string
+         :only [blank? trim split-lines lower-case replace]
+         :rename {replace s-replace}])
   (:import java.text.SimpleDateFormat))
 
 (defn- parse-params
@@ -60,3 +62,19 @@
         slurp
         parse-blog))
     sort-blogs))
+
+(defn blog->url
+  "Given a blog, this returns the url that should identity it."
+  [blog]
+  (->
+    (:title blog)
+    (s-replace #" " "-")
+    (s-replace #"[^\w\-]" "")))
+
+(defn load-blog-by-url
+  "Returns the blog whose url matches the one provided."
+  [url]
+  (->>
+    (load-all-blogs)
+    (filter #(= url (blog->url %)))
+    first))

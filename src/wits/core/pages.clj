@@ -2,17 +2,10 @@
   (:use hiccup.element
         [hiccup.page :only [html5 include-css include-js]]))
 
-(def base-css [])
-
-(defn extend-base-css
-  [& more-csses]
-  (concat base-css more-csses))
+(def base-css
+  ["/css/core.css"])
 
 (def base-js [])
-
-(defn extend-base-js
-  [& more-jses]
-  (concat base-js more-jses))
 
 (defn extend-base
   [& {:keys [title content css js script]}]
@@ -22,8 +15,9 @@
        [:title title]]
       [:body
        [:canvas#side-graphic]
+       [:div#page
+         [:div#page-content content]]
        (link-to {:id "navigation"} "/" "wits")
-       [:div#page-content content]
        (map include-css css)
        (map include-js js)
        (javascript-tag script)])))

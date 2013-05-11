@@ -3,7 +3,7 @@
         [hiccup.util :only [escape-html]]
         [hiccup.page :only [html5 include-css include-js]]
         [wits.core.html :only [sections html->hiccup html->enlive]]
-        [wits.blog.core :only [load-all-blogs]]
+        [wits.blog.core :only [blog->url load-all-blogs load-blog-by-url]]
         [markdown.core :only [md-to-html-string]]
         [wits.util :only [-#> -#>>]])
   (:require [markdown.core :as md]
@@ -18,10 +18,12 @@
 
 (defn blog-with-content
   "Creates a view of a blog, given the blog and a function for processing its content."
-  [{:keys [title date content]} process-content]
+  [{:keys [title date content] :as blog} process-content]
   [:div.blog
    (sections
-     :title title
+     :title (link-to
+              (str "/blog/entries/" (blog->url blog))
+              title)
      :date date
      :content (process-content content))])
 
@@ -53,25 +55,50 @@
        prepare-blog-content
        (truncate-by-paragraphs 3))))
 
+(def blog-css
+  (concat core-pages/base-css
+          ["/css/blog.css"
+           "/css/lib/syntax-highlighter/shCore.css"
+           "/css/lib/syntax-highlighter/themes/witsTheme.css"]))
+
+(def blog-js
+  (concat core-pages/base-js
+          ["/js/lib/syntax-highlighter/shCore.js"
+           "/js/lib/syntax-highlighter/brushes/shBrushClojure.js"]))
+
+(defn blog-page
+  [& {:keys [title content]}]
+  (core-pages/extend-base
+    :title
+    title
+
+    :content
+    content
+
+    :css
+    blog-css
+
+    :js
+    blog-js
+
+    :script
+    "SyntaxHighlighter.all()"))
+
 (defn blog-roll
   []
-  (core-pages/extend-base
+  (blog-page
     :title
     "Blog"
 
     :content
-    (map truncated-blog (load-all-blogs))
+    (map truncated-blog (load-all-blogs))))
 
-    :css
-    (core-pages/extend-base-css
-      "/css/blog.css"
-      "/css/lib/syntax-highlighter/shCore.css"
-      "/css/lib/syntax-highlighter/themes/witsTheme.css")
+(defn blog
+  [url]
+  (let [blog (load-blog-by-url url)]
+    (blog-page
+      :title
+      (str "Blog - " (:title blog))
 
-    :js
-    (core-pages/extend-base-js
-      "/js/lib/syntax-highlighter/shCore.js"
-      "/js/lib/syntax-highlighter/brushes/shBrushClojure.js")
-
-    :script
-     "SyntaxHighlighter.all()"))
+      :content
+      (full-blog blog))))
