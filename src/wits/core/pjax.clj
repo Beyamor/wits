@@ -1,6 +1,7 @@
 (ns wits.core.pjax
   (:use [compojure.core :only [make-route let-request]]
-        [clout.core :only [route-compile]]))
+        [clout.core :only [route-compile]]
+        [hiccup.element :only [javascript-tag]]))
 
 (defn- prepare-route
   "Pre-compile the route.
@@ -27,3 +28,5 @@
        (let-request [~bindings request#]
                     (let [~'pjax? (-> request# :headers (get "x-pjax"))]
                       ~@body)))))
+
+(def page-script (javascript-tag "$(document).pjax('.page-content', '#page')"))

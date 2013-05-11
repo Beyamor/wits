@@ -37,6 +37,7 @@ body {
 	background-color: white;
 	padding: 40px;
 	overflow-y: auto;
+	z-index: -1;
 }
 
 #page-content {
@@ -44,3 +45,10 @@ body {
 	@include centered;
 }
 
+#side-graphic {
+	height: 100%;
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	z-index: -2;
+}
