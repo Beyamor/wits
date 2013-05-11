@@ -79,7 +79,7 @@
            "/js/lib/syntax-highlighter/brushes/shBrushClojure.js"]))
 
 (defn blog-page
-  [& {:keys [title content]}]
+  [& {:keys [title content full-page?]}]
   (core-pages/extend-base
     :title
     title
@@ -94,7 +94,10 @@
     blog-js
     
     :script
-    "SyntaxHighlighter.all()"))
+    "SyntaxHighlighter.all()"
+
+    :full-page?
+    full-page?))
 
 (defn blog-roll
   []
@@ -109,6 +112,9 @@
   [url]
   (let [blog (load-blog-by-url url)]
     (blog-page
+      :full-page?
+      true
+
       :title
       (str "Blog - " (:title blog))
 

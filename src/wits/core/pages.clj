@@ -8,13 +8,14 @@
 (def base-js [])
 
 (defn extend-base
-  [& {:keys [title content css js script]}]
-  (let [title (str "Words in the Sky" (if title (str " - " title)))]
+  [& {:keys [title content css js script full-page?]}]
+  (let [title (str "Words in the Sky" (if title (str " - " title)))
+        css (if full-page? css (conj css "/css/half-page.css"))]
     (html5
       [:head
        [:title title]]
       [:body
-       [:canvas#side-graphic]
+       (when-not full-page? [:canvas#side-graphic])
        [:div#page
          [:div#page-content content]]
        (link-to {:id "navigation"} "/" "wits")

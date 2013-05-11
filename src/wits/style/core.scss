@@ -27,19 +27,13 @@ a {
 	background-color: rgba(10, 10, 10, 0.9);
 	padding: 10px 30px 15px 30px;
 	border-radius: 0px 0px 5px 5px;
-font-size: x-large; }
+	font-size: x-large;
+}
 
 #page {
 	background-color: white;
 	padding: 40px;
-	width: 900px;
 	overflow-y: auto;
-	position: fixed;
-	right: 0px;
-	top: 0px;
-	bottom: 0px;
-	border-style: solid;
-	border-width: 0px 0px 0px 1px;
 }
 
 #page-content {
