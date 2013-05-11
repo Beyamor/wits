@@ -9,7 +9,8 @@
 
 (def base-js
   ["/js/lib/jquery-1.9.1.min.js"
-   "/js/lib/jquery.pjax.js"])
+   "/js/lib/jquery.pjax.js"
+   "/js/page-content.js"])
 
 (defn pjax-page
   [& {:keys [title content css js script full-page? pjax?]}]
@@ -22,8 +23,7 @@
                [:div#page-content content]
                (map include-css css)
                (map include-js js)
-               (javascript-tag script)
-               pjax/page-script)]
+               (javascript-tag script))]
     (if pjax?
       page
       (html5

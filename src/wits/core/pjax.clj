@@ -28,5 +28,3 @@
        (let-request [~bindings request#]
                     (let [~'pjax? (-> request# :headers (get "x-pjax"))]
                       ~@body)))))
-
-(def page-script (javascript-tag "$(document).pjax('.page-content', '#page')"))
