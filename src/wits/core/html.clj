@@ -1,4 +1,6 @@
-(ns wits.core.html)
+(ns wits.core.html
+  (:require [net.cgrand.enlive-html :as enlive])
+  (:import java.io.StringReader))
 
 (defn sections
   "Takes section-name/content pairs
@@ -7,3 +9,40 @@
   [& args]
   (for [[section-name content] (partition 2 args)]
     [:div {:class section-name} content]))
+
+(defn enlive->hiccup
+  "Taking some Enlive HTML structure,
+   this transforms it into a Hiccup structure."
+  [el]
+  (if-not (string? el)
+    (->>
+      (map enlive->hiccup (:content el))
+      (concat [(:tag el) (:attrs el)])
+      (keep identity)
+      vec)
+    el))
+
+(defn html->enlive
+  "Taking some HTML string, this returns an Enlive data structure."
+  [html]
+  (-> html enlive/html-snippet))
+
+(defn html->hiccup
+  "Taking some HTML string, this returns a Hiccup data structure."
+  [html]
+  (->> html html->enlive (map enlive->hiccup)))
+
+(defn content
+  "Gets some Hiccup element's contents."
+  [el]
+  (last el))
+
+(defn set-content
+  "Sets some Hiccup element's contents."
+  [el new-content]
+  (-> (butlast el) vec (conj new-content)))
+
+(defn tag
+  "Gets the tag of some Hiccp element."
+  [el]
+  (first el))
