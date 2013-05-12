@@ -1,7 +1,8 @@
 (ns wits.web.pjax
   (:use [compojure.core :only [make-route let-request]]
         [clout.core :only [route-compile]]
-        [hiccup.element :only [javascript-tag]]))
+        [hiccup.element :only [javascript-tag]])
+  (:require [wits.web.pages :as pages]))
 
 (defn- prepare-route
   "Pre-compile the route.
@@ -28,3 +29,13 @@
        (let-request [~bindings request#]
                     (let [~'pjax? (-> request# :headers (get "x-pjax"))]
                       ~@body)))))
+
+(defn page
+  "Given a full page template and the content attributes,
+   this will either return a full page or the given content
+   if the request is a PJAX one."
+  [full-page-template pjax? page-attributes]
+  (let [content (pages/as-content page-attributes)]
+    (if pjax?
+      content
+      (pages/main content))))

@@ -6,13 +6,13 @@
             [wits.blog.load :as load]))
 
 (defroutes all
-           (GET "/blog"
+           (PJAX "/blog"
                 []
                 (->
                   (load/all)
-                  view/blog-roll))
-           (GET "/blog/entries/:blog-url"
+                  (view/blog-roll pjax?)))
+           (PJAX "/blog/entries/:blog-url"
                 [blog-url]
                 (->
                   (load/by-url blog-url)
-                  view/blog-entry)))
+                  (view/blog-entry pjax?))))
