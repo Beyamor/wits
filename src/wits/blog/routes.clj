@@ -1,7 +1,7 @@
 (ns wits.blog.routes
   (:use compojure.core
         wits.blog.views
-        [wits.core.pjax :only [PJAX]])
+        [wits.web.pjax :only [PJAX]])
   (:require [wits.blog.views :as view]
             [wits.blog.load :as load]))
 

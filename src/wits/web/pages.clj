@@ -1,8 +1,8 @@
-(ns wits.core.pages
+(ns wits.web.pages
   (:use hiccup.element
         [hiccup.core :only [html]]
         [hiccup.page :only [html5 include-css include-js]])
-  (:require [wits.core.pjax :as pjax]))
+  (:require [wits.web.pjax :as pjax]))
 
 (def base-css
   ["/css/core.css"])

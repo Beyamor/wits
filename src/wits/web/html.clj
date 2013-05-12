@@ -1,4 +1,4 @@
-(ns wits.core.html
+(ns wits.web.html
   (:require [net.cgrand.enlive-html :as enlive])
   (:import java.io.StringReader))
 

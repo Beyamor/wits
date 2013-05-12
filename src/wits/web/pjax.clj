@@ -1,4 +1,4 @@
-(ns wits.core.pjax
+(ns wits.web.pjax
   (:use [compojure.core :only [make-route let-request]]
         [clout.core :only [route-compile]]
         [hiccup.element :only [javascript-tag]]))
