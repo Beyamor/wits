@@ -47,16 +47,10 @@
 (defn truncate-by-paragraphs
   "Returns the blog contents truncated to some number of paragraphs"
   [number-of-paragraphs blog-content]
-  (let [els-with-words (filter (-#> html/tag #{:p :h1 :h2}) blog-content)]
-    (loop [collected-paragraphs 0 remaining-els els-with-words truncated-content []]
-      (if (and (< collected-paragraphs number-of-paragraphs)
-               (seq remaining-els))
-        (let [[el & more-els] remaining-els]
-          (recur
-            (+ collected-paragraphs (if (= :p (html/tag el)) 1 0))
-            more-els
-            (conj truncated-content el)))
-        (list* truncated-content)))))
+  (->>
+    blog-content
+    (filter (-#> html/tag (= :p)))
+    (take number-of-paragraphs)))
 
 (defn truncated-blog
   "Creates a view of a blog whose contents are truncated."
