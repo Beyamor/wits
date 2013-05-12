@@ -3,7 +3,7 @@
         [hiccup.util :only [escape-html]]
         [hiccup.page :only [html5 include-css include-js]]
         [wits.core.html :only [sections html->hiccup html->enlive]]
-        [wits.blog.core :only [blog->url load-all-blogs load-blog-by-url]]
+        [wits.blog.core :only [blog->url]]
         [markdown.core :only [md-to-html-string]]
         [wits.util :only [-#> -#>>]])
   (:require [markdown.core :as md]
@@ -94,23 +94,22 @@
     full-page?))
 
 (defn blog-roll
-  []
+  [blogs]
   (blog-page
     :title
     "Blog"
 
     :content
-    (map truncated-blog (load-all-blogs))))
+    (map truncated-blog blogs)))
 
-(defn blog
-  [url]
-  (let [blog (load-blog-by-url url)]
-    (blog-page
-      :full-page?
-      true
+(defn blog-entry
+  [blog]
+  (blog-page
+    :full-page?
+    true
 
-      :title
-      (:title blog)
+    :title
+    (:title blog)
 
-      :content
-      (full-blog blog))))
+    :content
+    (full-blog blog)))

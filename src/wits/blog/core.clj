@@ -40,8 +40,8 @@
      :date date
      :content contents}))
 
-(defn sort-blogs
-  "Sorts a sequence of blogs."
+(defn sort-by-date
+  "Sorts a sequence of blogs by their dates."
   [blogs]
   (let [formatter (SimpleDateFormat. "MM-dd-yyyy")
         parse-date #(.parse formatter %)]
@@ -50,19 +50,6 @@
       #(* -1 (compare %1 %2))
       blogs)))
 
-(defn load-all-blogs
-  "Loads all of the blogs, obviously. Assumed to  be in /blogs/"
-  []
-  (->>
-    (for [file (-> "./blogs" clojure.java.io/file file-seq)
-          :when (-> file .getName (.endsWith "blarg"))]
-      (->
-        file
-        clojure.java.io/reader
-        slurp
-        parse-blog))
-    sort-blogs))
-
 (defn blog->url
   "Given a blog, this returns the url that should identity it."
   [blog]
@@ -70,11 +57,3 @@
     (:title blog)
     (s-replace #" " "-")
     (s-replace #"[^\w\-]" "")))
-
-(defn load-blog-by-url
-  "Returns the blog whose url matches the one provided."
-  [url]
-  (->>
-    (load-all-blogs)
-    (filter #(= url (blog->url %)))
-    first))
