@@ -34,7 +34,6 @@
   [:div.blog
    (sections
      :title (link-to
-              {:class "page-content"}
               (str "/blog/entries/" (blog->url blog))
               title)
      :date date
@@ -80,13 +79,10 @@
            "/js/lib/syntax-highlighter/brushes/shBrushClojure.js"]))
 
 (defn blog-page
-  [& {:keys [title content full-page? pjax?]}]
-  (core-pages/pjax-page
+  [& {:keys [title content full-page?]}]
+  (core-pages/regular-page
     :title
     title
-
-    :pjax?
-    pjax?
 
     :content
     content
@@ -104,26 +100,20 @@
     full-page?))
 
 (defn blog-roll
-  [pjax?]
+  []
   (blog-page
     :title
     "Blog"
-
-    :pjax?
-    pjax?
 
     :content
     (map truncated-blog (load-all-blogs))))
 
 (defn blog
-  [url pjax?]
+  [url]
   (let [blog (load-blog-by-url url)]
     (blog-page
       :full-page?
       true
-
-      :pjax?
-      pjax?
 
       :title
       (:title blog)

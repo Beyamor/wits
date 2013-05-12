@@ -4,5 +4,5 @@
         [wits.core.pjax :only [PJAX]]))
 
 (defroutes all
-           (PJAX "/blog" [] (blog-roll pjax?))
-           (PJAX "/blog/entries/:blog-url" [blog-url] (blog blog-url pjax?)))
+           (GET "/blog" [] (blog-roll))
+           (GET "/blog/entries/:blog-url" [blog-url] (blog blog-url)))
