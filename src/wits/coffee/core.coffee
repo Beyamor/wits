@@ -44,4 +44,18 @@ $ ->
 	$(document).on('pjax:complete', setUpPJAXLinks)
 	setUpPJAXLinks()
 
+	# Used to fix the header to the top of the screen when scrolling down
+	# Dunno. Looks kinda cheesy, but I'll keep the code around for now.
+	###
+	$header		= $('#header')
+	basePos		= $header.offset().top
+	fixHeader = ->
+		if $(window).scrollTop() > basePos
+			$header.css({'position': 'fixed', 'top': "0px"})
+		else
+			$header.css({'position': 'relative', 'top': 'auto'})
+	$(window).scroll(fixHeader)
+	fixHeader()
+	###
+
 	drawArt('art') if drawArt?
