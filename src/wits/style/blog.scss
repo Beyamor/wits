@@ -1,11 +1,6 @@
 @import "values";
 
 .blog {
-	margin-top: 60px;
-	&:first-child {
-		margin-top: 0px;
-	}
-
 	.title {
 		display: block;
 		font-size: xx-large;
@@ -30,4 +25,8 @@
 	.code-block {
 		margin-top: 20px;
 	}
+}
+
+.blog-separator {
+	margin: 80px 0px;
 }

@@ -84,7 +84,10 @@
     (merge
       blog-page
       {:title "Blog"
-       :content (map truncated-blog blogs)})))
+       :content
+       (->> blogs
+         (map truncated-blog)
+         (interpose [:div.blog-separator]))})))
 
 (defn blog-entry
   [blog pjax?]
