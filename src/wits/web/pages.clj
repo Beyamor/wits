@@ -10,7 +10,7 @@
 (def core-js
   ["/js/lib/jquery-1.9.1.min.js"
    "/js/lib/jquery.pjax.js"
-   "/js/page-content.js"
+   "/js/core.js"
    "/js/lib/syntax-highlighter/shCore.js"])
 
 (defn wits-title
