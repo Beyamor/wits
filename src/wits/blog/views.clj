@@ -64,25 +64,18 @@
        (truncate-by-paragraphs 3))))
 
 (def blog-css
-  (concat pages/base-css
-          ["/css/blog.css"
-           "/css/lib/syntax-highlighter/shCore.css"
-           "/css/lib/syntax-highlighter/themes/witsTheme.css"]))
+  ["/css/blog.css"
+   "/css/lib/syntax-highlighter/themes/witsTheme.css"])
 
 (def blog-js
-  (concat pages/base-js
-          ["/js/lib/syntax-highlighter/shCore.js"
-           "/js/lib/syntax-highlighter/brushes/shBrushClojure.js"]))
+  ["/js/lib/syntax-highlighter/brushes/shBrushClojure.js"])
 
 (def blog-page
   {:css
    blog-css
 
    :js
-   blog-js
-   
-   :script
-   "SyntaxHighlighter.all()"})
+   blog-js})
 
 (defn blog-roll
   [blogs pjax?]
@@ -100,4 +93,11 @@
     (merge
       blog-page
       {:title (blog :title)
-       :content (full-blog blog)})))
+       :content (full-blog blog)
+
+       ; I should really move this into an external script
+       ; but whatever #WorstDev
+       :script
+       "$(function() {
+          SyntaxHighlighter.highlight();
+       });"})))

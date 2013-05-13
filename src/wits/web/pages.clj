@@ -3,13 +3,15 @@
         [hiccup.core :only [html]]
         [hiccup.page :only [html5 include-css include-js]]))
 
-(def base-css
-  ["/css/core.css"])
+(def core-css
+  ["/css/core.css"
+   "/css/lib/syntax-highlighter/shCore.css"])
 
-(def base-js
+(def core-js
   ["/js/lib/jquery-1.9.1.min.js"
    "/js/lib/jquery.pjax.js"
-   "/js/page-content.js"])
+   "/js/page-content.js"
+   "/js/lib/syntax-highlighter/shCore.js"])
 
 (defn wits-title
   [title]
@@ -40,7 +42,9 @@
    These page contents should include css, js, etc."
   [page-contents]
   (html5
-    [:head]
+    [:head
+     (map include-css core-css)
+     (map include-js core-js)]
     [:body
      [:canvas#art]
      [:div#page
