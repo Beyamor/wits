@@ -50,4 +50,17 @@
      header
      [:div#page
       [:div#page-content
-       page-contents]]]))
+       page-contents]]
+
+     ; Super temporary, just wanna be drawing something into the canvas
+     (javascript-tag
+       "
+       var img = new Image();
+       img.src = '/images/main-background.jpg';
+       img.onload = function() {
+         var $art = $('#art'), context = $art[0].getContext('2d');
+         context.canvas.width = $art.width();
+         context.canvas.height = $art.height();
+         context.drawImage(img, 0, 0);
+       };
+       ")]))
