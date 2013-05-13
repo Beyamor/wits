@@ -47,7 +47,7 @@
      (map include-js core-js)]
     [:body
      [:canvas#art]
+     header
      [:div#page
-      header
       [:div#page-content
        page-contents]]]))
