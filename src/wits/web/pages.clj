@@ -13,7 +13,7 @@
 
 (defn wits-title
   [title]
-  (str "Words in the Sky" (if title (str " - " title))))
+  [:title (str "Words in the Sky" (if title (str " - " title)))])
 
 (def header
   [:div#header
@@ -29,6 +29,7 @@
    this returns the resulting HTML contents."
   [{:keys [title content js css script]}]
   (html
+    (wits-title title)
     (map include-css css)
     content
     (map include-js js)
