@@ -54,15 +54,11 @@ $ ->
 	###
 	
 	$viewport = $('html, body')
-
 	$.pjax.defaults.scrollTo = false if $.support.pjax
-
-	setUpPJAXLinks = ->
-		$(document).pjax('.page-content', '#page-content')
-	setUpPJAXLinks()
+	$(document).pjax('.page-content', '#page-content')
 
 	pjaxReload = ->
-		setUpPJAXLinks()
+		$('#page').pjax('.page-content', '#page-content')
 
 		# Scroll back up the header
 		$('body,html').animate({
