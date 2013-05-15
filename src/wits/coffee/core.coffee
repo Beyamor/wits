@@ -74,7 +74,7 @@ $ ->
 				$viewport.stop().unbind('scroll mousedown DOMMouseScroll mousewheel keyup')
 		)
 
-	$(document).on('pjax:complete', pjaxReload)
+	$(document).on('pjax:success', pjaxReload)
 
 	$('#art').height($(window).height() - $('#header').height())
 	drawArt('art') if drawArt?
