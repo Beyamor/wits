@@ -1,7 +1,7 @@
 (ns wits.web.pjax
   (:use [compojure.core :only [make-route let-request]]
         [clout.core :only [route-compile]]
-        [hiccup.element :only [javascript-tag]])
+        [hiccup.element :only [javascript-tag link-to]])
   (:require [wits.web.pages :as pages]))
 
 (defn- prepare-route
@@ -39,3 +39,7 @@
     (if pjax?
       content
       (pages/main content))))
+
+(defn wrap-in-pjax-link
+  [content url]
+  (link-to {:class "page-content"} url content))

@@ -29,39 +29,38 @@
     html->hiccup
     add-code-tags))
 
-(defn blog-with-content
-  "Creates a view of a blog, given the blog and a function for processing its content."
-  [{:keys [title date content] :as blog} process-content]
+(defn blog-view
+  "Creates a Hiccup structure for a blog view."
+  [{:keys [title date content]}]
   [:div.blog
    (sections
-     :title (link-to
-              {:class "page-content"}
-              (str "/blog/entries/" (blog->url blog))
-              title)
+     :title title
      :date date
-     :content (process-content content))])
+     :content content)])
 
 (defn full-blog
   "Creates a view of a full blog."
   [blog]
-  (blog-with-content blog prepare-blog-content))
+  (-> blog
+    (update-in [:content] prepare-blog-content)
+    blog-view))
 
 (defn truncate-by-paragraphs
   "Returns the blog contents truncated to some number of paragraphs"
-  [number-of-paragraphs blog-content]
+  [blog-content number-of-paragraphs]
   (->>
     blog-content
     (filter (-#> html/tag (= :p)))
     (take number-of-paragraphs)))
 
-(defn truncated-blog
-  "Creates a view of a blog whose contents are truncated."
+(defn blog-preview
+  "Creates a view of a preview of a blog for the blog roll."
   [blog]
-  (blog-with-content
-    blog
-    (-#>>
-       prepare-blog-content
-       (truncate-by-paragraphs 3))))
+  (-> blog
+    (update-in [:content] prepare-blog-content)
+    (update-in [:content] truncate-by-paragraphs 3)
+    (update-in [:title] pjax/wrap-in-pjax-link (str "/blog/entries/" (blog->url blog)))
+    blog-view))
 
 (def blog-css
   ["/css/blog.css"
@@ -86,7 +85,7 @@
       {:title "Blog"
        :content
        (->> blogs
-         (map truncated-blog)
+         (map blog-preview)
          (interpose [:div.blog-separator]))})))
 
 (defn blog-entry
