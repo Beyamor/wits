@@ -1,5 +1,9 @@
-$main-text-color: #262626;
-$light-text-color: #888;
-$link-color: #3399FF;
+$dark: #262626;
+$light: #888;
+$highlight: #3399FF;
+
+$main-text-color: $dark;
+$light-text-color: $light;
+$link-color: $highlight;
 $header-height: 100px;
 $page-width: 900px;

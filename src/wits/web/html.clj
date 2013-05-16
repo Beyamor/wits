@@ -57,3 +57,5 @@
   "Adds a class specifying that the link is a PJAX one."
   [url content]
   (link-to {:class "pjax"} url content))
+
+(def content-separator [:div.content-separator])

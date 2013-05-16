@@ -86,7 +86,7 @@
        :content
        (->> blogs
          (map blog-preview)
-         (interpose [:div.blog-separator]))})))
+         (interpose html/content-separator))})))
 
 (defn blog-entry
   [blog pjax?]
