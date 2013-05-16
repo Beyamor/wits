@@ -58,8 +58,6 @@ $ ->
 	$(document).pjax('.page-content', '#page-content')
 
 	pjaxReload = ->
-		$('#page').pjax('.page-content', '#page-content')
-
 		# Scroll back up the header
 		$('body,html').animate({
 			scrollTop: $('#header').offset().top,
