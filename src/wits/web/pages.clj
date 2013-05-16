@@ -1,7 +1,8 @@
 (ns wits.web.pages
   (:use hiccup.element
         [hiccup.core :only [html]]
-        [hiccup.page :only [html5 include-css include-js]]))
+        [hiccup.page :only [html5 include-css include-js]])
+  (:require [wits.web.html :as html]))
 
 (def core-css
   ["/css/core.css"
@@ -21,11 +22,11 @@
 (def header
   [:div#header
     [:div.title
-     (link-to {:class "page-content"} "/" "words in the sky")]
+     (html/pjax-link "/" "words in the sky")]
     [:div.navigation
-     (link-to {:class "page-content"} "/blog" "blog")
-     (link-to {:class "page-content"} "/" "code")
-     (link-to {:class "page-content"} "/" "me")]])
+     (html/pjax-link "/blog" "blog")
+     (html/pjax-link "/" "code")
+     (html/pjax-link "/" "me")]])
 
 (defn as-content
   "Given a map of page attributes (contents, title, css, etc.),

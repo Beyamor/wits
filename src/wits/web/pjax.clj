@@ -39,7 +39,3 @@
     (if pjax?
       content
       (pages/main content))))
-
-(defn wrap-in-pjax-link
-  [content url]
-  (link-to {:class "page-content"} url content))

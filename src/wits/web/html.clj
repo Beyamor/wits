@@ -1,4 +1,5 @@
 (ns wits.web.html
+  (:use [hiccup.element :only [link-to]])
   (:require [net.cgrand.enlive-html :as enlive])
   (:import java.io.StringReader))
 
@@ -51,3 +52,8 @@
   "Returns true if the given Hiccup element has the provided tag."
   [tag-to-match el]
   (= tag-to-match (tag el)))
+
+(defn pjax-link
+  "Adds a class specifying that the link is a PJAX one."
+  [url content]
+  (link-to {:class "pjax"} url content))
