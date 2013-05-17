@@ -25,7 +25,7 @@
      (html/pjax-link "/" "words in the sky")]
     [:div.navigation
      (html/pjax-link "/blog" "blog")
-     (html/pjax-link "/code" "code")
+     (html/pjax-link "/games" "games")
      (html/pjax-link "/" "me")]])
 
 (defn as-content

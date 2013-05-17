@@ -59,3 +59,9 @@
   (link-to {:class "pjax"} url content))
 
 (def content-separator [:div.content-separator])
+(def small-content-separator [:div.small-content-separator])
+
+(defn paragraphs
+  "Takes a buncha strings and puts each one in a paragraph."
+  [& ps]
+  (map (fn [p] [:p p]) ps))

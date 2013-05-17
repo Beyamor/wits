@@ -6,12 +6,14 @@
             [compojure.route :as route]
             [wits.blog.routes :as blog]
             [wits.code.routes :as code]
+            [wits.games.routes :as games]
             [ring.util.response :as ring-resp]))
 
 (defroutes all-routes
            (GET "/" [] (ring-resp/redirect "/blog"))
            blog/all
            code/all
+           games/all
            (route/resources "/")
            (route/not-found "Page not found"))
 
