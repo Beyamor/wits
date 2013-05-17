@@ -1,5 +1,6 @@
 (ns wits.web.html
-  (:use [hiccup.element :only [link-to]])
+  (:use [hiccup.element :only [link-to]]
+        [hiccup.util :only [to-uri]])
   (:require [net.cgrand.enlive-html :as enlive])
   (:import java.io.StringReader))
 
@@ -65,3 +66,9 @@
   "Takes a buncha strings and puts each one in a paragraph."
   [& ps]
   (map (fn [p] [:p p]) ps))
+
+(defn include-coffee
+  "Includes a list of coffee scripts."
+    [& scripts]
+    (for [script scripts]
+      [:script {:type "text/coffeescript", :src (to-uri script)}]))

@@ -1,5 +1,6 @@
 (ns wits.games.views
   (:use hiccup.element
+        [hiccup.util :only [escape-html]]
         [wits.util :only [-#> -#>>]]
         [wits.web.html :only [sections]])
   (:require [wits.web.pages :as pages]
@@ -31,3 +32,17 @@
      (->> games
        (map preview)
        (interpose html/small-content-separator))}))
+
+(defn play
+  "Returns a view for playing a game."
+  [{:keys [title description code]} pjax?]
+  (pjax/page
+    pages/main pjax?
+    {:title
+     (:title (escape-html title))
+
+     :content
+     (list
+       [:h1 (escape-html title)]
+       code
+       [:div.description description])}))

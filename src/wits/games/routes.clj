@@ -9,4 +9,10 @@
                 []
                 (->
                   games/all
-                  (view/collection pjax?))))
+                  (view/collection pjax?)))
+           (PJAX "/games/:title"
+                 [title]
+                 (->
+                   title
+                   games/by-title
+                   (view/play pjax?))))
