@@ -10,7 +10,7 @@
 (defmethod html-representation :canvas
   [{{[width _ height] :dimensions} :implementation :keys [url]}]
   [:iframe
-   {:src (str "/games/" url "/play")
+   {:src (str "/games/" url "/canvas")
     :width width :height height
     :class "game-container"
     :scrolling "no"}])
@@ -20,12 +20,8 @@
   [game]
   (assoc game :html-representation (html-representation game)))
 
-(defmulti standalone-content
-  "Based on the type of the implementation of a game,
-   this returns the content to, y'know, play the damn thing."
-  :type)
-
-(defmethod standalone-content :canvas
+(defn canvas
+  "Prepares the canvas content for a canvas-based game."
   [{:keys [js] [width _ height] :dimensions}]
   (list
     (->> js
@@ -33,9 +29,3 @@
       (map #(str % ".js"))
       (map include-js))
     [:canvas {:id "game-canvas" :width width :height height}]))
-
-(defn standalone
-  "Creates the standalone content for playing a game.
-   i.e., the game itself."
-  [game]
-  (standalone-content (:implementation game)))

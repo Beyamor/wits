@@ -23,10 +23,11 @@
                    presentation/full-game
                    (view/full-game pjax?)))
 
-           (GET "/games/:url/play"
+           (GET "/games/:url/canvas"
                 [url]
                 (->
                   url
                   games/by-url
-                  presentation/standalone
+                  :implementation
+                  presentation/canvas
                   pages/content-wrapper)))
