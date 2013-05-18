@@ -2,7 +2,10 @@
   (:use [hiccup.page :only [include-js]]
         [wits.util :only [flatten-lists]]))
 
-(defmulti html-representation #(-> % :implementation :type))
+(defmulti html-representation
+  "Based on the type of the implementation,
+   this returns the content for the game itself."
+  #(-> % :implementation :type))
 
 (defmethod html-representation :canvas
   [{{[width _ height] :dimensions} :implementation :keys [url]}]
@@ -13,12 +16,16 @@
     :scrolling "no"}])
 
 (defn full-game
+  "Prepares a game for viewing in full."
   [game]
   (assoc game :html-representation (html-representation game)))
 
-(defmulti playable-representation :type)
+(defmulti standalone-content
+  "Based on the type of the implementation of a game,
+   this returns the content to, y'know, play the damn thing."
+  :type)
 
-(defmethod playable-representation :canvas
+(defmethod standalone-content :canvas
   [{:keys [js] [width _ height] :dimensions}]
   (list
     (->> js
@@ -27,6 +34,8 @@
       (map include-js))
     [:canvas {:id "game-canvas" :width width :height height}]))
 
-(defn playable
+(defn standalone
+  "Creates the standalone content for playing a game.
+   i.e., the game itself."
   [game]
-  (playable-representation (:implementation game)))
+  (standalone-content (:implementation game)))

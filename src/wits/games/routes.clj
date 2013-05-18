@@ -28,5 +28,5 @@
                 (->
                   url
                   games/by-url
-                  presentation/playable
+                  presentation/standalone
                   pages/content-wrapper)))
