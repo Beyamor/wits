@@ -54,8 +54,3 @@
        [:h1 (escape-html title)]
        html-representation
        [:div.description description])}))
-
-(defn playable
-  [playable-representation]
-  (html5
-    [:body playable-representation]))

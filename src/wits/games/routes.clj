@@ -4,7 +4,8 @@
         [wits.web.pjax :only [PJAX]])
   (:require [wits.games.views :as view]
             [wits.games.library :as games]
-            [wits.games.presentation :as presentation]))
+            [wits.games.presentation :as presentation]
+            [wits.web.pages :as pages]))
 
 (defroutes all
 
@@ -28,4 +29,4 @@
                   url
                   games/by-url
                   presentation/playable
-                  view/playable)))
+                  pages/content-wrapper)))

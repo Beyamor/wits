@@ -53,3 +53,11 @@
      [:div#page
       [:div#page-content
        page-contents]]]))
+
+(defn content-wrapper
+  "Creates a cer simple page which only wraps some content in the body."
+  [content]
+  (html5
+    [:body
+     {:style "margin: 0px; padding: 0px;"}
+     content]))
