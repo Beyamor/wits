@@ -40,7 +40,7 @@
 
 (defn full-game
   "Returns a view for playing a game."
-  [{:keys [title description html-representation]} pjax?]
+  [{:keys [title description html-representation source]} pjax?]
   (pjax/page
     pages/main pjax?
     {:title
@@ -52,5 +52,8 @@
      :content
      (list
        [:h1 (escape-html title)]
-       html-representation
+       ; haha this is so dumb
+       [:div.game-container-container
+         html-representation
+         (when source (link-to {:class "source" :target "_blank"} source "source"))]
        [:div.description description])}))

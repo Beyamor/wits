@@ -1,7 +1,19 @@
 @import "common";
 
+.game-container-container {
+
+	margin-bottom: 30px;
+	text-align: center;
+}
+
 .game-container {
 	@include content-container;
 	border-style: none;
-	margin-bottom: 30px;
+}
+
+.source {
+	color: $highlight;
+	&:hover { color: $dark; }
+	font-size: small;
+	font-weight: bold;
 }
