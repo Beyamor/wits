@@ -2,15 +2,10 @@
 
 .game-preview {
 
-	display: inline-block;
+	@include content-container;
 	position: relative;
-	background-color: $very-dark;
-	color: white;
 	width: 700px;
-	border-radius: 4px;
-	padding: 10px;
 	min-height: 200px;
-	@include centered;
 
 	&:hover {
 		background-color: $highlight;

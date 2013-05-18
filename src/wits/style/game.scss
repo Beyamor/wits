@@ -1,7 +1,7 @@
 @import "common";
 
 .game-container {
-	@include centered;
+	@include content-container;
 	border-style: none;
-	display: block;
+	margin-bottom: 30px;
 }
