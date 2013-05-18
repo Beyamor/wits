@@ -10,14 +10,14 @@
 
 (defn preview
   "A Hiccup data structure for the preview of some game."
-  [{:keys [url title thumbnail short-description]}]
+  [{:keys [url title thumbnail short-description description]}]
   (html/pjax-link (str "/games/" url)
            [:div.game-preview
              (sections
                :thumbnail (image thumbnail)
                :info (sections
                        :title title
-                       :description short-description))]))
+                       :description (or short-description description)))]))
 
 (defn collection
   "A preview of some collection of games."

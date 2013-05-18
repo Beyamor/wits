@@ -1,5 +1,6 @@
 (ns wits.games.presentation
   (:use [hiccup.page :only [include-js]]
+        [hiccup.util :only [escape-html]]
         [wits.util :only [flatten-lists]]))
 
 (defmulti html-representation
@@ -39,7 +40,8 @@
 (defn full-game
   "Prepares a game for viewing in full."
   [game]
-  (assoc game :html-representation (html-representation game)))
+  (-> game
+    (assoc :html-representation (html-representation game))))
 
 (defn canvas
   "Prepares the canvas content for a canvas-based game."
