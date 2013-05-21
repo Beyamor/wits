@@ -11,8 +11,9 @@
 (def core-js
   ["/js/lib/jquery-1.9.1.min.js"
    "/js/lib/jquery.pjax.js"
-   "/js/art/image.js"
    "/js/core.js"
+   "/js/art/arts.js"
+   "/js/art/starry.js"
    "/js/lib/syntax-highlighter/shCore.js"])
 
 (defn wits-title
