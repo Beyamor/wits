@@ -31,10 +31,23 @@ body {
 		@include centered;
 	}
 
+
+	a {
+		color: $light;
+		&:hover { color: $link-color; }
+	}
+
+
 	.title {
 		display: block;
 		font-size: xx-large;
 		font-weight: bold;
+		color: $dark;
+
+		a {
+			color: $dark;
+			&:hover { color: $link-color; }
+		}
 	}
 }
 

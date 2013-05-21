@@ -53,13 +53,20 @@
     (filter (-#> html/tag (= :p)))
     (take number-of-paragraphs)))
 
+(defn blog-link
+  ([link-contents blog]
+   (blog-link [] link-contents blog))
+  ([classes link-contents blog]
+    (html/pjax-link classes (str "/blog/entries/" (blog->url blog)) link-contents)))
+
 (defn blog-preview
   "Creates a view of a preview of a blog for the blog roll."
   [blog]
   (-> blog
     (update-in [:content] prepare-blog-content)
     (update-in [:content] truncate-by-paragraphs 3)
-    (update-in [:title] #(html/pjax-link (str "/blog/entries/" (blog->url blog)) %))
+    (update-in [:title] blog-link blog)
+    (update-in [:content] concat [(blog-link ["read-more"] "read more..." blog)])
     blog-view))
 
 (def blog-css
