@@ -19,7 +19,10 @@ $content-width: 640px;
 
 	border-radius: 4px;
 	background-color: $very-dark;
-	color: white;
+	color: white !important;
+	.title {
+		color: white !important;
+	}
 	padding: 10px;
 	@include centered;
 	display: block;
