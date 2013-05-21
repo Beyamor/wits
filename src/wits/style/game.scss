@@ -4,15 +4,19 @@
 
 	margin-bottom: 30px;
 	text-align: center;
+	width: auto !important;
+	@include centered;
 }
 
 .game-container {
 	@include content-container;
 	border-style: none;
+	display: inline-block;
 }
 
 .source {
 	color: $light;
 	font-size: small;
 	font-weight: bold;
+	display: block;
 }

@@ -51,8 +51,7 @@
      [:canvas#art]
      header
      [:div#page
-      [:div#page-content
-       page-contents]]]))
+      page-contents]]))
 
 (defn content-wrapper
   "Creates a cer simple page which only wraps some content in the body."

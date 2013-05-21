@@ -55,7 +55,7 @@ $ ->
 	
 	$viewport = $('html, body')
 	$.pjax.defaults.scrollTo = false if $.support.pjax
-	$(document).pjax('.pjax', '#page-content')
+	$(document).pjax('.pjax', '#page')
 
 	pjaxReload = ->
 		# Scroll back up the header
