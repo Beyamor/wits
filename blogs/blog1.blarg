@@ -1,38 +1,22 @@
-title: here's a blog
-date: 12-04-2013
+title: hello world v2.0
+date: 05-21-2013
 
-# This is the best blog
+Well, hi there.
 
-Well, it's alright
+The world was blessed with a wonderful silence from yours truly, a silence put into place by a particularly heavy school term, but nailed into finality by the expiration of my old web hosting. Sadly, you can't keep a rambling mouth closed for long, so here we are, back again.
 
-Lorem ipsum dolor sit amet, *consectetur* _adipiscing_ **elit. Quisque ultrices feugiat felis at ornare. Maecenas sagittis sem vel elit tempus sagittis. Proin nibh sapien, elementum ultrices laoreet eget, pretium id sapien**. Nullam adipiscing, dui eget semper faucibus, leo magna scelerisque ipsum, id rutrum dui nisi vitae tellus.
+The death of my old site was actually pretty welcome and not simply because it gave the world a reprieve from my writing. I wrote the first version of the site about two years ago and here I use "wrote" in the same way a historian might remark that the savage barbarians "wrote" a chapter of history. I hacked together the first site before I had had any programming jobs. I had no idea what software engineering really was, let alone how to apply it to a project. Hell, I thought PHP was a pretty nice language.
 
->Morbi nec justo et turpis lacinia bibendum nec ornare arcu. Proin quis eros odio, at consectetur mi. Sed congue congue lorem, ut pharetra urna vulputate eget. Donec in lorem id tortor consequat imperdiet. Quisque vulputate magna quis dui hendrerit suscipit. Quisque molestie leo sit amet massa ultrices vitae ultricies massa viverra.
+Two years later and, well, at least I'm not as fond of PHP.
 
-* foo
-* bar
-* baz
+Anyway, I had been meaning to rewrite the site for a while and this is an opportune time to do so. Right now, I'm going at it with Clojure, SASS, and Coffeescript. Down the line, I'd love to discuss those decisions and their implications, but for the time being, trust that I'm merrily plugging away. If you're really interested, you can check out the new site's code [here](https://github.com/Beyamor/wits).
 
-Okay, now for the cool stuff. `1 + 2 = 2` Check out that code.
+I'd invite you to poke around a bit, but it should really go without saying that, at the time of writing, things are very much a work in progress. I've got to add a few more project pages, upload more of my games, and probably spend the next fifty years of my life tweaking the CSS. There are some fundamental things missing too - namely, a comment system and all of my previous blogs. While the latter should just be a matter of sucking it up and integrating the old blogs with the new system, I want to take some time to think about the former. In the mean time, [hit me up on Twitter](https://twitter.com/_Beyamor).
 
-What.
-
-* 1
-* 2
-* 3
-
-What is that.
+But man, things are looking good. Check it yo, real syntax highlighting instead of the mess of regexes I had before:
 
 ```clojure
-; Aw yiss, this code
-(defn blog
-  "Creates a view of a blog whose contents are truncated."
-  [{:keys [title date content]}]
-  (sections
-    :blog (sections
-            :title title
-            :date date
-            :content (prepare-blog-content content))))
+(println "how cool is that")
 ```
 
-Integer ac odio sed augue pulvinar blandit non vitae felis. In feugiat dolor at turpis pharetra ut iaculis nisi laoreet. Proin sit amet nisi vitae dolor varius condimentum. Integer in posuere eros. Suspendisse placerat mattis enim non consequat. Duis massa arcu, rutrum ac blandit ac, cursus quis eros. Integer nec urna eget nibh pellentesque faucibus...
+Righteous. Anyway, the blog's back up and it's nice to talk to you again, my beloved imaginary reader.
