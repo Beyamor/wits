@@ -23,11 +23,10 @@
 (def header
   [:div#header
     [:div.title
-     (html/pjax-link "/" "words in the sky")]
+     "words in the sky"]
     [:div.navigation
      (html/pjax-link "/blog" "blog")
-     (html/pjax-link "/games" "games")
-     (html/pjax-link "/" "me")]])
+     (html/pjax-link "/games" "games")]])
 
 (defn as-content
   "Given a map of page attributes (contents, title, css, etc.),
