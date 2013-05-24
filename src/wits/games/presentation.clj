@@ -1,7 +1,8 @@
 (ns wits.games.presentation
   (:use [hiccup.page :only [include-js]]
         [hiccup.util :only [escape-html]]
-        [wits.util :only [flatten-lists]]))
+        [wits.util :only [flatten-lists]])
+  (:require [wits.web.html :as html]))
 
 (defmulti html-representation
   "Based on the type of the implementation,
@@ -19,23 +20,7 @@
 (defmethod html-representation :flash
   [{{[width _ height] :dimensions :keys [swf]} :implementation}]
   [:div.game-container
-   [:object
-    {:classid "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
-     :width width
-     :height height}
-    [:param
-     {:name "movie"
-      :value swf}]
-    "<!--[if !IE]>-->"
-    [:object
-     {:type "application/x-shockwave-flash"
-      :data swf
-      :width width
-      :height height}
-     [:param
-      {:name "movie"
-       :value swf}]]
-    "<!--<![endif]-->"]])
+   (html/swf :width width :height height :source swf)])
 
 (defn full-game
   "Prepares a game for viewing in full."

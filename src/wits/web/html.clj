@@ -76,3 +76,24 @@
     [& scripts]
     (for [script scripts]
       [:script {:type "text/coffeescript", :src (to-uri script)}]))
+
+(defn swf
+  "The Hiccup representation of a swf"
+  [& {:keys [width height source]}]
+  [:object
+    {:classid "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
+     :width width
+     :height height}
+    [:param
+     {:name "movie"
+      :value source}]
+    "<!--[if !IE]>-->"
+    [:object
+     {:type "application/x-shockwave-flash"
+      :data source
+      :width width
+      :height height}
+     [:param
+      {:name "movie"
+       :value source}]]
+    "<!--<![endif]-->"])
