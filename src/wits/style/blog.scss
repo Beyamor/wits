@@ -26,6 +26,12 @@
 		padding-right: 40px;
 		padding-top: 20px;
 	}
+
+	img {
+
+		@include centered;
+		display: block;
+	}
 }
 
 .blog-separator {

@@ -99,7 +99,29 @@
      :swf "/games/vikesinvaders/vikesinvaders.swf"}
 
     :source
-    "https://github.com/Beyamor/vikes-invaders"}])
+    "https://github.com/Beyamor/vikes-invaders"}
+
+   {:title
+    "Endless Mazes"
+
+    :url
+    "endless-mazes"
+
+    :thumbnail
+    (thumbnail "endless-mazes")
+
+    :short-description
+    "An example of a randomly generated infinite maze."
+
+    :description
+    (paragraphs
+      "An example of a randomly generated infinite maze."
+      "Move with the arrow keys/WASD. Press backspace to create a new maze.")
+
+    :implementation
+    {:type :flash
+     :dimensions [800 :by 600]
+     :swf "/games/endless-mazes/EndlessMazes.swf"}}])
 
 (defn by-url
   "Returns some game by url"

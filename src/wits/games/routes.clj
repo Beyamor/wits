@@ -5,6 +5,7 @@
   (:require [wits.games.views :as view]
             [wits.games.library :as games]
             [wits.games.presentation :as presentation]
+            [wits.web.apps :as apps]
             [wits.web.pages :as pages]))
 
 (defroutes all
@@ -28,6 +29,5 @@
                 (->
                   url
                   games/by-url
-                  :implementation
-                  presentation/canvas
+                  presentation/for-canvas
                   pages/content-wrapper)))
