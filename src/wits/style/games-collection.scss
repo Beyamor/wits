@@ -1,8 +1,8 @@
 @import "common";
 
 .game-preview {
-
 	@include content-container;
+
 	position: relative;
 	width: 700px;
 	min-height: 200px;
@@ -13,8 +13,8 @@
 
 	.info {
 		float: right;
-		width: 475px;
-		margin: 0px 5px;
+		width: 460px;
+		margin: 0px 20px;
 	}
 
 	img {
@@ -26,5 +26,7 @@
 		top: 0;
 		bottom: 0;
 		margin: auto;
+
+		border-radius: 4px;
 	}
 }

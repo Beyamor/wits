@@ -11,13 +11,14 @@
 (defn preview
   "A Hiccup data structure for the preview of some game."
   [{:keys [url title thumbnail short-description description]}]
-  (html/pjax-link (str "/games/" url)
-           [:div.game-preview
-             (sections
-               :thumbnail (image thumbnail)
-               :info (sections
-                       :title title
-                       :description (or short-description description)))]))
+  [:div
+   (html/pjax-link (str "/games/" url)
+                   [:div.game-preview
+                    (sections
+                      :thumbnail (image thumbnail)
+                      :info (sections
+                              :title title
+                              :description (or short-description description)))])])
 
 (defn collection
   "A preview of some collection of games."
@@ -54,6 +55,6 @@
        [:h1 (escape-html title)]
        ; haha this is so dumb
        [:div.game-container-container
-         html-representation
-         (when source (link-to {:class "source" :target "_blank"} source "source"))]
+        html-representation
+        (when source (link-to {:class "source" :target "_blank"} source "source"))]
        [:div.description description])}))
