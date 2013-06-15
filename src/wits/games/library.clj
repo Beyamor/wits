@@ -121,7 +121,29 @@
     :implementation
     {:type :flash
      :dimensions [800 :by 600]
-     :swf "/games/endless-mazes/EndlessMazes.swf"}}])
+     :swf "/games/endless-mazes/EndlessMazes.swf"}}
+
+   {:title
+    "Chomp"
+
+    :url
+    "chomp"
+
+    :thumbnail
+    (thumbnail "chomp")
+
+    :short-description
+    "A quick riff on Snake"
+
+    :description
+    (paragraphs
+      "A quick riff on Snake."
+      "Move with the arrows keys/WASD. Avoid the poop.")
+
+    :implementation
+    {:type :flash
+     :dimensions [640 :by 480]
+     :swf "/games/chomp/Chomp.swf"}}])
 
 (defn by-url
   "Returns some game by url"
