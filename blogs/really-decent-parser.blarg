@@ -1,0 +1,304 @@
+title: really decent parser
+date: 06-29-2013
+
+Let's write a parser. A [recursive descent parser](http://en.wikipedia.org/wiki/Recursive_descent_parser), if you really want to get specific. Doesn't matter, really. We're gunna parse something somehow, dangit.
+
+Okay. Remember parsers? They eat up a string in some language and poop out a syntax tree according to some grammar. Right? [More or less](https://en.wikipedia.org/wiki/Parsing)?
+
+We're going to kind of lump lexers in too, but whatever.
+
+At the end of the day, we want to parse something like this:
+
+```
+const x=1;
+```
+
+Into something like this:
+
+```clojure
+[:const "x" 1]
+```
+
+# persnickety parsers
+
+Where do we start? Well, okay. What's our model of a parser, exactly? It's something that takes in a string and returns a list of parse results. Each parse result is a tuple of two things: a value and the rest of the string. "The rest of the string" is whatever wasn't consumed in parsing. It might be the original string, unchanged if the parser doesn't consume anything.
+
+Got it? Cool. Let's write the simplest possible parser. It'll consume one character and return it as the value in a parse result, but only if a character is available.
+
+```clojure
+(defn item
+  [s]
+  (if (empty? s)
+    [] ; no parse results for the empty string
+    [[(first s) (subs s 1)]])) ; else parse char
+
+(item "abc")
+; => [[\a "bc"]]
+
+(item "")
+; => []
+```
+
+Pretty simple, right? Let's do something more interesting. It turns out that parsers are a nice building block - they compose really well. For example, let's write a function that returns a parser which reads the first character in the string and produces a parse result only if that character matches some predicate. We can do this by building on top of `item`.
+
+```clojure
+(defn is? ; our parser factory
+  [p?]
+  (fn [s] ; the actual parser
+    (for [[c s'] (item s) ; for item's results
+          :when (p? c)] ; when p? succeeds
+      [c s']))) ; return that parse result
+
+((is? #(= % \a)) "abc")
+; => [[\a "bc"]]
+
+((is? #(= % \a)) "zbc")
+; => []
+```
+
+There's something subtle but important here. If the parser `is?` depends on returns no parse results, `is?` will produce no parse results. We get that logical shortcut for free by iterating through all of `item`'s parse results and handling failure - no parse results - as an empty list. That makes composing these things easy, huh?
+
+Anyway, we can start to define even cooler parsers like, say, matching a specific character.
+
+```clojure
+(defn char=
+  [match-c]
+  (is? #(= % match-c)))
+
+((char= \a) "abc")
+; => [[\a "bc"]]
+```
+
+Child's play. Let's aim big. What about a parser which matches a particular string?
+
+```clojure
+(defn str=
+  [match-str]
+  (if (empty? match-str)
+    (fn [s]
+      [[nil s]])
+    (fn [s]
+      (for [[_ s'] ((char= (first match-str)) s)
+            [_ s''] ((str= (subs match-str 1)) s')]
+        [match-str s'']))))
+
+((str= "abc") "abcd")
+; => [["abc" "d"]]
+
+((str= "abc") "zbcd")
+; => []
+```
+
+That one's a little tricky, right? There's two cases here. If we're trying to match against the empty string, well, bingo, any string will match that, so we return a parser that *always* succeeds no matter what string you give it. Here, this degenerate parser returns `nil` as its value because, well, whatever. In the more interesting case, we compose `char=` and a recursive `str=`. If both succeed - producing parse results - we know we matched the string, so we return it and the unconsumed text.
+
+Nearly there. Remember the text we were originally trying to parse? `const x=1;`? We just need two more parsers: one to parse an identifier and one to parse a number. For simplicity, let's say our identifiers can only be one character and our numbers can only be on digit.
+
+```clojure
+(defn ident
+  [s]
+  (for [[c s'] ((is? #(Character/isLetter %)) s)]
+    [(str c) s']))
+
+(ident "x")
+; => [["x" ""]]
+
+(defn number
+  [s]
+  (for [[c s'] ((is? #(Character/isDigit %)) s)]
+    [(Character/getNumericValue c) s']))
+
+(number "1")
+; => [[1 ""]]
+```
+
+And that's it. Now we can write something to parse our constant declaration.
+
+```clojure
+(defn const
+  [s]
+  (for [[_ s'] ((str= "const ") s)
+        [identifier s''] (ident s')
+        [_ s'''] ((str= "=") s'')
+        [value s''''] (number s''')
+        [_ s'''''] ((str= ";") s'''')]
+    [[:const identifier value] s''''']))
+
+(ffirst (const "const x=1;"))
+; => [:const "x" 1]
+```
+
+Cool. So, we're done, right? Code works, so no problems here? And hey, I actually kind of like `s'''''` as an identifier. It's got a certain grandeur to it.
+
+Right now, our parsers have a painful amount of boilerplate. When we go to compose parsers, we have to iterate through all the parse results and pull them apart to get the value and unconsumed string for each and every parser. It's annoying to type, error prone (did you mean `s'''` or `s''''`?), and we're duplicating the steps to extract and use parse results all over the code base.
+
+Let's do better.
+
+# plumbing the parsers
+
+Let's address the DRY thing first. There's a set of steps that happens every time we compose parsers - iterate through all of the parse results and for each, grab the value and unconsumed string, maybe do something with the value, then pass the unconsumed string along. Thankfully, we have a pretty dece mechanism for abstracting this junk away. It's our old friend *the function* to the rescue!
+
+So, let's write a function. Since I'm feeling whimsical, we'll name it `bind`. `bind` is going to take a parser we want to compose and a function which takes the values of that parser's parse results (binding one at a time to the function argument), does *something* with them, and returns another parser. `bind` is then going to return a new parser which combines the parse results of the parsers created by the function supplied to it.
+
+A little confusing to read, but pretty straightforward in the code.
+
+```clojure
+(defn bind
+  [old-parser parser-factory]
+  (fn [s] ; return a new parser
+    (apply concat ; combining parse results
+      (for [[value s'] (old-parser s)] ; of old parser
+        (let [new-parser (parser-factory value)]
+          (new-parser s')))))) ; parsed by new parser
+```
+
+Let's rewrite `is?` to use this new function.
+
+```clojure
+(defn is?
+  [p?]
+  (bind item
+    (fn [c] ; binding char to c
+      (if (p? c) ; if c matches
+        (fn [s] ; return a parser
+          [[c s]]) ; with c as a parse result
+        (fn [s] ; otherwise return a parser
+          []))))) ; with no parse results
+```
+
+Hm. That actually looks *more* complicated. What about our `const` parser?
+
+```clojure
+(def const
+  (bind (str= "const")
+    (fn [_] (bind ident
+      (fn [identifier] (bind (str= "=")
+        (fn [_] (bind number
+          (fn [value] (bind (str= ";"))
+            (fn [_]
+              (fn [s]
+                [[:const identifier value] s])))))))))))
+```
+
+Well, if anything, it's *more* boilerplate, but at least we hid the complex unpacking/packing steps away, so that's a win. What else can we do?
+
+One thing we're doing here a couple times is writing a very simple parser that always returns a single parse result of some value and the original, unchanged string. Let's give a name to that thing. `result` will take a value and wrap it in this minimal parser.
+
+```clojure
+(defn result
+  [value]
+  (fn [s]
+    [[value s]]))
+```
+
+Another thing that we should name is the parser which always returns *no* parse results. Let's call it `zero`.
+
+```clojure
+(def zero
+  (fn [s]
+    []))
+```
+
+We can rewrite `is?` again.
+
+```clojure
+(defn is?
+  [p?]
+  (bind item
+    (fn [c]
+      (if (p? c)
+        (result c)
+        zero))))
+```
+
+That's a little cleaner, eh? We can do the same for, let's say, `str=`.
+
+```clojure
+(defn str=
+  [match-str]
+  (if (empty? match-str)
+    (result nil)
+    (bind (char= (first match-str))
+      (fn [_]
+        (bind (str= (subs match-str 1))
+          (fn [_]
+            (result match-str)))))))
+```
+
+Not too bad. But, you know, it seems like we're running into this very common pattern. When we want to compose parsers, we do a bunch of `bind`s and then wrap the result in `result`. In the case of `is?`, we slip into the mix a little conditional check that'll shortcut to returning `zero`, but it still fits pretty much the same pattern repeated again and again.
+
+Let's make a syntax for that. We'll call it `doparse`. I'll leave the definition here, but don't worry about it too much. Just trust that it lets us supply a vector specifying the bindings and condition checks and transforms it into our binding boilerplate.
+
+```clojure
+(defmacro doparse
+  [steps expr]
+  (reduce
+    (fn [inner-expr [left right]]
+      (cond
+        (symbol? left)
+        `(bind ~right (fn [~left] ~inner-expr))
+
+        (= :when left)
+        `(if ~right ~inner-expr zero)))
+
+    `(result ~expr)
+    (->> steps (partition 2) reverse)))
+```
+
+Using this, we can rewrite `str=` as follows:
+
+```clojure
+(defn str=
+  [match-str]
+  (if (empty? match-str)
+    (result nil)
+    (doparse
+      [_ (char= (first match-str))
+       _ (str= (subs match-str 1))]
+      match-str)))
+```
+
+And `is?` becomes:
+
+```clojure
+(defn is?
+  [p?]
+  (doparse
+    [c item
+     :when (p? c)]
+    c))
+```
+
+That cleaned things up, huh? What about `const`?
+
+```clojure
+(def const
+  (doparse
+    [_ (str= "const ")
+     identifier ident
+     _ (str= "=")
+     value number
+     _ (str= ";")]
+    [:const identifier value]))
+```
+
+Whoa. Hey. That, uh, that's it, right? That's exactly what we wanted. All our boilerplate is gone. Evaporated like the morning mist. And hell, not only are we no longer worrying about grabbing and extracting the parse results, at this point, we don't even need to think about the string we're threading through all of this. It just happens. We can compose parsers as we'd like without ever having to worry about the mess of plumbing underneath.
+
+How did this happen? Magic? Well, yes, but a special kind of magic we've taken to calling *monads*.
+
+# that monad fad
+
+What in god's name is a monad? See, it's one of the useful things we programmers fished out of the big, scary sea that is category theory. There's a [whole buncha rigmarole](https://en.wikipedia.org/wiki/Monad_(functional_programming)) around them, but the thing to keep in your head is that they're a handy way to abstract away the plumbing of computations.
+
+There are actually many different types of monads. For example, some are good for saving you from checking whether computations fail. Others are handy for abstracting away state.
+
+Every monad has its own monadic values, a sort of context for operations. You might get away with thinking about monadic values as containers for regular (non-monadic) ones. In our case, a parser is a monadic value. The regular values it "contains" are the values in its parse results. Monadic functions are functions which take a regular value and produce a monadic one.
+
+Every monad is defined in terms of two very important functions: `return`, which wraps a regular value in a monadic one and `bind`, which takes a monadic function and applies it to the regular values wrapped in a monadic value. These two functions [follow some laws](http://www.haskell.org/haskellwiki/Monad_laws). Two other definitions allow us to do even more with monads - `plus`, which combines monadic values, and `zero`, which acts as the identity operand for `plus` (i.e., combining something with `zero` returns that same something).
+
+The cool thing is that when we define monads like this, we immediately get a bunch of tools for free. For instance, `doparse` is really [domonad](http://richhickey.github.io/clojure-contrib/monads-api.html#clojure.contrib.monads/domonad) and it can be used with *any* type of monad. We can also do mind-blowing things like [combining monads](http://en.wikipedia.org/wiki/Monad_transformer).
+
+Man, I don't even know. There's so much to talk about there. But, y'know what, there's like a hundred monad tutorials out there. Go read some of 'em. Get lost in the big, incomprehensible world of these things. Spend most of your life having no idea what anybody's talking about, just like the rest of us.
+
+The thing to take away today is that monads provide a very, very powerful tool for abstraction. We can bury the trivial details of our programs, the plumbing, so far down we never see it again and in doing so, we can start to think about our problems unburdened by the little details. That's pretty rad.
+
+Shout out to [Functional Pearls: Monadic Parsing in Haskell](http://www.cs.nott.ac.uk/~gmh/pearl.pdf) for getting me here, BTW.
