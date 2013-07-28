@@ -1,0 +1,26 @@
+title: midpoint fashion
+date: 07-27-2013
+
+I've been thinking about how you generate the models - the visual representations - for procedural loot. It's, uh, tricky business. Like, making stuff that doesn't suck is hard. Words to live by.
+
+One idea I was playing around with was introducing some controlled noise into the *shape* of the model. You take the shape and push and prod it just a bit. This lets us start with something we know looks good (or, good enough), and add just a bit of randomness to it.
+
+So, let's say we wanted to tweak a polygon's lines a bit. It turns out, we've got a pretty handy tool for introducing randomness along edges, namely, [midpoint displacement](http://www.gameprogrammer.com/fractal.html#midpoint). This is a super simple technique. For every line segment, find the midpoint and move it by some random amount, thereby creating two new line segments. Repeat.
+
+One of the nice properties of this algorithm is that it's pretty amenable to tuning. You can adjust both the amount you displace by and the number of times you subdivide an edge and these affect the resulting, uh, bumpiness. Neat.
+
+Okay, so, while something like this sees more use in [terrain generation](http://en.wikipedia.org/wiki/Diamond-square_algorithm), we could apply it here, right?
+
+We can start off with a fairly simple model. Humor me and pretend this looks like the head, torso, and shoulder for a suit of armor. Stretch a bit first, you don't want to overexert your imagination.
+
+![simple model](http://i.imgur.com/7HExOsK.png)
+
+Now, we can apply our midpoint displacement. We're only going to divide every edge once and we'll displace the midpoints vertically and horizontally by some random value in (-5, 5). With a little bit of extra variation for the color, we can generate a set of armor permutations:
+
+![multiple models](http://i.imgur.com/I4bz9YB.png)
+
+Hey, look at that! It's, well, it's something, I guess. Maybe not a big something, but something. Spicing up the edges a bit doesn't *drastically* change things, but it does introduce a little diversity, which is all we were looking to achieve.
+
+Now, what's cool here is that this technique *composes*, right? We could, for example, first select from among several possible armor templates, then apply the midpoint displacement to introduce further variety.
+
+The lesson at the end of the day? Well, this is a handy tool to have in our bag, I guess. Whatever. [Code is here](https://github.com/Beyamor/pcg/tree/master/loot/midpoint-displacement).
