@@ -1,11 +1,11 @@
-(ns wits.games.library
+(ns wits.projects.library
   (:use [hiccup.page :only [html5 include-js]]
         [wits.web.html :only [include-coffee paragraphs]]
         [wits.util :only [prefixed -#>]]))
 
 (defn- thumbnail
   [name]
-  (str "/images/games/" name "-thumbnail.png"))
+  (str "/images/projects/" name "-thumbnail.png"))
 
 (def all
   [{:title
@@ -26,7 +26,7 @@
      :dimensions [544 :by 544]
      :js ["/js/lib/jquery-1.9.1.min"
           "/js/lib/coffee-script"
-          (prefixed "/games/candy/js/ame/"
+          (prefixed "/projects/candy/js/ame/"
                     "ns"
                     "debug"
                     "util"
@@ -44,7 +44,7 @@
                     "systems/topdownPhysics"
                     "systems/topdown"
                     "systems/gfx")
-          (prefixed "/games/candy/js/candy/"
+          (prefixed "/projects/candy/js/candy/"
                     "game")]}
       
     :description
@@ -76,7 +76,7 @@
     :implementation
     {:type :flash
      :dimensions [800 :by 600]
-     :swf "/games/beef-and-harp/BeefHarp.swf"}
+     :swf "/projects/beef-and-harp/BeefHarp.swf"}
 
     :source
     "https://github.com/Beyamor/ggj-2013"}
@@ -96,7 +96,7 @@
     :implementation
     {:type :flash
      :dimensions [800 :by 600]
-     :swf "/games/vikesinvaders/vikesinvaders.swf"}
+     :swf "/projects/vikesinvaders/vikesinvaders.swf"}
 
     :source
     "https://github.com/Beyamor/vikes-invaders"}
@@ -121,7 +121,7 @@
     :implementation
     {:type :flash
      :dimensions [800 :by 600]
-     :swf "/games/endless-mazes/EndlessMazes.swf"}}
+     :swf "/projects/endless-mazes/EndlessMazes.swf"}}
 
    {:title
     "Chomp"
@@ -143,7 +143,7 @@
     :implementation
     {:type :flash
      :dimensions [640 :by 480]
-     :swf "/games/chomp/Chomp.swf"}}])
+     :swf "/projects/chomp/Chomp.swf"}}])
 
 (defn by-url
   "Returns some game by url"

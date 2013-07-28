@@ -1,4 +1,4 @@
-(ns wits.games.views
+(ns wits.projects.views
   (:use hiccup.element
         [hiccup.page :only [html5]]
         [hiccup.util :only [escape-html]]
@@ -9,11 +9,11 @@
             [wits.web.pjax :as pjax]))
 
 (defn preview
-  "A Hiccup data structure for the preview of some game."
+  "A Hiccup data structure for the preview of some project."
   [{:keys [url title thumbnail short-description description]}]
   [:div
-   (html/pjax-link (str "/games/" url)
-                   [:div.game-preview
+   (html/pjax-link (str "/projects/" url)
+                   [:div.project-preview
                     (sections
                       :thumbnail (image thumbnail)
                       :info (sections
@@ -21,8 +21,8 @@
                               :description (or short-description description)))])])
 
 (defn collection
-  "A preview of some collection of games."
-  [games pjax?]
+  "A preview of some collection of projects."
+  [projects pjax?]
   (pjax/page
     pages/main pjax?
     {:title
@@ -32,15 +32,15 @@
      "candy"
 
      :css
-     ["/css/games-collection.css"]
+     ["/css/project-collection.css"]
 
      :content
-     (->> games
+     (->> projects
        (map preview)
        (interpose html/small-content-separator))}))
 
-(defn full-game
-  "Returns a view for playing a game."
+(defn full-project
+  "Returns a view for playing a project."
   [{:keys [title description html-representation source]} pjax?]
   (pjax/page
     pages/main pjax?
@@ -48,13 +48,13 @@
      (:title (escape-html title))
 
      :css
-     ["/css/game.css"]
+     ["/css/project.css"]
 
      :content
      (list
        [:h1 (escape-html title)]
        ; haha this is so dumb
-       [:div.game-container-container
+       [:div.project-container-container
         html-representation
         (when source (link-to {:class "source" :target "_blank"} source "source"))]
        [:div.description description])}))

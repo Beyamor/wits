@@ -26,7 +26,7 @@
      "words in the sky"]
     [:div.navigation
      (html/pjax-link "/blog" "blog")
-     (html/pjax-link "/games" "games")]])
+     (html/pjax-link "/projects" "projects")]])
 
 (defn as-content
   "Given a map of page attributes (contents, title, css, etc.),

@@ -1,6 +1,6 @@
 @import "common";
 
-.game-container-container {
+.project-container-container {
 
 	margin-bottom: 30px;
 	text-align: center;
@@ -8,7 +8,7 @@
 	@include centered;
 }
 
-.game-container {
+.project-container {
 	@include content-container;
 	border-style: none;
 	display: inline-block;

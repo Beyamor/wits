@@ -1,33 +1,33 @@
-(ns wits.games.routes
+(ns wits.projects.routes
   (:use compojure.core
         [hiccup.page :only [html5 include-js]]
         [wits.web.pjax :only [PJAX]])
-  (:require [wits.games.views :as view]
-            [wits.games.library :as games]
-            [wits.games.presentation :as presentation]
+  (:require [wits.projects.views :as view]
+            [wits.projects.library :as projects]
+            [wits.projects.presentation :as presentation]
             [wits.web.apps :as apps]
             [wits.web.pages :as pages]))
 
 (defroutes all
 
-           (PJAX "/games"
+           (PJAX "/projects"
                 []
                 (->
-                  games/all
+                  projects/all
                   (view/collection pjax?)))
 
-           (PJAX "/games/:url"
+           (PJAX "/projects/:url"
                  [url]
                  (->
                    url
-                   games/by-url
-                   presentation/full-game
-                   (view/full-game pjax?)))
+                   projects/by-url
+                   presentation/full-project
+                   (view/full-project pjax?)))
 
-           (GET "/games/:url/canvas"
+           (GET "/projects/:url/canvas"
                 [url]
                 (->
                   url
-                  games/by-url
+                  projects/by-url
                   presentation/for-canvas
                   pages/content-wrapper)))

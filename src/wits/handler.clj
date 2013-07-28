@@ -6,7 +6,7 @@
             [compojure.route :as route]
             [wits.blog.routes :as blog]
             [wits.code.routes :as code]
-            [wits.games.routes :as games]
+            [wits.projects.routes :as projects]
             [wits.web.pages :as wits-pages]
             [wits.web.pjax :as pjax]
             [ring.util.response :as ring-resp]))
@@ -19,7 +19,7 @@
                          ["/css/home.css"]}))
            blog/all
            code/all
-           games/all
+           projects/all
            (route/resources "/")
            (route/not-found "Page not found"))
 

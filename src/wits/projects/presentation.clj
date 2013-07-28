@@ -1,4 +1,4 @@
-(ns wits.games.presentation
+(ns wits.projects.presentation
   (:use [hiccup.page :only [include-js]]
         [hiccup.util :only [escape-html]]
         [wits.util :only [flatten-lists]])
@@ -7,13 +7,13 @@
 
 (defmulti html-representation
   "Based on the type of the implementation,
-   this returns the content for the game itself."
+   this returns the content for the project itself."
   #(-> % :implementation :type))
 
 (defmethod html-representation :canvas
   [{{[width _ height] :dimensions} :implementation :keys [url]}]
   (apps/embed-canvas
-    :url (str "/games/" url "/canvas")
+    :url (str "/projects/" url "/canvas")
     :width width
     :height height))
 
@@ -24,14 +24,14 @@
     :width width
     :height height))
 
-(defn full-game
-  "Prepares a game for viewing in full."
-  [game]
-  (-> game
-    (assoc :html-representation (html-representation game))))
+(defn full-project
+  "Prepares a project for viewing in full."
+  [project]
+  (-> project
+    (assoc :html-representation (html-representation project))))
 
 (defn for-canvas
-  "Prepares a game for, y'know, a canvas."
+  "Prepares a project for, y'know, a canvas."
   [{{:keys [js] [width _ height] :dimensions} :implementation}]
   (println width "," height)
   (apps/canvas
