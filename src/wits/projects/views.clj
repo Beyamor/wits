@@ -6,7 +6,8 @@
         [wits.web.html :only [sections]])
   (:require [wits.web.pages :as pages]
             [wits.web.html :as html]
-            [wits.web.pjax :as pjax]))
+            [wits.web.pjax :as pjax]
+            [wits.projects.library :as library]))
 
 (defn preview
   "A Hiccup data structure for the preview of some project."
@@ -28,16 +29,33 @@
     {:title
      "Games"
 
-     :url
-     "candy"
-
      :css
      ["/css/project-collection.css"]
 
      :content
-     (->> projects
-       (map preview)
-       (interpose html/small-content-separator))}))
+     (list
+       [:div.showcase
+        [:div.screenshot
+         (image "/images/projects/candy-showcase.png")]
+        [:div.info
+         [:div.title "Candy"]
+         [:div.summary
+          [:p "Collect candy in a randomly generated level while avoiding the four monsters."]]
+         (link-to {:class "check-it-out"} "/projects" "check it out")]]
+
+       [:div.collection
+        [:div.categories
+         (for [category ["all" "games" "pcg"]]
+           [:div.category category])]
+        [:div.previews
+         (for [{:keys [thumbnail title]} library/all]
+           [:div.preview
+            [:div.preview-image
+              (image {:title title} thumbnail)]])]])}))
+
+     ;(->> projects
+     ;  (map preview)
+     ;  (interpose html/small-content-separator))}))
 
 (defn full-project
   "Returns a view for playing a project."
