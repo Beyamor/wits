@@ -33,7 +33,6 @@
 (defn for-canvas
   "Prepares a project for, y'know, a canvas."
   [{{:keys [js] [width _ height] :dimensions} :implementation}]
-  (println width "," height)
   (apps/canvas
     :js js
     :width width
