@@ -2,7 +2,8 @@
   (:use hiccup.element
         [hiccup.core :only [html]]
         [hiccup.page :only [html5 include-css include-js]])
-  (:require [wits.web.html :as html]))
+  (:require [wits.web.html :as html]
+            [clojure.walk :as walk]))
 
 (def core-css
   ["/css/core.css"
@@ -23,13 +24,24 @@
   [title]
   [:title (str "Words in the Sky" (if title (str " - " title)))])
 
+(defn add-pjax-links
+  "Makes in-site links pjax"
+  [content]
+  (walk/postwalk
+    (fn [form]
+      (if (and (sequential? form) (html/tagged? :a form) (html/has-internal-url? form))
+        (html/add-class form "pjax")
+        form))
+    content))
+
 (def header
-  [:div#header
-    [:div.title
-     "words in the sky"]
-    [:div.navigation
-     (html/pjax-link "/blog" "blog")
-     (html/pjax-link "/projects" "projects")]])
+  (add-pjax-links
+    [:div#header
+      [:div.title
+       "words in the sky"]
+      [:div.navigation
+       (link-to "/blog" "blog")
+       (link-to "/projects" "projects")]]))
 
 (defn as-content
   "Given a map of page attributes (contents, title, css, etc.),
@@ -38,7 +50,8 @@
   (html
     (wits-title title)
     (map include-css css)
-    content
+    (-> content
+      add-pjax-links)
     (map include-js js)
     (when script (javascript-tag script))))
 

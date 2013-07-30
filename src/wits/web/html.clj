@@ -54,15 +54,6 @@
   [tag-to-match el]
   (= tag-to-match (tag el)))
 
-(defn pjax-link
-  "Adds a class specifying that the link is a PJAX one."
-  ([url content]
-   (pjax-link [] url content))
-  ([additional-classes url content]
-   (link-to
-     {:class (apply str "pjax " additional-classes)}
-     url content)))
-
 (def content-separator [:div.content-separator])
 (def small-content-separator [:div.small-content-separator])
 
@@ -109,3 +100,54 @@
   [s]
   (for [line (clojure.string/split-lines s)]
     [:p line]))
+
+(defn has-attrs?
+  [form]
+  {:pre [(sequential? form)]}
+  (and (> (count form) 1)
+       (map? (second form))))
+
+(defn get-attrs
+  [form]
+  (if (has-attrs? form)
+    (second form)
+    {}))
+
+(defn get-attr
+  [form attr]
+  (get (get-attrs form) attr))
+
+(defn has-attr?
+  [form attr]
+  (and (has-attrs? form)
+       (contains? (get-attrs form) attr)))
+
+(defn set-attr
+  [form attr value]
+  (if (has-attrs? form)
+    (assoc-in form [1 attr] value)
+    (list* (first form) {attr value} (rest form))))
+
+(defn get-classes
+  [form]
+  (-> form
+    get-attrs
+    (get :class "")
+    (#(do
+        (println "classes for" (get-attr form :href) "are" %)
+        %))
+    (clojure.string/split #" ")
+    (->> (into #{}))))
+
+(defn add-class
+  [form clazz]
+  (->> form
+    get-classes
+    (interpose " ")
+    (apply str clazz " ")
+    (set-attr form :class)))
+
+(defn has-internal-url?
+  [a]
+  (and (has-attr? a :href)
+       (.startsWith (str (get-attr a :href)) "/")))

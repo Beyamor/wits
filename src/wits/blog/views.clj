@@ -57,7 +57,9 @@
   ([link-contents blog]
    (blog-link [] link-contents blog))
   ([classes link-contents blog]
-    (html/pjax-link classes (str "/blog/entries/" (blog->url blog)) link-contents)))
+    (link-to
+      {:class (->> classes (interpose " ") (apply str))}
+      (str "/blog/entries/" (blog->url blog)) link-contents)))
 
 (defn blog-preview
   "Creates a view of a preview of a blog for the blog roll."

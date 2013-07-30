@@ -14,7 +14,7 @@
   "A Hiccup data structure for the preview of some project."
   [{:keys [url title thumbnail short-description description]}]
   [:div
-   (html/pjax-link (str "/projects/" url)
+   (link-to (str "/projects/" url)
                    [:div.project-preview
                     (sections
                       :thumbnail (image thumbnail)
@@ -37,7 +37,7 @@
     [:div.title title]
     [:div.summary
      [:p short-description]]
-    (html/pjax-link "check-it-out" url "check it out")]])
+    (link-to {:class "check-it-out"} url "check it out")]])
 
 (defn collection
   "A preview of some collection of projects."
