@@ -1,13 +1,15 @@
 onloadCallbacks = {}
 
-window.onPageReady = (page, f) ->
+window.whenPageLoads = (page, f) ->
 	onloadCallbacks[page] or= []
 	onloadCallbacks[page].push f
 
 callOnloadCallbacks = ->
+	console.log "calling onload callbacks"
 	page = document.location.pathname
 
 	if onloadCallbacks[page]?
+		console.log "callbacks for #{page}"
 		f() for f in onloadCallbacks[page]
 
 $ ->

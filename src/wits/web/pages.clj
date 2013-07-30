@@ -16,6 +16,9 @@
    "/js/art/starry.js"
    "/js/lib/syntax-highlighter/shCore.js"])
 
+(def page-initialization-js
+  ["/js/project-collection.js"])
+
 (defn wits-title
   [title]
   [:title (str "Words in the Sky" (if title (str " - " title)))])
@@ -46,7 +49,8 @@
   (html5
     [:head
      (map include-css core-css)
-     (map include-js core-js)]
+     (map include-js
+          (concat core-js page-initialization-js))]
     [:body
      [:canvas#art]
      header

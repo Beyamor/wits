@@ -50,9 +50,6 @@
      :css
      ["/css/project-collection.css"]
 
-     :js
-     ["/js/project-collection.js"]
-
      :script
      (str
        "projectCollection="

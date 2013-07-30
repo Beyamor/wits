@@ -1,10 +1,10 @@
-onPageReady '/projects', ->
+whenPageLoads '/projects', ->
 	$previews = $ '.collection > .previews > .preview'
 
 	selectCategory = ($el) ->
 		$('.collection > .categories > .category').removeClass 'selected'
 		$el.addClass 'selected'
-		scrollTo $('.collection')
+		# scrollTo $('.collection')
 
 	$('#collection-category-all').click ->
 		$previews.show()
