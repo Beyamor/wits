@@ -37,7 +37,7 @@
     [:div.title title]
     [:div.summary
      [:p short-description]]
-    (link-to {:class "check-it-out"} url "check it out")]])
+    (html/pjax-link "check-it-out" url "check it out")]])
 
 (defn collection
   "A preview of some collection of projects."
