@@ -8,7 +8,6 @@ callOnloadCallbacks = ->
 	page = document.location.pathname
 
 	if onloadCallbacks[page]?
-		console.log "firing callbacks for " + page
 		f() for f in onloadCallbacks[page]
 
 $ ->
@@ -30,10 +29,10 @@ $ ->
 	$.pjax.defaults.scrollTo = false if $.support.pjax
 	$(document).pjax('.pjax', '#page')
 
-	pjaxReload = ->
+	window.scrollTo = ($el) ->
 		# Scroll back up the header
 		$('body,html').animate({
-			scrollTop: $('#header').offset().top,
+			scrollTop: $el.offset().top,
 			duration: 200,
 			queue: false
 		})
@@ -44,6 +43,11 @@ $ ->
 			if e.which > 0 or e.type == "mousedown" or e.type == "mousewheel"
 				$viewport.stop().unbind('scroll mousedown DOMMouseScroll mousewheel keyup')
 		)
+	window.scrollToTop = ->
+		scrollTo $('#header')
+
+	pjaxReload = ->
+		scrollToTop()
 
 	$(document).on('pjax:success', pjaxReload)
 

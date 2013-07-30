@@ -4,7 +4,7 @@ onPageReady '/projects', ->
 	selectCategory = ($el) ->
 		$('.collection > .categories > .category').removeClass 'selected'
 		$el.addClass 'selected'
-
+		scrollTo $('.collection')
 
 	$('#collection-category-all').click ->
 		$previews.show()
@@ -35,3 +35,5 @@ onPageReady '/projects', ->
 		$('.showcase > .info > .summary > p').text data['short-description']
 		$('.showcase > .info > .summary > p').text data['short-description']
 		$('.showcase > .info > a').attr 'href', data['url']
+
+		scrollToTop()
