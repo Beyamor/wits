@@ -27,13 +27,18 @@ whenPageLoads '/projects', ->
 		showCategory 'pcg'
 		selectCategory $(this)
 
-	$previews.click (e) ->
-		data = projectCollection[$(this).data('id')]
+	$previews.each (_, preview) ->
+		$preview = $(preview)
 
-		$('.showcase > .screenshot > img').attr 'src', data['showcase']
-		$('.showcase > .info > .title').text data['title']
-		$('.showcase > .info > .summary > p').text data['short-description']
-		$('.showcase > .info > .summary > p').text data['short-description']
-		$('.showcase > .info > a').attr 'href', data['url']
+		$('a', $preview).click (e) ->
+			unless e.ctrlKey
+				e.preventDefault()
+				data = projectCollection[$preview.data('id')]
 
-		scrollToTop()
+				$('.showcase > .screenshot > img').attr 'src', data['showcase']
+				$('.showcase > .info > .title').text data['title']
+				$('.showcase > .info > .summary > p').text data['short-description']
+				$('.showcase > .info > .summary > p').text data['short-description']
+				$('.showcase > .info > a').attr 'href', data['url']
+
+				scrollToTop()

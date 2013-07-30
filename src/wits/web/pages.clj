@@ -29,7 +29,10 @@
   [content]
   (walk/postwalk
     (fn [form]
-      (if (and (sequential? form) (html/tagged? :a form) (html/has-internal-url? form))
+      (if (and (sequential? form)
+               (html/tagged? :a form)
+               (html/has-internal-url? form)
+               (not (html/has-class? form "not-pjax")))
         (html/add-class form "pjax")
         form))
     content))

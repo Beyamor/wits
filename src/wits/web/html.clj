@@ -139,6 +139,10 @@
     (clojure.string/split #" ")
     (->> (into #{}))))
 
+(defn has-class?
+  [form clazz]
+  (contains? (get-classes form) clazz))
+
 (defn add-class
   [form clazz]
   (->> form

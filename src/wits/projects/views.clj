@@ -72,12 +72,13 @@
 
         [:div.previews
          (for [i (range (count projects))
-               :let [{:keys [thumbnail title category]} (nth projects i)]]
+               :let [{:keys [url thumbnail title category]} (nth projects i)]]
            [:div.preview
             {:data-category category
              :data-id i}
             [:div.preview-image
-             (image {:title title} thumbnail)]])]])}))
+             (link-to {:class "not-pjax"} url
+               (image {:title title} thumbnail))]])]])}))
 
 (defn full-project
   "Returns a view for playing a project."
