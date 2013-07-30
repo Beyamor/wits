@@ -86,7 +86,7 @@
   (pjax/page
     pages/main pjax?
     {:title
-     (:title (escape-html title))
+     (escape-html title)
 
      :css
      ["/css/project.css"]
