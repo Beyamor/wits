@@ -1,0 +1,83 @@
+title: pleajax
+date: 07-29-2013
+
+When I sat down to rewrite this old website here, I decided one thing I defs wanted to do was include some sort of canvas-y goodness. Somewhere I could scrawl on with a bit of JavaScript, draw a nice little doodle. At the time of writing, it's the space up there where I've hung some hopefully-not-too-garish procedural art.
+
+So, we're drawing on a [canvas](http://en.wikipedia.org/wiki/Canvas_element), right? Looks ~~great~~ bearable, right? Now, the thing of it is, we want the canvas to carry across pages as a user like you (equally fictional in nature) moves through the site. We don't want to redraw it on every page because a) that's expensive and b) the persistence just looks better. 
+
+# async, i think
+
+Okay, now, what we're really talking about here is reloading only *part* of the page. Ideally, we're gunna just reload the main content of the page, and leave the canvas (and, what the hey, the nav bar) where it is. When we start talking about dynamic page content, we're talking about [AJAX](http://en.wikipedia.org/wiki/Ajax_programming). Some JavaScript pesters the server for data and dynamically displays the response without requiring a full page load. Cool. So, we can make a JavaScript request to grab new page content and plug that into the page when the user clicks on a link.
+
+Problem is, in general, AJAX doesn't maintain page history. The new content straight up replaces the old stuff. There is, however, a relatively new piece of browser goodness, the [pushState API](http://caniuse.com/#search=pushstate), which allows the browser's history to be manipulated with JavaScript. And, whoa, there's a super cool library that combines pushState with AJAX - [PJAX](https://github.com/defunkt/jquery-pjax).
+
+It's hella hip. Just specify the container which holds the dynamic content and mark links as being PJAX-y and then, lo and behold, clicking on those links will push the page state, make a PJAX request to the server, and fill the container with the new content. Righteous.
+
+And, like, it works, right? Hopefully? Click around the site a bit, dude. Press the back button a couple times. What fun.
+
+# ready steady - no go?
+
+That's all great and all, but - ah, *but*, that most Lovecraftian of conjunctions - but there's a bit of a hitch. 
+
+See, it's fairly common to have some JavaScript that runs when the page has finished loading. I mean, [jQuery](http://jquery.com/) knows this stuff is so cash money it used the `$` for it:
+
+```coffee
+$ ->
+	doPageLoadStuff()
+```
+
+This website here needs something like that for the [projects](/projects) page to hook up the project widget.
+
+Fair enough. The problem is, jQuery's `$` doesn't fire with PJAX loads. It's not a full page load and that's all jQuery is interested in. Whatever. PJAX gives us a few events to hook into its request model. In particular, `pjax:end` looks like the one we want. If we attach our page loading stuff to that, we should be in business, right?
+
+```coffee
+onloadCallbacks = []
+
+window.onPageLoad = (fn) ->
+	onloadCallbacks.push fn
+
+callOnloadCallbacks = ->
+	fn() for fn in onloadCallbacks
+	onloadCallbacks.length = 0
+
+$(document).on('pjax:end', callOnloadCallbacks)
+```
+
+But. Unfortunately, that event fires *before* any of the dynamically loaded JavaScript is run. So, if we go to something like the projects page and get a heaping pile of fresh JavaScript which registers a page load callback, it will only be called on the *next* `pjax:end`, long after we need it to fire.
+
+Ugh.
+
+# callback fever forever
+
+Alright. Dang. The problem is, we start listening for the event only *after* it fires. What if, well, we, uh, we started listening for the event *before* it fires? Problem solved.
+
+Yeesh. Here's what I've got then. Not saying it's the best, but it's what I've got.
+
+If we register all of the event callbacks on that first full page load, then everything will be in place when those `pjax:end` events fire. However, obviously we don't want every callback firing for every page load, right? So, we'll register the callbacks for particular pages. Simple enough.
+
+```coffee
+onloadCallbacks = {}
+
+window.whenPageLoads = (page, f) ->
+	onloadCallbacks[page] or= []
+	onloadCallbacks[page].push f
+
+callOnloadCallbacks = ->
+	page = document.location.pathname
+
+	if onloadCallbacks[page]?
+		f() for f in onloadCallbacks[page]
+
+$(document).on('pjax:end', callOnloadCallbacks)
+```
+
+Got it? We specify the page for which the callback fires and, when we hit that page, we fire the callback. We can use it like this:
+
+```coffee
+whenPageLoads '/projects', ->
+	doProjectsStuff()
+```
+
+Note that, in order for this to work, we have to include all of these page load callbackers in the full page load, so we lose out on dynamically loading the JavaScript, but that wasn't really something we were trying to do anyway.
+
+Well, alright. Engineering summary then: we lose a bit of modularity because we've got to include everything all at once, but - and it's a good but this time - shit works, yo. We've got our page initialization, we've got our partial page loading, and, most importantly, I've got my canvas. Whoo.

@@ -76,7 +76,8 @@
    "/css/lib/syntax-highlighter/themes/witsTheme.css"])
 
 (def blog-js
-  ["/js/lib/syntax-highlighter/brushes/shBrushClojure.js"])
+  ["/js/lib/syntax-highlighter/brushes/shBrushClojure.js"
+   "/js/lib/syntax-highlighter/brushes/shBrushCoffeeScript.js"])
 
 (def blog-page
   {:css
