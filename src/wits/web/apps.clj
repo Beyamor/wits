@@ -6,7 +6,7 @@
 (defn embed-canvas
   "Returns the HTML in which a canvas is embedded."
   [& {:keys [width height url container-class]
-      :or {container-class "game-container"}}]
+      :or {container-class "project-container"}}]
   [:iframe
    {:src url
     :width width :height height
@@ -16,7 +16,7 @@
 (defn embed-swf
   "Returns the HTML for putting a swf on the page."
   [& {:keys [width height swf container-class]
-      :or {container-class "game-container"}}]
+      :or {container-class "project-container"}}]
   [:div {:class container-class}
    (html/swf :width width :height height :source swf)])
 

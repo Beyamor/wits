@@ -6,8 +6,18 @@
 		width: 550px;
 		height: 250px;
 
+		
+
 		.screenshot {
 			position: absolute;
+
+			img {
+				border: {
+					style: solid;
+					color: $very-dark;
+					width: 2px;
+				}
+			}
 		}
 
 		.info {
