@@ -1,20 +1,29 @@
 $ ->
-	$previews = $ '.collection > .previews'
+	$previews = $ '.collection > .previews > .preview'
 
 	$('#collection-category-all').click ->
-		$('.preview', $previews).show()
+		$previews.show()
 
 	showCategory = (category) ->
-		$('.preview', $previews).each (_, e) ->
-			$e = $(e)
+		$previews.each (_, el) ->
+			$el = $(el)
 
-			if $e.data('category') is category
-				$e.show()
+			if $el.data('category') is category
+				$el.show()
 			else
-				$e.hide()
+				$el.hide()
 
 	$('#collection-category-games').click ->
 		showCategory 'game'
 
 	$('#collection-category-pcg').click ->
 		showCategory 'pcg'
+
+	$previews.click (e) ->
+		data = projectCollection[$(this).data('id')]
+
+		$('.showcase > .screenshot > img').attr 'src', data['showcase']
+		$('.showcase > .info > .title').text data['title']
+		$('.showcase > .info > .summary > p').text data['short-description']
+		$('.showcase > .info > .summary > p').text data['short-description']
+		$('.showcase > .info > a').attr 'href', data['url']

@@ -14,6 +14,7 @@
                 []
                 (->
                   projects/all
+                  (->> (map presentation/add-properties))
                   (view/collection pjax?)))
 
            (PJAX "/projects/:url"
@@ -21,6 +22,7 @@
                  (->
                    url
                    projects/by-url
+                   presentation/add-properties
                    presentation/full-project
                    (view/full-project pjax?)))
 
@@ -29,5 +31,6 @@
                 (->
                   url
                   projects/by-url
+                  presentation/add-properties
                   presentation/for-canvas
                   pages/content-wrapper)))

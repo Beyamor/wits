@@ -1,7 +1,7 @@
 (ns wits.projects.presentation
   (:use [hiccup.page :only [include-js]]
         [hiccup.util :only [escape-html]]
-        [wits.util :only [flatten-lists]])
+        [wits.util :only [flatten-lists assoc-if-missing]])
   (:require [wits.web.html :as html]
             [wits.web.apps :as apps]))
 
@@ -13,7 +13,7 @@
 (defmethod html-representation :canvas
   [{{[width _ height] :dimensions} :implementation :keys [url]}]
   (apps/embed-canvas
-    :url (str "/projects/" url "/canvas")
+    :url (str url "/canvas")
     :width width
     :height height))
 
@@ -37,3 +37,11 @@
     :js js
     :width width
     :height height))
+
+(defn add-properties
+  [{:keys [title] :as project}]
+  (-> project
+    (assoc :thumbnail (str "/images/projects/" (html/urlify title) "-thumbnail.png"))
+    (assoc :showcase (str "/images/projects/" (html/urlify title) "-showcase.png"))
+    (assoc :url (str "/projects/" (html/urlify title)))
+    (assoc-if-missing :short-description (-> project :description clojure.string/split-lines first))))

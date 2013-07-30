@@ -30,3 +30,9 @@
         (concat results x)
         (conj results x)))
     [] xs))
+
+(defn assoc-if-missing
+  [m k v]
+  (if (contains? m k)
+    m
+    (assoc m k v)))

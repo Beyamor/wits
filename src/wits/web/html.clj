@@ -97,3 +97,15 @@
       {:name "movie"
        :value source}]]
     "<!--<![endif]-->"])
+
+(defn urlify
+  [s]
+  (-> s
+    clojure.string/lower-case
+    (clojure.string/replace #"[ -_]" "-")
+    (clojure.string/replace #"[^a-z0-9\-]" "")))
+
+(defn str->p
+  [s]
+  (for [line (clojure.string/split-lines s)]
+    [:p line]))
