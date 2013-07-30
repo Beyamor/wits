@@ -11,6 +11,9 @@
   [{:title
     "Candy"
 
+    :category
+    :game
+
     :url
     "candy"
 
@@ -18,8 +21,7 @@
     (thumbnail "candy")
 
     :short-description
-    (paragraphs
-      "Collect candy in a randomly generated level while avoiding the four monsters.")
+    "Collect candy in a randomly generated level while avoiding the four monsters."
 
     :implementation
     {:type :canvas
@@ -56,6 +58,9 @@
    {:title
     "Beef and Harp"
 
+    :category
+    :game
+
     :url
     "beef-and-harp"
 
@@ -63,8 +68,7 @@
     (thumbnail "beef-and-harp")
 
     :short-description
-    (paragraphs
-      "A two-player rhythm game/shmup made for Global Game Jam 2013.")
+    "A two-player rhythm game/shmup made for Global Game Jam 2013."
 
     :description
     (paragraphs
@@ -83,6 +87,9 @@
 
    {:title
     "Vikes Invaders"
+
+    :category
+    :game
 
     :url
     "vikes-invaders"
@@ -103,6 +110,9 @@
 
    {:title
     "Endless Mazes"
+
+    :category
+    :pcg
 
     :url
     "endless-mazes"
@@ -125,6 +135,9 @@
 
    {:title
     "Chomp"
+
+    :type
+    :category
 
     :url
     "chomp"

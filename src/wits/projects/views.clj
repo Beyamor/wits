@@ -7,7 +7,8 @@
   (:require [wits.web.pages :as pages]
             [wits.web.html :as html]
             [wits.web.pjax :as pjax]
-            [wits.projects.library :as library]))
+            [wits.projects.library :as library]
+            [clojure.data.json :as json]))
 
 (defn preview
   "A Hiccup data structure for the preview of some project."
@@ -21,6 +22,20 @@
                               :title title
                               :description (or short-description description)))])])
 
+(defn filter-by-category
+  "Creates a filter function which
+   returns only the projects in the given category"
+  [category projects]
+  (filter #(= category (:category %)) projects))
+
+(defn collection-categories-json
+  "Spits out the JSON categorizing the given projects."
+  [projects]
+  (json/write-str
+    {:all projects
+     :games (filter-by-category :game projects)
+     :pcg (filter-by-category :pcg projects)}))
+
 (defn collection
   "A preview of some collection of projects."
   [projects pjax?]
@@ -31,6 +46,12 @@
 
      :css
      ["/css/project-collection.css"]
+
+     :script
+     (str
+       "projectCategories="
+       (collection-categories-json projects)
+       ";")
 
      :content
      (list

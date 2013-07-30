@@ -8,6 +8,7 @@
                            [hiccup "1.0.0"]
                            [enlive "1.1.1"]
                            [markdown-clj "0.9.21"]
-                           [clout "1.1.0"]]
+                           [clout "1.1.0"]
+                           [org.clojure/data.json "0.2.2"]]
             :plugins [[lein-ring "0.8.3"]]
             :ring {:handler wits.handler/app})
