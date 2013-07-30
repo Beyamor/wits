@@ -22,7 +22,7 @@
 
 (defn wits-title
   [title]
-  [:title (str "Words in the Sky" (if title (str " - " title)))])
+  [:title (if title title "Words in the Sky")])
 
 (defn add-pjax-links
   "Makes in-site links pjax"

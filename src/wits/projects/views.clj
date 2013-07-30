@@ -45,7 +45,7 @@
   (pjax/page
     pages/main pjax?
     {:title
-     "Games"
+     "Projects"
 
      :css
      ["/css/project-collection.css"]
