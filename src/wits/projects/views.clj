@@ -32,7 +32,8 @@
   [{:keys [title short-description url] showcase-image :showcase}]
   [:div.showcase
    [:div.screenshot
-    (image showcase-image)]
+    (link-to url
+      (image showcase-image))]
    [:div.info
     [:div.title title]
     [:div.summary

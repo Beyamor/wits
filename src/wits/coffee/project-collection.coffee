@@ -35,7 +35,8 @@ whenPageLoads '/projects', ->
 				e.preventDefault()
 				data = projectCollection[$preview.data('id')]
 
-				$('.showcase > .screenshot > img').attr 'src', data['showcase']
+				$('.showcase > .screenshot img').attr 'src', data['showcase']
+				$('.showcase > .screenshot > a').attr 'href', data['url']
 				$('.showcase > .info > .title').text data['title']
 				$('.showcase > .info > .summary > p').text data['short-description']
 				$('.showcase > .info > .summary > p').text data['short-description']
