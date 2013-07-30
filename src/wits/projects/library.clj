@@ -136,8 +136,8 @@
    {:title
     "Chomp"
 
-    :type
     :category
+    :game
 
     :url
     "chomp"

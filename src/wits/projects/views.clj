@@ -7,8 +7,7 @@
   (:require [wits.web.pages :as pages]
             [wits.web.html :as html]
             [wits.web.pjax :as pjax]
-            [wits.projects.library :as library]
-            [clojure.data.json :as json]))
+            [wits.projects.library :as library]))
 
 (defn preview
   "A Hiccup data structure for the preview of some project."
@@ -47,36 +46,38 @@
      :css
      ["/css/project-collection.css"]
 
-     :script
-     (str
-       "projectCategories="
-       (collection-categories-json projects)
-       ";")
+     :js
+     ["/js/project-collection.js"]
 
      :content
      (list
-       [:div.showcase
-        [:div.screenshot
-         (image "/images/projects/candy-showcase.png")]
-        [:div.info
-         [:div.title "Candy"]
-         [:div.summary
-          [:p "Collect candy in a randomly generated level while avoiding the four monsters."]]
-         (link-to {:class "check-it-out"} "/projects" "check it out")]]
+       (let [{:keys [title short-description url]} (first projects)]
+         [:div.showcase
+          [:div.screenshot
+           (image "/images/projects/candy-showcase.png")]
+          [:div.info
+             [:div.title title]
+             [:div.summary
+              [:p short-description]]
+             (link-to {:class "check-it-out"}
+                      (str "/projects/" url)
+                      "check it out")]])
 
        [:div.collection
         [:div.categories
-         (for [category ["all" "games" "pcg"]]
-           [:div.category category])]
+         (for [[category id] [["all" "all"]
+                               ["games" "games"]
+                               ["procedural generation" "pcg"]]]
+           [:div.category
+            {:id (str "collection-category-" id)}
+            category])]
+
         [:div.previews
-         (for [{:keys [thumbnail title]} library/all]
+         (for [{:keys [thumbnail title category]} library/all]
            [:div.preview
+            {:data-category category}
             [:div.preview-image
               (image {:title title} thumbnail)]])]])}))
-
-     ;(->> projects
-     ;  (map preview)
-     ;  (interpose html/small-content-separator))}))
 
 (defn full-project
   "Returns a view for playing a project."
