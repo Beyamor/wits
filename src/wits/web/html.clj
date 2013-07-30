@@ -133,9 +133,6 @@
   (-> form
     get-attrs
     (get :class "")
-    (#(do
-        (println "classes for" (get-attr form :href) "are" %)
-        %))
     (clojure.string/split #" ")
     (->> (into #{}))))
 

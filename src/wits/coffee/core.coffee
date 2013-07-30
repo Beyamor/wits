@@ -5,11 +5,9 @@ window.whenPageLoads = (page, f) ->
 	onloadCallbacks[page].push f
 
 callOnloadCallbacks = ->
-	console.log "calling onload callbacks"
 	page = document.location.pathname
 
 	if onloadCallbacks[page]?
-		console.log "callbacks for #{page}"
 		f() for f in onloadCallbacks[page]
 
 $ ->
