@@ -11,4 +11,5 @@
                            [clout "1.1.0"]
                            [org.clojure/data.json "0.2.2"]]
             :plugins [[lein-ring "0.8.3"]]
-            :ring {:handler wits.handler/app})
+            :ring {:handler wits.handler/app}
+            :profiles {:prod {:ring {:port 13994}}})
