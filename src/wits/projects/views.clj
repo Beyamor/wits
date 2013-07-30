@@ -68,8 +68,9 @@
          (for [[category id] [["all" "all"]
                               ["games" "games"]
                               ["procedural generation" "pcg"]]]
-           [:div.category
-            {:id (str "collection-category-" id)}
+           [:div
+            {:id (str "collection-category-" id)
+             :class (str "category" (when (= "all" id) " selected"))}
             category])]
 
         [:div.previews

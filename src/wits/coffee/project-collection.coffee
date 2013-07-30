@@ -1,8 +1,14 @@
 $ ->
 	$previews = $ '.collection > .previews > .preview'
 
+	selectCategory = ($el) ->
+		$('.collection > .categories > .category').removeClass 'selected'
+		$el.addClass 'selected'
+
+
 	$('#collection-category-all').click ->
 		$previews.show()
+		selectCategory $(this)
 
 	showCategory = (category) ->
 		$previews.each (_, el) ->
@@ -15,9 +21,11 @@ $ ->
 
 	$('#collection-category-games').click ->
 		showCategory 'game'
+		selectCategory $(this)
 
 	$('#collection-category-pcg').click ->
 		showCategory 'pcg'
+		selectCategory $(this)
 
 	$previews.click (e) ->
 		data = projectCollection[$(this).data('id')]
