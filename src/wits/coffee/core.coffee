@@ -1,3 +1,16 @@
+onloadCallbacks = {}
+
+window.onPageReady = (page, f) ->
+	onloadCallbacks[page] or= []
+	onloadCallbacks[page].push f
+
+callOnloadCallbacks = ->
+	page = document.location.pathname
+
+	if onloadCallbacks[page]?
+		console.log "firing callbacks for " + page
+		f() for f in onloadCallbacks[page]
+
 $ ->
 	# Used to fix the header to the top of the screen when scrolling down
 	# Dunno. Looks kinda cheesy, but I'll keep the code around for now.
@@ -36,3 +49,6 @@ $ ->
 
 	$('#art').height($(window).height() - $('#header').height())
 	drawArt('art') if drawArt?
+
+	$(document).on('pjax:end', callOnloadCallbacks)
+	callOnloadCallbacks()

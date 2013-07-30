@@ -1,4 +1,4 @@
-$ ->
+onPageReady '/projects', ->
 	$previews = $ '.collection > .previews > .preview'
 
 	selectCategory = ($el) ->
