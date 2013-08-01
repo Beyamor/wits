@@ -117,7 +117,23 @@
     :implementation
     {:type :flash
      :dimensions [640 :by 480]
-     :swf "/projects/chomp/Chomp.swf"}}])
+     :swf "/projects/chomp/Chomp.swf"}}
+
+    {:title
+    "Fruit Flies! Attack! Surprise!"
+
+    :category
+    :game
+
+    :description
+    "A silly little one-day jam about fruit flies."
+
+    :implementation
+    {:type :canvas
+     :dimensions [800 :by 600]
+     :js [(prefixed "/projects/fruit-flies-attack-surprise/"
+                    "jaws"
+                    "game")]}}])
 
 (defn by-url
   "Returns some game by url"

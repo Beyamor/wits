@@ -93,7 +93,7 @@
   [s]
   (-> s
     clojure.string/lower-case
-    (clojure.string/replace #"[ -_]" "-")
+    (clojure.string/replace #"[ \-_]" "-")
     (clojure.string/replace #"[^a-z0-9\-]" "")))
 
 (defn str->p
