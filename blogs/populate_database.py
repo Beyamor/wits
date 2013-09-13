@@ -2,15 +2,16 @@ import MySQLdb
 from os import listdir
 import re
 from datetime import datetime
+import ConfigParser
 
-config = {}
-execfile("../db.conf", config)
+config = ConfigParser.ConfigParser()
+config.readfp(open("../db.conf"))
 
 db = MySQLdb.connect(
-		host=config["host"],
-		user=config["user"],
-		passwd=config["password"],
-		db=config["database"]
+		host = config.get("db", "host"),
+		user = config.get("db", "user"),
+		passwd = config.get("db", "password"),
+		db = config.get("db", "database")
 )
 
 cur = db.cursor()
