@@ -1,0 +1,89 @@
+title: pass the schmuck
+date: 3-25-2012
+
+I'm reading through [The Joy of Clojure](http://fogus.me/) and [Code Complete](http://www.cc2e.com/) right now and that has somewhat stalled my code writing because it turns out it's really hard to type and turn the pages at the same time.
+
+	Clojure is a really neat language, which is the short version of my exploration thus far. Like, *really* neat is perhaps the long version. Somewhere in the dank, dangerous Amazon that is my home directory rests the start of a blog about my first project in the language, but it's a dense jungle in there and it'll be a while till I hack a finished piece out of it. The energy afforded to me by the excitement of a newfound creative avenue did, however, prove too little to fully escape the burly grip of *Guncrawl*.
+
+Remember the infamous [messengers](http://wordsinthesky.com/blog/entries/interesting-is-just-a-synonym-for-horrifying), that hideous chimera of acyclic visitors and the curiously recurring template pattern? God, how I adore that tremendous beast. And yet, at work the other day, I stopped, sighed aloud, and admitted that maybe it was too much for a mortal man to tame.
+
+I reworked the implementation some. Functionally, it's more or less the same, but the *visitableness* found itself shunted out of the components themselves. The quick breakdown is that the new implementation looks much like the [chain of command](http://sourcemaking.com/design_patterns/command) pattern except that *every* link in the chain passes the request along, whether or not it gets handled there.
+
+Okay, code time.
+
+```
+class BaseComponentReceiver {
+public:
+	BaseComponentReceiver();
+	virtual ~BaseComponentReceiver();
+
+	virtual void Accept( AbstractComponentMessenger* abs );
+	void AddNext( BaseComponentReceiver* nextReceiver );
+
+private:
+	BaseComponentReceiver* m_NextReceiver;
+};
+```
+
+Aight, so, you might've guess this guy is the base class. It does two things. First, it accepts - or, let's say, *receives* - an `AbstractComponentMessenger` just like the `Component` did back in the good ol' days. Second, with that `AddNext` method, it adds another receiver to the chain.
+
+Chain, chain, chain, it's all I every talk about these days. The receivers are structured as a list. Each has a pointer to the next receiver, with null denoting the end of the list. When a receiver in the list accepts a messenger, it'll handle it, then pass it along to be accepted by the next receiver in the chain. In this way, the messenger can be fed through the list of receivers and handled by each.
+
+Handled. Now there's as vague a term as a body's ever heard. Let's give it some meaning:
+
+```
+template <typename COMPONENT_TYPE>
+class ComponentReceiver : public BaseComponentReceiver {
+private:
+	typedef ComponentMessenger<COMPONENT_TYPE> SpecializedMessenger;
+
+	COMPONENT_TYPE* m_Component;
+
+public:
+	ComponentReceiver( COMPONENT_TYPE* component ) :
+		m_Component( component ) {
+
+	}
+
+	virtual void Accept( AbstractComponentMessenger* abs ) {
+
+		SpecializedMessenger* messenger
+			= dynamic_cast<SpecializedMessenger*>( abs );
+		if ( messenger )
+			messenger->Visit( m_Component );
+
+		BaseComponentReceiver::Accept( abs );
+	}
+};
+```
+
+No surprises here either. It looks about the same as our poor, departed friend the `VisitableComponent` did. When a `ComponentReceiver` in the chain accepts a messenger, it'll check to see if it's the right type and, if it is, it'll hook the messenger up with its `Component` pal. After that, it'll toss the messenger up to the base class so it can be juggled along the chain.
+
+For completeness's sake, there's a `ComponentReceiverChain` class to keep these boys in line, but it's basically just a wrapper around checking whether the head of the chain is null.
+
+```
+class ComponentReceiverChain {
+private:
+	BaseComponentReceiver* m_Head;
+
+public:
+	ComponentReceiverChain();
+	~ComponentReceiverChain();
+
+	void AddReceiver( BaseComponentReceiver* receiver );
+	void Accept( AbstractComponentMessenger* messenger );
+};
+```
+
+With this scheme, any component can be visited as long as it adds a `ComponentReceiver` to its entity's `ComponentReceiverChain`. Naturally, a component's base class can add its own receiver too, so visiting base classes its less ornery.
+
+```
+entity->GetReceiverChain()->AddReceiver(
+	new ComponentReceiver<Body>( this ) );
+```
+
+So, as you can see, it's all tremendously boring.
+
+Okay, okay, I can throw my hands in the air and admit that this is easier to understand. Powerful as CRTP is, it's a dangerous and powerful thing and it probably shouldn't be thrown around lightly. I can write this in as many lines with far less opaque syntax and greater flexibility and, if I wasn't getting the magical type inference afforded by the vanilla visitor pattern anyway, it's pleasant to be able to package that whole visiting mess in another class altogether.
+
+And that's about all we've got for today, as far as writing stuff goes. This whole refactoring business took maybe half an hour, but this weekend saw a rich bloom of code dedicated to particle-y stuff. If you're good, my imaginary reader, maybe we can talk about that in the near future.

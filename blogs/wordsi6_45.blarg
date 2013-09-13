@@ -1,0 +1,65 @@
+title: another link in the chain
+date: 4-1-2012
+
+I spend a lot of time likening myself to Hemingway makin' out with Danielle Steel, insofar as my writing prowess goes, so let's make the most of that and do up a few more words about that [last blog](http://wordsinthesky.com/blog/entries/pass-the-schmuck).
+
+# yanking your chain
+
+A heaping hunk of words went into describing the "chain" mechanism of the `ComponentReceivers`. As a quick refresher, there is, somewhere, a chain of these receiver nodes. When a component messenger comes along, it gets passed through this chain. So, that's nice. But I think I kind of skimped on the *why*.
+
+First, let's take another look at the `ComponentReceiver`:
+
+```
+template <typename COMPONENT_TYPE>
+class ComponentReceiver : public BaseComponentReceiver {
+private:
+    typedef ComponentMessenger<COMPONENT_TYPE> SpecializedMessenger;
+    COMPONENT_TYPE* m_Component;
+public:
+    ComponentReceiver( COMPONENT_TYPE* component ) :
+        m_Component( component ) {
+    }
+    virtual void Accept( AbstractComponentMessenger* abs ) {
+        SpecializedMessenger* messenger
+            = dynamic_cast<SpecializedMessenger*>( abs );
+        if ( messenger )
+            messenger->Visit( m_Component );
+        BaseComponentReceiver::Accept( abs );
+    }
+};
+```
+
+This guy is constructed with a reference to some `Component` and specialized to that `Component`'s type with templates. It also *overrides* the `BaseComponentReceiver`'s `Accept` method to do some cool stuff.
+
+The so-called "cool stuff" is casting the `Messenger` the `Receiver` accepts to the type the `Receiver` is specialized for and, if possible, the `Messenger` is directed to visit the `Component` the `Receiver` references. This is a pattern we've seen before.
+
+Now, one way or another, the specialized `ComponentReceiver` calls the `BaseComponentReceiver`'s `Accept` so that the `Messenger` can be passed along the rest of the chain. And that's it.
+
+Because the `ComponentReceiver` is specialized for the component types, it's the only class that derives from the `BaseComponentReceiver`. The `BaseComponentReceiver` itself only exists to build the chain and provide a common interface for a collection of `Receiver`s.
+
+So, when a `Component` needs to be made visitable, it adds a `Receiver` for itself to the `Entity`. Remember this line?
+
+```
+entity->GetReceiverChain()->AddReceiver(
+    new ComponentReceiver<Body>( this ) );
+```
+
+What that says, in effect, is, "Hey, I'm a Body, let me know if anybody tries to visit me!" The `ComponentReceiver` is specialized for a `Body` component and added to the chain. If that `ComponentReceiver` accepts a `Messenger`, it can direct it to visit its `Body`.
+
+By creating `Receiver`s for themselves, `Components` provide a means by which `Messengers` can visit them. Sounds good? I'm happy enough with it, anyway.
+
+# breaking the chain
+
+[Knutaf](http://barncover.blogspot.ca/) posed an interesting question and one I'm trying to be more conscious about - if I wanted to change this design, could I?
+
+The answer is, *sorta*.
+
+One suggestion was being able to change the underlying data structure of the "chain" from a list to, for example, an array. This, I think, is doable. From the perspective of the `Component`s, anyway, all they do is create a `ComponentReceiver` and add it to their `Entity`'s `ComponentReceiverChain`. Behind the scenes, the `ComponentReceiverChain` could chuck the `ComponentReceiver`s into an array or a vector or, well, whatever. Since it's responsibly for forwaring a `Messenger` to a `Receiver`, it can impose its own control structure.
+
+As far as parallelizing, another suggestion, a lot of other things in the code base might need some work, but this wouldn't be too bad. Rework to use a structure other than the linked list and the messenger could, conceivably, be directed along all dimensions in parallel. I think. *Neat*.
+
+What irks me more is the `GetReceiverChain` call. It exposes the inner mechanism the `Entity` uses to store `Receiver`s. What if, down the road, I did want to make a different object, something like a `ReceiverArray`, that *did* use a different structure, replacing the `ReceiverChain` altogether? The choice of one class over the other has been spread through the codebase and reversing that decision would be a big pain.
+
+All it would take it hiding that behind an `AddReceiver` method to the `Entity` itself.
+
+Am I going to change it? Probably not. I think it's safe enough. However, it's an aspect of design worth thinking about going ahead. I'd like to think I'm getting better at writing code that's conducive to change, but it was eye-opening to sit down and answer whether or not I'd actually managed to do so.

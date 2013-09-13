@@ -1,0 +1,39 @@
+title: the sky is no place for birds
+date: 7-19-2011
+
+I'm playing around with the favicon. It's, it's pretty dumb. Not my favicon - that's too inconsequential a thing to merit *dumb* - but the word. *Favicon*. Portmanteaus, despite the synthesis of their nature, live in a very binary world. Either brilliant or *guesstimate*, there is no in between.
+
+Did you notice the new italics tag? Yeah, let's go over that for a second.
+
+```
+// yeah, we're doing some more regex up in here
+// this guy matches a very simple [**i]italic stuff[**/i] pattern
+/\[i\](.*?)\[\/i\]/s
+
+// that's thrown in a preg_replace_callback call that sticks
+// the matched group (.*) in an italicized span
+return '<span style="font-style:italic">$matches[1]</span>';
+
+// horribly mundane, but any excuse for the code tag
+// ah, right, still highlights commented keywords. lolz
+```
+
+More restructuring on the back end. I'm a fan of feng shui, you see. The sort of feng shui *no one will ever see*.
+
+I love this tag.
+
+A bit of sprucing up with the CSS too. Mostly little changes, but I finally broke away from the ghastly underlined urls. Feels good bro. Honestly, there ain't a heck of a lot to brag about, but dang, it's a treat to put words on a page and have 'em show up all pretty like.
+
+Oh, yeah, images. There's a thing. See, ideally, I'd get to a point where I can upload - or something - images and have them be associated with the blogs that link to them. That is, I'd like to have a means of linking to images which guarantees the links'll still work even if I decide I want to completely restructure the way the images themselves are stored. Well, hey, this sounds like a problem I've already solved. No, don't think too hard about it.
+
+```
+// this beast tears the image name outta the url
+// then stuffs it into a common directory
+RewriteRule ^entries/([0-9a-zA-Z\-_]+)/images/(.*)$ ./images/$2
+```
+
+The obvious problem with the system above is that trying to force feed duplicate image names will cause it to swallow one forever. And the inevitable gargantuan folder full of images. But *details*. It'll tide us over until I get around to, say, making an actual unique image directory for each blog. Or hash the image names. Something. *Anything*.
+
+Italics.
+
+Also, [this](http://www.wordsinthesky.com/blog/tags/). It's a work in progress, but something I'd much like to see through to the end. Tag clouds are a right trip, insofar as visually representing categorization goes. But anyway. At some point, I'm going to have to really commit to a non-website project. Talking about the design of a site on that same site is hella meta, but let's face it, my dear imaginary reader, you and I both have better places to be.

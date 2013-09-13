@@ -1,0 +1,24 @@
+title: progress is breaking the right pieces
+date: 7-17-2011
+
+Oh my.
+
+That the site you see before you, dear imaginary reader, at all resembles what you've become familiar with is the product of some truly heroic effort. Actually, credit where credit is due, that you see anything at all is probably down to luck.
+
+So, I spent this weekend hunched over my laptop, attached to my chair like a limpet, gutting almost the entirety of this fine website. Huge swathes of code were thrown out - a forest of deadwood bristles with the trunks of obsolete code I haven't thrown out yet. But why, you might wonder in your ponderous little skull, would anyone go to such lengths to fix something which, by all rights, wasn't broken? Well, as though picked by Noah himself, there is a perfect pair of reasons.
+
+First, I'm an idiot. Probably the best explanation I can give for squandering my oh-so precious youth in the bowels of the PHP docs. But forget that, the outside world is a nightmare of heatstroke and amiable passers-by.
+
+Second, I'm an idiot. Simply and honestly put, the code I wrote was bad. To be fair, when this began, I was struggling to learn the new languages and paradigms, but even so, the product of my work was an ugly aberration of hacks. Not spaghetti code, but certainly nothing anyone would ever want to touch. So, loins well girded, I scrapped the bulk of it and did it, if not right, at least better.
+
+Easily the biggest change is that I'm using my .htaccess file to process the urls with regex a la [this](http://wettone.com/code/clean-urls). Before, a complex system of pulleys and leavers would shift files into a pleasant directory structure. Now, done properly, I can separate the file system from access to it. It cleans up the code tremendously and, by very decisively drawing a line between representation and application, it just good sense. I feel happy with this.
+
+I just wish I'd known about it earlier.
+
+Uh, there's a few other tweaks here and there - overhauled the pagination to make it less of a basement-locked monster and more of a friendly and accessible general utility. In a lot of places, I've made modifications to do nothing more than separate the code into logical chunks - before, we were approaching rat's nest.
+
+Probs the best new hotness is on the editor side. I've introduced a couple of regular expressions to process the stuff I write. They do a couple of things, but perhaps the most important is automatically escaping html and inserting the <p> paragraph tag around linebreaks so I don't have to jam them in while I'm writing. It's part laziness, but also a good example of divorcing content from how it's represented. I also made a bastardization of [BBCode](http://en.wikipedia.org/wiki/BBCode) with links, images and codeblocks. I'm used to BBCode, it's a good way to handle the escaped html and it lets me use more regex, so you can see why I jumped on that ship.
+
+That's probably not a real expression.
+
+Anyway, still a lot I gotta fix and polish, but it's a good, clean feeling to write code that could be the work of a software engineer and not a distressed pelican trying to eat the keyboard.

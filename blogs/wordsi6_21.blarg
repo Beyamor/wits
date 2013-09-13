@@ -1,0 +1,24 @@
+title: drinking the virtual paint
+date: 8-2-2011
+
+Gosh dang, I am tremendously bad at creating a sultry GUI. This isn't a matter of color alone. Truth be told, color-wise, my work could look like [Urkel](http://www.awesomehq.com/wp-content/uploads/2011/03/steveurkel.jpg) barfed Skittles all across the page - ah, Urkel, will you ever fall out of the public eye? - and I could make my peace with that. The real concern is the horrid, janky assembly of knobs and wire I assemble as my interactive elements.
+
+The pieces of a GUI, at its best and insofar as is practical, are metaphors. Check out your browser. Is there a picture of a house? Maybe, I don't know, *representing your home page?* Or tabs? You could have tabs. People have tabs. Point is, there are bits that convey ideas about the functions of the program you're using as intuitively and unobtrusively as possible by drawing parallels between themselves and real-world concepts. But you get that - you've been doing it since the conception of windows, folders, and the desktop.
+
+Me, I'm still waiting for a truly effective [dinosaur metaphor](http://www.totallyfreecursors.com/details.cfm/id/603/Dinosaur%20Female.htm).
+
+Anyway. These virtual analogies are still something I struggle with much more than I'd like. They're simply not a concept I [grok](http://en.wikipedia.org/wiki/Grok). And that really bothers me. I did take a course in [human-computer interaction](http://en.wikipedia.org/wiki/Human%E2%80%93computer_interaction), but it was one of those courses that only really teach you how to hate the course. Well, okay, use your imaginary eyes on this:
+
+![some image](/images/blog/recaps-template-entry.png)
+
+Mhm. Not a pretty piece, but let's set aside the style for the time being. Fingers crossed that comes about at some point. Look more at the ideas being conveyed. You can see pencils, X's, and checkmarks. Those should be reasonably intuitive - that sort of repetition of ingrained concepts is kind of a big deal in HCI. It's rough - ideally editing the link and editing the text could be made into a whole, but my only solutions there run counter to the workflow, which is kind of the biggest deal. I flip-flopped for, honestly, hours, but if you accept that links not in an editing state should be clickable and that both fields should be editable at once, something in this line is, I think, inevitable.
+
+Worse is this:
+
+![some image](/images/blog/recaps-template-generate.png)
+
+Right. So. That, the generate control panel, is a mess. It starts off well enough with a drop-down for different recappers and picks up some steam with the cumbersome-but-functional radio button. The Generate button is abhorrent but with some razzle-dazzle, it'll be fine. The formatter though, maybe the most interesting feature, is a disaster. It's a barely concealed regular expression with no promise of a workable visual tool. It's bad in a few ways, but mostly that it asks the user to hammer out a textual template of what is a very visual thing. So many solutions could work better than this and *should*.
+
+This is a failed metaphor and, working with a craft that trades almost exclusively in such things, it's an embarrassment. And - oh. Shoot. Time for work. Ah well. Uh. Okay. It's worth pointing out the ugliness of ugly things - that ugliness is something to be improved.
+
+Except, of course, in the case of yours truly. That's a truly lost cause.

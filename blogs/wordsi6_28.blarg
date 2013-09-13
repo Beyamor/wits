@@ -1,0 +1,32 @@
+title: finding your c legs
+date: 9-18-2011
+
+Oh man. Guys. Guys. Oh man. Guys.
+
+Oh man.
+
+Lay your optic receptacles on this:
+
+![some image](/images/blog/gc-blank1.png)
+
+How boss is that? So boss. *So boss*. We're talking CEO-levels, yo. I- oh, wait, hang up.
+
+![some image](/images/blog/gc-blank2.png)
+
+Eh? *Eh*? You see it? There, in the corner? The output to the console? A pair of numbers which could very well be believed to be the XY coordinates of an object in 2D space whose position has been displaced from the origin by player input? Yeah!
+
+I was briefly adjacent to this year's [OrcaJam](http://www.orcajam.com/), a Victoria-based game development fest, and before I quit out like the Prince of Chince I am - I suck, forever - I got a few hours of effort into *Guncrawl*. Nothing super wow-worthy, but enough to hammer into place what I'm hoping is a solid foundation for the game. It'll be a long while before we can get to the "interesting" bits, dear reader, but I'm hoping that this would offer sure footing. I mean, there are additions and even some refactoring I can anticipate, but anyway. Let's talk about what we've got so far, humble though it may be.
+
+Some of it is pretty pedestrian. There's the regular game state pattern which allows the game to shift between modes like the title screen and the main gameplay. I mean, it's been done to death, so we don't really need to dwell on it, but hey, might as well make it clear what the backbone of the game's structure is.
+
+More interesting is the work put into creating the initial game entities. Or, perhaps more accurately, into setting up the structure which will allow me to create game entities at what will hopefully be a near point in the future. But I'm beating around bushes - let's visit the past for a spell. Near the end of the last iteration of *Guncrawl* I was working on cutting up the few objects I had into more manageable pieces. With some unpracticed surgery, a sort of classectomy, I ended up with things like a *Spatial* and a few *Movers*, different components which combined Megazord-style to make up my game objects.
+
+This idea really appealed to me and even though I dropped the project, I circled back to ponder the motions at play. Aggregation, for reasons we might better explore down the line, should be the tendency of object-oriented programming. In brief, it does a great job of separating concerns and allowing reuse by way of building-by-composition. Anyway. I hunted around and found a few articles describing component-based architectures - [this one](http://cowboyprogramming.com/2007/01/05/evolve-your-heirachy/) being particularly salient - by people much smarter than me. With the reassurance that this idea was only half-asinine, and my heart dearly set on this dream of extensible objects composed of diverse components, I set about trying to be an architect.
+
+An *Entity* is a very simple thing. In fact, at the time of writing, it's really little more than a wrapper around a collection of *Components*, though it will almost certainly need to expand for things like intra-entity message passing. That, of course, is the beauty of the *Entity* - it's a shell waiting to be filled with juicy goodness. The compliment to the *Entity* is the *EntityFactory*, a [factory](http://sourcemaking.com/design_patterns/factory_method) which encapsulates the details of building an *Entity*. As an aside, these *EntityFactories* will unquestionably need to be reworked, but we'll talk about that later. For now, just know that all they need to do is give entities the right components.
+
+The components are no more than classes, each with a single responsibility. Together, they define the data and behaviour of the *Entities* they make up. While not yet implemented, components might, for example, determine AI movement or draw characters on the screen. As it stands, they have two big methods, *preMoveUpdate()* and *postMoveUpdate()*, which allow the pieces to do whatever it is they do before and after the point in an update where the objects in the world are moved. This could lead to a lot of extra processing for *Components* which don't do one or the other, but optimization there is something we'll worry about as needed. The point here is that this general structure will provide the system with a means of adding all sorts of kooky behaviour without worrying about exactly what happens when we poke 'em into updating.
+
+Most components will inherit from *RegularComponent* because they'll only be involved with the all-purpose update bump. However, there are a few special cases. The first one, and something of an important piece, is the *Spatial*. This *Component* holds the data about an *Entity*'s physical properties like its speed and position. It's a key element in that a real ton of its neighbours will be reading from it - the piece responsible for rendering, for example, will draw itself based on that spatial data. Moreover, the *Spatials* and their interaction requires its own subsystem, the *PhysicsEngine*. To ensure movement it fair and coordinated and all the collisions resolve well, they'll be done in a *move()* call in the update step where the physics manager will, hopefully, sort everything out. But we'll nail down the details there in time.
+
+And that's about all we've got so far. Jesus, okay, that's a lot of words and dishearteningly few pictures. What're we taking away from today, my fictional friend? We've got the start of our component-based system. Had I mentioned a *PlayerIntent* component was responsible for the spatial displacement we drooled over far somewhere far above? There are a number of things I can name that I'll have to sort out with the architecture and components, but hey, it's progress. We're underway.

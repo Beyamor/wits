@@ -1,0 +1,71 @@
+title: a subject of much discussion
+date: 2-4-2012
+
+Listen! Listen! Hey, listen! Event listeners!
+
+Let's close the book on menus with this blog because, good lord, I want to be done with the menus. We covered the structure of the menu elements in that [last blog](http://wordsinthesky.com/blog/entries/contain-your-excitment) and today, we're gunna dance a word jig about jamming some functionality into it. Obviously a menu has things it. Buttons, say. Now, in our idealized world, when the user clicks on these buttons, they do things. Cool things. *Button things*. But how do we hook that up? How do we shoehorn it in there?
+
+So, one way to approach this is by subclassing menu elements like the buttons to add the desired functionality. For example, to set up a button that equips a weapon, you create the `EquipTheDangWeaponButton` button which does all the button-y stuff and, in addition, has a handler setup to, surprise surprise, equip the weapon. And that's fine, it'll work, but it makes me all sad and stuff. See, that binds the visual part, the button, to the functionality behind it really strongly. If one aspect needs an overhaul, the other gets dragged under the knife with it. A better solution leaves the nice GUI as it is so I never have to touch the menus again, and allows the bits that actually do things to be built around it.
+
+And hey, who'da thunk we have just such a solution?
+
+There's a bit of debate about the philosophical bent behind the pattern, but for clarity, we'll say I'm using [observers](http://en.wikipedia.org/wiki/Observer_pattern). I'mma break this down for you. Let's say you have some stateful object called a "subject" and other objects called "observers" who observe changes in the subject's state. A conventional model might see the observers continuously polling the subject to see if anything has changed. The observer pattern flips this on its head. The observers register themselves with the subject and then, when the subject changes, it notifies the observers. It's like this, dear reader. Instead of you coming to this blog to check for updates - a farfetched notion, but bear with me - I walk to your house, break down the door, and scream at you that I've posted a new entry and probably haven't done a great job editing it.
+
+Okay, where's that land us? Glad you asked. The `MenuElements` themselves subclass the `MenuSubject`, a class which wraps up all that pretty subject stuff that was topic of our last paragraph. Boom:
+
+```
+class MenuSubject {
+public:
+	MenuSubject();
+	virtual ~MenuSubject();
+	void addObserver( MenuObserver *o, MenuEventType type = meAny, bool deleteWithMe = true );
+	void removeObserver( MenuObserver *o );
+	void clearObservers();
+protected:
+	void notify( MenuEvent e = NULL_EVENT );
+private:
+	std::map< MenuEventType, std::set<MenuObserver*> > observers;
+	std::map< MenuObserver*, bool > responsibleForDeletion;
+	static MenuEvent NULL_EVENT;
+};
+```
+
+So there's some stuff and junk, but you've got the essential pieces, `addObserver` and `notify`. Yee-haw. You'll notice we've got a little enum called `MenuEventType`. This is something like `LeftPressed` or `RightReleased` that describes a mouse event in relation to a menu element. Observers are registered by event type so there's some granularity as far the nature of the notifications. And observers? Welp, here we go:
+
+```
+class MenuObserver {
+public:
+	MenuObserver();
+	virtual ~MenuObserver();
+	virtual void respond( MenuEvent e ) {};
+};
+```
+
+Well, that's tidy, isn't it? Since all the observer side of things needs is a method to respond to the subject's events, this class is pretty lightweight. We won't get into the `MenuEvent` itself because it's pretty well just information about whatever event was generated. *Dur*. How's this look in action?
+
+Here's a charming class by the name of `InventoryItemMenuCloser`. It's an observer which, as you might've worked out, closes an inventory item menu.
+
+```
+class InventoryItemMenuCloser : public MenuObserver {
+public:
+	InventoryItemMenuCloser( MenuElement *menu )
+		: MenuObserver()
+		, menu( menu ) {
+
+	}
+
+	~InventoryItemMenuCloser() {}
+
+	void respond( MenuEvent e ) {
+
+		menu->close();
+	}
+
+private:
+	MenuElement* menu;
+};
+```
+
+When an item's inventory menu is created, one of these babies is instantiated and gets added as an observer. It's just that simple. All that functionality wrapped up in this cute little object. I'm thinking that most of observers will look like this - fairly sleek, almost throwaway classes  that are entirely specialized to one task. It's kind of an object-intensive strategy - any new task means writing up one of these guys. Despite that, it feels right with me. Separating the menu GUI from the functionality behind it makes it much easier for me to reason about how that functionality, by itself, is implemented and with as little reason as I have, I'll take any help I can get. Furthermore, it's just real easy to add this stuff. Write the observer, register it, carry on. Feels good.
+
+Phew. I'm hoping that's it with the menus for a while. They need some more work, certainly, but I want to start looking at other stuff. We've got the rest of this game to finish.

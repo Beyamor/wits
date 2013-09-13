@@ -1,0 +1,16 @@
+title: plié delay
+date: 10-5-2011
+
+Why, hello again, my make-believe blogophile. Been a while, huh? Let's brush off the cobwebs and get back to it. What have we accomplished in the past two weeks? Well, a staggering amount of security engineering and signal analysis, for a start, but it hasn't been all fun and games, my fictional friend. I haven't exactly been resting on my laurels. A fortnight ago, *Guncrawl* was a crude and ugly pixel golem:
+
+![some image](/images/blog/gc-circle-renderer.png)
+
+And now? Now it is a digital ballerina, stepping lightly on shoes of electronic glamour to the tune of sweet desire:
+
+![some image](/images/blog/gc-square-renderer.png)
+
+Uh. Yeah. Okay. So maybe there was some small loss of momentum. Such is the life academic - time is a scarce commodity. But still, progress. Hey, I know, let's play a game. Can you spot the differences in the pictures above? The answers are below - no peeking.
+
+Did you spot them all? The second picture is centred on the entity thanks to a little help from our component friend *EntityCamera* and the entity itself is oriented towards the cursor position. Also, one is a square. Hopefully you picked up on that.
+
+A bigger change, albeit one invisible to the outside world, is an overhaul of how the entities are constructed. That, however, is a topic we'll expand on in the next blog. This particular entry can stand as nothing more than the fervent blowing-off of dust on my poor, dilapidated website.

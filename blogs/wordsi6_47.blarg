@@ -1,0 +1,148 @@
+title: really terrifying type info
+date: 6-23-2012
+
+Let's spend some time staring into the black abyss of metaprogramming in C++. Today, we're gunna cover variadic templates.
+
+A comrade in code, Nicolas Guillemot, is working on a [game engine](https://github.com/nguillemot/viking) in C++ and reached a point where he was thinking about adding run time type information to his ```(https://github.com/nguillemot/viking/blob/master/purgatory/TestRTTI.cpp). There's this pattern where an RTTI information object is attached to each class, supplementing them with additional class data. This is useful because, for example, the RTTI objects can contain information about the class hierarchy, allowing for quick inheritance checks, which is the nature of the problem you and I are tackling today, my imaginary friend.
+
+# declare rtti
+
+Alrighty. So, every class is going to have its own RTTI object. This object is going to be reasonably simple - it'll contain the class name and be able to answer whether it (or its parents) derives from some other RTTI instance. Snagging Nicolas's stellar code, the class's public interface looks like this:
+
+[code]
+class RTTI {
+public:
+	RTTI( const char* className, const std::vector<const RTTI*>& parents )
+		: m_className( className )
+		  , m_parents( parents )
+	{}
+
+	const char* getClassName() const {
+
+		return m_className;
+	}
+
+	bool derivesFrom( const RTTI& r ) const {
+
+		// check whether this instance or any of its parents derive from r
+	}
+};
+```
+
+Okay? Takes a class name string and a vector of parent RTTI instances and can return the class name and whether a particular instance derives from another. Now, every class is going to have its own instance of this guy and, moreover, each instance of every class is going to be able to whip out its RTTI object so we can check whether it derives from another. As implemented, this involves a couple macros:
+
+```
+// declares typeinfo member variables/functions to be used within a class declaration
+#define RTTI_DECLARE() \
+	public: static const RTTI typeInfo; \
+	public:  virtual const RTTI& getTypeInfo() const { return typeInfo; }
+
+// For base classes
+#define RTTI_DEFINE0(ThisClass) \
+	const RTTI ThisClass::typeInfo(#ThisClass, {})
+
+// For classes which use single inheritance
+#define RTTI_DEFINE1(ThisClass, ParentClass) \
+	const RTTI ThisClass::typeInfo(#ThisClass, { &ParentClass::typeInfo })
+
+// For classes which use multiple inheritance with 2 parents
+#define RTTI_DEFINE2(ThisClass, ParentClass1, ParentClass2) \
+	const RTTI ThisClass::typeInfo(#ThisClass, { &ParentClass1::typeInfo, &ParentClass2::typeInfo })
+```
+
+`RTTI_DECLARE` is used in the class definition to declare that a class will have RTTI information and the various `RTTI_DEFINE`s are used to actually define the nature of the inheritance. Lame though it may be, thanks to C++'s compilation model and the way it handles static variables, `RTTI_DEFINE` has to be written *outside* of the class definition. But whatevs. Check out those [initializer lists](http://en.wikipedia.org/wiki/C%2B%2B11#Initializer_lists) though - man, C++11 is hip. Anyway, using the declarations and definitions looks kinda like this:
+
+```
+class Shoes {
+	RTTI_DECLARE();
+};
+
+class FlipFlops : public Shoes {
+	RTTI_DECLARE();
+};
+
+class StupidLookingThing {
+	RTTI_DECLARE();
+};
+
+class Crocs : public Shoe, public StupidLookingThing {
+	RTTI_DECLARE();
+};
+
+RTTI_DEFINE0(Shoes);
+RTTI_DEFINE1(FlipFlops,Shoes);
+RTTI_DEFINE0(StupidLookingThing);
+RTTI_DEFINE2(Crocs,Shoes,StupidLookingThing);
+```
+
+Awesome. Couldn't have written it better myself, though that's not saying much. It's a pretty nice way of jamming that class hierarchy in there, anyway. The only thing to watch out for is that the RTTI_DEFINE has to match the number of superclasses - 0 superclasses, RTTI_DEFINE0; 1 superclass, RTTI_DEFINE1. This is because, while [can be variadic](http://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html), the variadic arguments are only available as a comma-separated list. So, while we could pass in a list of classes, using macros alone, we can't get 'em in the form `&Class1::typeInfo, &Class2::typeInfo,..., &ClassN::typeInfo` needed for the vector initialization list. The numbered defines aren't a big deal though, and without some stupid hacky stuff, it's the best you're going to get.
+
+# define rtti
+
+Ideally, we could have a single macro of the form `RTTI_DEFINE` that takes a variable number of superclasses and sets up the RTTI instance appropriately. At this point, longtime readers, though fictional, will realize that if we're talking about types and metaprogramming, C++ templates are soon to follow. First, some discourse about another of C++11's cool features - variadic templates.
+
+[Variadic templates](http://en.wikipedia.org/wiki/Variadic_template) are templates which take a variable number of parameters. Whoa, right? They look like this:
+
+```
+template <typename... Typelist>
+class Tuple {
+};
+```
+
+`typename...` "packs" the variadic list of template parameters into `TypeList`. At this point, `TypeList` is simply a list of types. Inside the class definition, `TypeList` can be "unpacked" with `TypeList...`, effectively expanding it into the comma-separated list values. Let me steal [this example](http://www.devx.com/cplus/Article/41533/0/page/3) by DevX.com because it's pretty illustrative of how you might use these lists.
+
+```
+// general class declaration
+template <typename ...Types>
+class Tuple;
+
+// specialized "null" tuple
+template <>
+class Tuple<> {};
+
+// tuple link
+template <typename First, typename ...Rest>
+class Tuple<First,Rest...> {
+public:
+	First head;
+	Tuple<Rest...> tail;
+
+	Tuple( First h, Rest... t )
+		: head( h )
+		, tail( t... )
+	{}
+};
+```
+
+The first `Tuple` definition declares a template class that takes a variadic number of parameters. This is simply declaring in the broadest sense the data we're going to be working with. The second `Tuple` is, conceptually, the end of a list. It's an empty tuple that takes no types, which'll make sense in a minute.
+
+The final `Tuple` definition is the good one. It defines a `Tuple` based on a `First` type and a `Rest` list of types. `First` is stored in `head` and the rest of, well, `Rest` is delegated to a `tail` `Tuple`, building the `Tuple` list recursively until the typelist is exhausted. In the constructor, `Rest...` is expanded into a typelist `t` whose values are unpacked and passed into the `tail` `Tuple`. Or something like that.
+
+Alright. With the idea of packing and unpacking, we're pretty much there. Unpacking can also be done in the context of a form, repeating the form for each element in the variadic list. With that bit of knowledge, we're good to go. Here's a class that builds up the RTTI derivation information by stuffing all of the parent class's RTTI objects into an instance's parent vector. Don't get hung up on those words, just take a gander:
+
+```
+template<typename Derived, typename... Parents>
+class RTTIInfo : public RTTI {
+public:
+	RTTIInfo( const char* className )
+		: RTTI( className, { &Parents::typeInfo... } ) // build list from expansion of variadic parentis
+	{}
+};
+```
+
+`{ &Parents::typeInfo... }` builds an initializer list by unpacking the parent classes and grabbing each one's static type info. This `RTTIInfo` class derives from `RTTI` so that it can be used as one, with the only difference being that this class supplies its own parent list. The class is used by instantiating a template specialized to the derived class and its parent classes. With this, we can get our grubby mitts on the general definition macro:
+
+```
+#define RTTI_DEFINE(ThisClass, Parents...) \
+	const RTTI ThisClass::typeInfo = RTTIInfo<ThisClass, ##Parents>(#ThisClass);
+```
+
+Simple enough. The variadic macro grabs a class and its parents, then instantiates the specialized `RTTIInfo` class which in turn builds its template list. *Hacha*.
+
+So Now you can create a class with this RTTI information like so:
+
+```
+RTTI_DEFINE(Crocs, Shoes, StupidLookingThing)
+```
+
+And there we go. Some packing, some unpacking, and suddenly we have a kickass RTTI system using variadic templates to build the class hierarchy.

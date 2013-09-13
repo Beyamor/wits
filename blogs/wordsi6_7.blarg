@@ -1,0 +1,24 @@
+title: the cosmic code teapot
+date: 5-21-2011
+
+I spent the day playing around with something pretty rad. [haXe](http://haxe.org/) is, well, to borrow the vernacular of today's youth, "wicked cool." It's a programming language which is not only platform agnostic but language agnostic. Well, kind of. Exaggeration falls within the poetic licence.
+
+A program written in haXe can be compiled as one of another handful of languages like PHP, Javascript or even C++. That is, you can specify the platform on which the result will be based. Okay, struggling to put the idea into words here. When you compile something written in C++, you will always get an executable program. Something written in ActionScript will be compiled into a .swf. JS will always be JS. However, something written in haXe can be compiled to an executable or to a .swf or even JS. The whole of disparate development ideologies can be encompassed by a single, uniform language. That's a beautiful idea.
+
+Plus, if you tell people you use haXe, they'll be impressed by what a l33tzor you are.
+
+Now, the language by itself is really cool and I'm interested in it as a concept alone. However, my immediate preoccupation with it stems from a desire to do some Flash development. Flash is itself a really lovely thing. It offers a really slick means of delivering web content and in that, it does a lot to make the internet dance. Moreover, and this is of particular interest to anyone with aspirations of game design, Flash games.
+
+Yeah, whoo, yeah.
+
+The big hangup with Flash is that, like, several pool-fulls of cash must change hands to nab the super nifty Flash IDE your professional producer of content will use. There's open source stuff like Flex Builder, but from my own experience, that's geared much heavier towards Windows than anything else. Of course, I've still got Vista on my poor, downtrodden laptop, but I'm much happier with that staple of the pesudo-hardcore computer user, Ubuntu. Now, I got something compiling with Adobe's stuff, but there were enough hitches along the way that I was looking to get my hands on another means. Enter here a chance to actually give haXe a go.
+
+Anyway. Long story long, that's how I spent the day, just getting a feel for what I could do. At this point, there is good news and bad. The good news is that it's very much a workable path. A game, and a host of other content, can, inarguably, be made. And before we get to the marginally bad news, my dear imaginary reader, it's worth pausing to celebrate that because it's really, really exciting news. So, for the second time this entry, we'll throw out another "whoo."
+
+Whoo.
+
+The only real problem I can see right now is animation. Flash, the proper IDE at least, is really geared towards making and integrating those beautiful animated movieclips that, in part, make the production so quick and competent. Unfortunately, I don't know any way to do the same without that IDE. Worst come to worst, a set of traditional spritemaps and maybe the jury rigging  of an analog to the movieclip, but it'd be great to make use of that somehow. Regardless, this might be something I spend some time with. We'll see how tomorrow looks.
+
+Speaking of looks, I've really got to change the colour of those urls because man, they are just underwhelming. Of course, this statement will be painfully outdated once that does transpire. Ah well, we are but captives of history.
+
+Oh, and pagination. Gotta make that happen. We've got a proper book full of nonsense all up in here.

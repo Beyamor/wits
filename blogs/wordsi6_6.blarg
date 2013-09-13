@@ -1,0 +1,24 @@
+title: bells and whistles and tweets
+date: 5-15-2011
+
+Oof. I am quite thoroughly burnt out. Yikes. I've got to find another hobby. Something that gets me out of the house, maybe.
+
+I think we're closing in on "done" here. Not done done, but done enough that it's fairly obvious that this is, in fact, a website. Haven't got around to the pagination mentioned below, ditto searching by tags, but until we actually have a few more blogs, those are kind of superfluous anyway.
+
+What do we have, dear reader? What tremendous strides have we made since yesterday? Truth is, not much. A tweak or two here and there, but nothing to write home about. Of course, I'm far from home and if even if I'm not writing there, I might as well at least write from here.
+
+Huh?
+
+One flashy but very purposeless feature is a bit of image sorcery. Now, large images are resized on the server side and every one gets this neat little window thing that shows off its full glory when you click on it. Here, check it out.
+
+![some image](/images/blog/starrynight.jpg)
+
+Mind you, there's no maximum size constraint right now, so a big picture will spill right off the left side of the page. However, it's a leap in the right direction. I can't say I have much in mind for the pictures, but doing that did let me play around with some regular expressions, which is always rad.
+
+Regular expressions describe patterns of text. That is, instead of checking whether something matches a bit of text exactly, you can check whether something matches the regular expression. For example, 'ya.', which uses the wildcard character '.', matches 'yam' and 'yay' and anything else that starts with 'ya' and ends with another character.
+
+One of the processors I'm using just checks through the file for any image tags. A regular expression pulls out the image source and, if it needs to be scaled down, the image's height and width are adjusted accordingly. Just that simple. Maybe not terribly efficient, but hey, who needs to rush.
+
+The other thing is a little one, but nice. I've justed added a "publish now" button for the blog editor. This does a couple of things. First, and more boring, the blog is automatically set to publish and save, which is pretty much what you'd expect. The second, and a little cooler, is that, using a [Twitter intent](http://dev.twitter.com/pages/intents), a tweet based on the blog is created. Then, if I'm feeling like spamming the poor fools who follow me, it's as simple as the push of a button. I was kind of aiming to make the tweets entirely automatic, but after a couple minutes of research, it didn't seem worth the hassle.
+
+Anyway. That's another day. Like I said, I think we're doing all right here. Been a draining couple of weeks, but we're leveling out, not just with the site, but maybe even life in general. Very cool indeed. Obviously there's a few other things I need to patch up around here, but with a bit of luck, I can move back to C++ pretty soon. God, I miss C++.

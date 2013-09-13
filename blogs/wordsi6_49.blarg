@@ -1,0 +1,43 @@
+title: spacilizer
+date: 6-23-2012
+
+Every spaceship's gotta have space, right? And if you have an eye for the aethestic, well, you'll shove some stars all up in that mother.
+
+Awesome. Okay. That's good. My first implementation was pretty simple. I simly tiled something like this across the viewport:
+
+![some image](http://i.imgur.com/T34Hl.png)
+
+Obviously it wasn't the flashiest thing. The first problem was how painfully repetetive it was. As a species, we're pretty good at picking up on patterns, so seeing this thing tiled across the screen stuck out like a sore thumb. I hackily mitigated this by making the sprite a lot bigger to dilute the patterniness of it. Not great, but good enough.
+
+The second problem was my buring desire for parallax scrolling.
+
+[Parallax scrolling](http://en.wikipedia.org/wiki/Parallax_scrolling) is where the stuff in the background is made to scroll by slower than the stuff in the foreground. This is done to fake depth in the view and it looks hella cool. Check out the background scenery that scrolls by in [Canabalt](http://adamatomic.com/canabalt/). Rad, right?
+
+This gave rise to [THE PARALLAXOR](https://github.com/Beyamor/sapce/blob/master/src/gfx/parallax.py). This mighty beast of a class is created with a reference to the view. Background layer images can be pushed onto it and when it draws, it tiles these images, shifting them based on the view's position to affect the parallax scrolling.
+
+Super cool. And it looked pretty good, except for the still present artificialness of the tiling. However, as hot as I was for the parallax effect, my laptop was hotter. The `Parallaxor`'s draw was causing the game to eat up a constant 99% of my CPU. Well, damn.
+
+See, the images I was blitting? Still pretty big. And even so, several had to be tiled to make sure every part of the view was covered. *And* this had to be done three times, once for each layer. Man. This was no good.
+
+I could have maybe wrote a better way to do this. Cut up the tile images into smaller pieces so the bliting calls weren't as big, say. However, even that little bit of effort was too much for me, so I took a bigger step back and looked at what I was really trying to achieve. The star images were big, but the amount of meaningful information they contained was pretty much nil, right? I mean, all I wanted out of them was the individual stars, who cares about the empty space between them?
+
+A new plan then. Forget the big, dumb background tiles and do this smart. Just render the stars themselves. This is sounding better already.
+
+So, I got the following classes out of the deal: the `Star`, which just has a position and draws itself; a `Section` which holds a collection of stars; a `Layer` which simply stores the `Section`s and can supply all of the stars in an area by grabbing them from the appropriate `Section`s, making new `Section`s if necessary; and `Space` itself, which contains the different `Layer`s. And now a painful visual aid.
+
+![some image](http://i.imgur.com/fJ8QO.png)
+
+When I was thinking about how I would do this, I was really concerned with a way a `Layer` stores its `Section`s. As we'll see in a minute, I need to be able to find all the stars in an area of space. This means, given an area, looking up which `Section`s it intersects. At first, I was jazzed up to do some cool spatial search stuff, maybe an [R-tree](http://en.wikipedia.org/wiki/R-tree) or some swag like that for quickly looking up locations and spatial ranges. I mean, we're going to be doing a lot of these lookups. Better make it efficient, right?
+
+Optimization. Root of all evils.
+
+Did this really need a complicated data structure? Even if I had hundreds of `Section`s, is even a O(n) search too much? So, I did the simplest thing that could work - I made a dictionary using the position tuples of the `Section`s as keys. Boom. Problem solved. How long did that take? Like, a minute. And it works like a pro. There's a lesson fro you kids - be lazy. Do the easiest thing you can think of.
+
+Anyway. While I was planning this, it occurred to me that, since the `Section`s had to make `Star`s anyway, they might as well do so randomly. And with that, we've got a second bird with this stone. Now each section procedurally generates its own stars, so the repetitive tiling issue is all taken care of. Score.
+
+With `Space` and friends written, we've got a way of producing the stars, but that's just the data. We need to present it right too. Enter the `Spacilizer`. This fills the same roll the `Parallaxor` did. When it draws, it looks at the current view and creates shifted parallax shifted views from it. It then requests the `Star`s visible in each of these parallax views and draws 'em. Simple as could be.
+
+And the result? Well, it looks kind of like this:
+![some image](http://i.imgur.com/QgzQv.gif)
+
+There we go. Now that we're only rendering the stars, the CPU hit is nothing *and* since it's procedurally generated, well, I can watch this thing forever.

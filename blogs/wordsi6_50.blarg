@@ -1,0 +1,58 @@
+title: a splash of hash
+date: 8-17-2012
+
+Hey yo hey. Clojure and crap.
+
+The always brilliant Nicolas Guillemot wrote this cool [compile time string hash thing](https://github.com/nguillemot/viking/blob/master/source/include/viking/HashString.hpp) with C++0x11's [constexpr](http://en.wikipedia.org/wiki/C%2B%2B11#Generalized_constant_expressions) keyword. It's pretty legit. If the string is known at compile time, it gets hashed at compile time. Alright. Let's get some Clojure code doing the same thing, just for fun.
+
+The algorithm is mad simple. Check it out [here](http://www.cse.yorku.ca/~oz/hash.html#djb2), but the gist is a bitshift and some magic numbers. Okay. First things first. We're going to flip a couple of switches to put the pedal to the metal.
+
+```
+(set! *warn-on-reflection* true)
+(set! *unchecked-math* true)
+```
+
+`*warn-on-reflection*` makes the runtime tell you when it uses reflection to determine the type of a value. By using *typehints*, we can supply the type information so that the reflection isn't needed. It's a little optimization, but worth showing off. `*unchecked-math*` is used to say, hey, integer overflow? IDGAF.
+
+Here's the solid juice:
+
+```
+(defn hash-string [s]
+  (if (empty? s)
+    0
+    (loop [h 5381, s s]
+      (if (empty? s)
+        h
+        (recur
+          (+ (bit-shift-left h 5) h (-> s (get 0) int))
+          (subs s 1))))))
+```
+
+If the string starts empty, it spits out 0. Otherwise, it does the recursive shift-add-add thing, iterating through the string. Okay, not much to see here, it's math stuff. Moving on.
+
+The really cool part of this is implementing the compile-time hashing off known strings. Clojure's got macros, you dig? Macros that rock. Macros that execute things at compile-time. Put your eyes on this:
+
+```
+(defmacro string-hash [e]
+  (if (string? e)
+    (do
+      (println (str "Compile time hash for: " e))
+      (hash-string e))
+    `(do
+       (println (str "Runtime hash for: " ~e))
+       (hash-string ~e))))
+```
+
+The `string-hash` macro takes *something*. If the thing, `e`, is a string, it's immediately hashed and the result is output. Otherwise, if `e` is not a string - if it is, for example, a symbol - `(hash-string e)` is output to be evaluated at run-time. And that's it. The macro evaluates strings at compile-time where it can and supplies the instruction to do it at run-time when it can't. Neat.
+
+You can use it kinda like this:
+
+```
+(string-hash "compile string") ; evaulated at compile time
+
+(defn runtime-hash [s]
+  (string-hash s))
+(runtime-hash "runtime string") ; evaulated at run-time
+```
+
+Man, I gotta get better syntax highlighting here.

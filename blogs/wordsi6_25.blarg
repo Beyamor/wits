@@ -1,0 +1,14 @@
+title: resigned to design
+date: 9-8-2011
+
+A cacophony of *real life* meant I only had about half an hour for actual code writing today. However, I did draw some lovely pictures.
+
+Design is a tremendously important part of a project and, unfortunately, an easy one to skimp on. In bygone days, I leaped head-first into an implementation without sparing much thought as to how it would all fall into place - a practice I've surely left behind by this point, right, my dear imaginary reader? Back when I was using GameMaker or other high-level development methodologies, kleudge would still fly. However, writing the architecture from scratch as I am now, that's a recipe for disaster and heart-break.
+
+I can't say I have much of a design process. It's mostly stomping around my apartment, grinding my teeth until the powdered enamel carries an idea into my brain, then scribbling furiously until something takes shape. I can't imagine that's how "the pros" do it, but now and again, it gets the job done.
+
+I do end up with monstrous reams of doodles though. And again, I'm sure there's a better, more legitimate means of doing this - UML would be a good start - but for now, working alone, this serves its purpose. It gives me something to check against as I muddle through the code. Maybe more importantly, putting things to paper lets me visualize a living system.
+
+These roughly hewn but *concrete* designs can be analyzed. They can be critiqued. They can be drawn on in turn as iteration carries the design forward. One of the things I like to do is scribble lines representing separations of concerns between the different classes and modules I've drawn out. It's a great way to neatly divide the system and the drive behind that consideration for engineering lends its own weight, an important one to be sure, to the project.
+
+Design and its importance is something I might like to come back to, but it's late and another day is soon to break. To my credit though, I've managed to maintain a single topic throughout this entry. It might still be stream-of-consciousness fueled by visions of my pillow, but at least it stayed on track today. I'm working, my fictional friend, to introduce a little more discipline into this whole blog process.

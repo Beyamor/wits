@@ -1,0 +1,153 @@
+title: contain your excitement
+date: 1-22-2012
+
+Good god, the last week and a bit has been an uphill struggle. A veritable *slog*. These are the days of the menus.
+
+In keeping with [the work on the inventory](http://www.wordsinthesky.com/blog/entries/putting-the-envy-in-inventory), I've been putting together the game's menu system. Yes, all those fly boxes and buttons that make up a user interface, those are getting their share of programmatic love. So far, most of the work has gone into the menu composition and arrangement with only a meager bit of effort in the way of making the menus, y'know, useful. In that light, we'll break this blog down into those two subjects - how the menus are structured and how they're layed out.
+
+# in the beginning was the button and the button was okay
+
+The first piece of the menu that came into being was a nice, simple button. You can see it in [that inventory screenshot](http://www.wordsinthesky.com/blog/entries/putting-the-envy-in-inventory/images/inventory-first-look.png) - a whimsical white square brimming with brilliance. We won't get into the down and dirty right now - it's a button and you click it, that's all you need to know. And for what it is, the lonely button works. However, if you want to start talking about two buttons or three buttons or, heaven help you, a collection of dynamically created buttons, you're going to need to think bigger. You're going to have to start talking menu structure - you're going to have to start talking *containers*.
+
+For any sort of GUI like these menus, it helps to be able to break it into sections and deal with those conceptually smaller pieces. For example, if you have a grid of buttons, you don't want to think about each individual button - you want to think about the group as a whole, one *collection* of buttons. This sort of thing is achieved very handily by containers, GUI elements which themselves contain more GUI elements. With this structure, controlling the container *implies* the controlling of the elements it contains. Check out the Wikipedia article on [scene graphs](http://en.wikipedia.org/wiki/Scene_graph) or, hey, take a gander at HTML's [div tag](http://www.w3schools.com/tags/tag_div.asp). The div simply describes a logical section of a page, wrapping the elements in that section. Transformations like constraining the width of the div trickle down to affect the elements *inside* the div. Got it? Groovy.
+
+At the top of the menu food chain, we've got the base `MenuElement`. This fella describes the contract all elements of the menus must follow. The specialized stuff is purely virtual in this base class - methods like setting the upper-left or returning the hight and width of the element are pushed down to the derived classes. However, methods like setting the border or outer margin of an element - because I'm straight up copying HTML at this point - are implemented in this baby. Taken as a whole, the `MenuElement` is just what you'd expect - any element of a menu.
+
+```
+class MenuElement {
+protected:
+	Vector2				upperLeft;
+	Color				backgroundColor,
+						borderColor;
+	Image*				backgroundImage;
+	MenuBorder*			border;
+
+	MenuContainer*		parentContainer;
+
+	virtual void		drawBackgroundColor();
+	virtual void		drawBackgroundImage();
+
+public:
+	MenuElement();
+	virtual ~MenuElement();
+
+	virtual void		draw();
+	virtual float		getWidth() = 0;
+	virtual float		getHeight() = 0;
+
+	void				setMargin( float margin );
+
+	void				setBorderType( eMenuBorder borderType );
+	void				setBorder( float Border );
+	void				setBorderColor( Color color );
+
+	void				setBackgroundColor( Color color );
+	void				setBackgroundImage( Image* image );
+
+	void				setParentContainer( MenuContainer *parent );
+};
+```
+
+Okay, we're fudging some of the details here. For brevity's sake, I cut out most of the methods and some of the detail, but that's a decent peek at what's up in the hizzy. There's also some noise about drawing a background colour and a background image - for the sake of prettifying the proceedings, a menu element can also paint out a colour or image over the entirety of its height and width. Still, it's about what you'd expect.
+
+Our humble indie button up above? Yeah, you bet your pants that's a `MenuElement`. In fact, it's a `RectangleButton` which itself is `MenuButton` - a subclass of `MenuElement` as well as a `MenuSubject`. `MenuSubject`? We'll get to that another day.
+
+```
+class RectangleButton: public gc::Button {
+public:
+	RectangleButton( float x, float y, float width, float height );
+	virtual ~RectangleButton();
+
+	void draw();
+
+protected:
+	float width, height;
+
+	virtual float getWidth();
+	virtual float getHeight();
+
+	virtual bool mouseIsOver();
+};
+```
+
+The point is that the button is what we'll call a "terminal" element, borrowing some of the verbiage of formal grammars. All that means is that it's an atomic element. And all *that* means is that you won't find any more elements *inside* the button. It's just a button. No surprises. These terminal elements are the meat and potatoes of the menu content - the good bits. Everyone likes buttons - *fact*. Moreover, they're the real points of interest for a user. Another example might be an element containing text, a piece essential to user interaction but itself not descriptive of the menu's arrangement as a whole.
+
+The other side of the of the coin is the `MenuContainer`. And what does the `MenuContainer` do, you might find yourself wondering? Well, my imaginary friend, let me put your fevered mind to rest - it contains menu elements. Simple as that. These could be terminal elements like the buttons or even more containers. Containers in containers like those [Russian dolls](http://en.wikipedia.org/wiki/Matryoshka_doll). But they do more than hold elements - they determine the layout of their contents.
+
+# how the layout plays out
+
+```
+class MenuContainer : public MenuElement {
+public:
+	MenuContainer();
+	virtual ~MenuContainer();
+
+	virtual void	add( MenuElement* element );
+	virtual void	remove( MenuElement* element );
+	ElementSet&		getElements();
+
+	void			setLayout( eMenuLayout layout );
+	void			setDimensions( float width, float height );
+
+	void			draw();
+
+protected:
+
+	ElementSet		elements;
+	MenuLayout*		layout;
+
+	float			constrainedWidth,
+					constrainedHeight;
+
+	bool			widthIsConstrained;
+	bool			heightIsConstrained;
+};
+```
+
+The actual element management of the `MenuContainer` is fairly tame. Add elements, remove elements, whatever. The layout is kind of cool. There's a few ways the content of a container might be arranged - stacking the elements vertically, stacking the elements horizontally, arranging them in a grid, or even letting the elements be placed freely. There's more ways, obviously - the always chic *zigzag* comes to mind - but this'll do. So, how do we make all of these layouts available? We could subclass the container with different types - `VerticalMenuContainer`, `GridMenuContainer`, but this is ugly on two fronts. First, it makes the client fret over the details of instanciation - they can't just get a container, they have to flip through the book to find the right one. Second, this kind of inheiritance gets messy real quick. An element can have different types of borders too - are we going to get `VerticalMenuContainerWidthSolidBorders` and `ZigzagMenuContainerWidthPokadotBorders`?
+
+Enter a new strategy - [the strategy pattern](http://sourcemaking.com/design_patterns/strategy). This guy isn't too exciting - it just means that, behind the scenes, the object a client interfaces with pushes the details of implementation off to some instance of the strategy object. In our case, rather than sorting out the details of the layout itself, the `MenuContainer` offloads the work onto an instance of a `MenuLayout`. When someone sets the position of the container or asks for its dimensions, the container forwards the requests on to its layout who then figures out what really needs to happen. The `MenuLayout` actually looks a lot like part of a `MenuContainer` because, in effect, that's what it is.
+
+```
+class MenuLayout {
+public:
+	MenuLayout( MenuContainer* container );
+	virtual ~MenuLayout();
+
+	virtual float		getWidth() = 0;
+	virtual float		getHeight() = 0;
+	virtual void		setUpperLeft( Vector2 position ) = 0;
+
+protected:
+	MenuContainer*		container;
+};
+```
+
+Rad. Now the details of a layout can be fleshed out by subclassing that guy. Exactly what it means to set the position of a vertical layout gets all wrapped up in the `VerticalMenuLayout` - our container doesn't have to worry its pretty little head about it. And from the client's perspective, all of this stuff is hidden away. As far as a user of the container knows, it just has to call the container's `setLayout` method. Taking a peek behind the curtain, that looks something like this:
+
+```
+void MenuContainer::setLayout( eMenuLayout layout ) {
+
+	switch( layout ) {
+
+	case FREE_MENU_LAYOUT:
+		setLayout( new FreeMenuLayout( this ) );
+		break;
+
+	case HORIZONTAL_MENU_LAYOUT:
+		setLayout( new HorizontalLayout( this ) );
+		break;
+
+	case GRID_MENU_LAYOUT:
+		setLayout( new GridLayout( this ) );
+		break;
+
+	case VERTICAL_MENU_LAYOUT:
+	default:
+		setLayout( new VerticalLayout( this ) );
+		break;
+	}
+}
+```
+
+Heck yeah. So what've we got now? We've got the structure of menus, baby. We've got a way of outlining how sections of the menu are created with containers and we've got an easy and extensible means of setting properties like the layout of containers. Now we just have to make it do things.

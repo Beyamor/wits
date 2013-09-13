@@ -1,0 +1,16 @@
+title: i do errors and other acronyms
+date: 9-8-2011
+
+I don't even
+
+Ah, now this is a development. Or, less endearingly, a blockade thereof. I sat myself down for a solid evening of development only to be greeted with discordant shouts from Eclipse as I tried to add a class. Not encouraging. The logs showed a null pointer exception, but one whose source eluded me. Uninterested in a long night of tracking down the exact cause, I elected for a brute force approach.
+
+Removed and re-added the project. Tinkered with project files. Tweaked the C/C++ plugin. Uninstalled and reinstalled. And here I sit now, my IDE cleanly installed - notably barren of the plugin mentioned above, the same plugin *whose name I totally forgot to take down beforehand* - and yet, my dear imaginary reader, my only gain is errors of a different nature.
+
+Well. Vexing.
+
+I might be inclined to hunt down the root of the problem - lord knows it'd be a "character building experience" - but salvation may lie waiting in the wings. There's a hope I might get my hands on my new laptop this weekend, thereby sparing myself hours of fruitless digital spelunking on this machine. Yes, I'm taking the quitter's way out.
+
+And in the mean time? I might try to import the project into a different IDE. Code::Blocks, maybe? The thing with an IDE though is it is, at its best, the electronic half of a developer, the closest to androidhood programmers have yet achieved. I have my workflow - and my custom syntax colouring - and it's hard to voluntarily set that aside. I mean, my work environment was much removed from my personal counterpart at home and I was more than content to use it too, but this is *my* space.
+
+I could write more, but none of it would be very interesting. This certainly isn't the subject I'd intended for today, so sparsity is perhaps permissible. Hey, it's a setback, but not the end of the world. I haven't planned exactly how the immediate future will play out - another IDE, gedit, VIM, or hey, even trying to fix my buddy Eclipse - but things will happen. Developers gotta develop.

@@ -1,0 +1,36 @@
+title: hack driven development
+date: 11-19-2012
+
+So, at work today, I was pounding away at the keyboard like a code monkey on crack. Givin' 'er so hard I thought the keys were going to fly off, spiralling through the air like plastic rocket ships, touching down on the black surface of my co-workers' coffee. Through it all, though, I never had to worry about whether what I was doing was going to work at the end of the day. That's amazing. That's the sort of confidence you need to really get it done. But hey, let's back up a couple days.
+
+This last weekend was the UVic GameDev Game Jam I. It was fun, as our jams tend to be, but more than that, I felt like I was on my A game. I'm not saying I had descended from the heavens to deliver to the world code on angels' wings, but I was meeting milestone after milestone that I set for myself. I coded like I was born for it. Sure, the game itself wasn't all that impressive, but that zone, man, I was in it.
+
+But, y'know, that was a game jam. That was code that I never had to come back to. That wasn't a *project*, it was, it was a riot, but I hacked out that code, man. Threw it together to throw it away. I wouldn't wish the horror of maintaining a project written like that on anyone.
+
+Getting back to today. It wasn't the same light, joyful work - I'm a work week away from levity - but I was movin'. Pushing lines around, whipping together classes, putting this whole neat rule system in place. No doubt, I was hacking. I was hacking, but it was cool, it was calm and collected. I was never in danger of flying off the rails. So, okay, what separates the wild hot mess of the game jam from the disciplined work I put in today?
+
+Gimme a second to put on my most evangelical voice here.
+
+Test-driven development.
+
+That's it.
+
+I've been trying to put into words why I like TDD and this is part of it. Not the part that makes design easy, but the part that makes coding fun.
+
+TDD let's us be hackers again, but with the contract that what we hack must work.
+
+You write a test. Then, you code like a dervish to make that test pass. And it doesn't matter what you do to make the test pass. Write the first thing that comes to mind. Write whatever stupid, hacky thing you can think. Just let it fly. As long as the test passes, you're good. And when the test passes, well, man, you make another test and you leap back into it. And boy, you just keep going until you can't go anymore.
+
+And that's all there is. Describe what you need to do, then do it.
+
+Aw, it's great. Having the concise explanation of how good - or crap - your code is allows you to stay on track and not get bogged down with trying to chase mysterious defects through your system or getting caught in design limbo. Write whatever you need to make the test you just wrote pass and if, along the way, another test starts failing, well, you'd better deal with that too.
+
+See, you're not blindly vomiting code because, with the tests, there's the promise that everything must work. It's not the flailing of some undisciplined amateur - the tests provide, in no uncertain terms, confidence in the system. They tell you if everything still works and, if it doesn't, where the problem is. I mean, how often did we, as novices, type and type and type and *compile*, only to find nothing worked anymore with no indication of *why*, no clue as to where in our system something had slipped out of place?
+
+What a god damn waste of time. Who has the patience to poke and prod stupidly at their ugly electronic pigsty like that? No. Tell me what doesn't work so I can fix it and can keep going. If I have to take five minutes or five hours hours to track down the ambiguous domain of some bug, I *can't* be hacking, right? And with TDD, well, pal, I've got a pretty good idea of what needs fixing and what's going to break when I try to fix it.
+
+At the same time, you don't have to worry about "good" design. Just do what it takes to get the test passing. Code hot and heavy and don't worry too much about whether you need an interface or an abstract class or whatever. When things cool down, you can come back and clean it up and hey, you've got the tests to tell you if your cleaning makes a mess. It's a hand out of the quick sand of formal design of the kind that so quickly gets blown to bits in the trenches of the real world.
+
+There's more to TDD than this. It does actually help to drive the design, making things light and simple. I mean, I could rant for days about people who haven't got YAGNI on their minds - hell, I too quickly become one of those people - and the simple test-driven iterations keep it tight. And man, just setting those little goals, it makes programming into a game, it's these little missions you set for yourself. Plus, y'know, the tests themselves are fantastically important, albeit a by-product here. But what makes TDD fun is that it lets you - responsibly - shrug your shoulders and hack it together. I'm not swearing by it as a way of life, but when it's good, it's great.
+
+TDD is the professional embodiment of *fuck it, get 'er done*.

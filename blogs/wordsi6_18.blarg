@@ -1,0 +1,24 @@
+title: bitten by dialog
+date: 7-26-2011
+
+I hate the search for housing. The search for housing is an experience on par with covering yourself in chum and jumping into a pool filled with toothless sharks.
+
+It is an unpleasant, if woefully survivable experience might, I think, be the thrust of that sentiment.
+
+Work proceeds at a crawl. The window and a half I've finished function like a lucid dream, were one disposed to such dreary dreams, but it's hardly a satisfying gait. Guess I gotta work back up to full steam, dear reader, but I fear I'm more possessed by [the vapours](http://en.wikipedia.org/wiki/Female_hysteria) than I am possessing them.
+
+The 19th century would have found that *uproarious*.
+
+Anyway. We got this and not much else.
+
+![some image](/images/blog/these-are-dialog-bites.png)
+
+And I mean not much else. It's hot, I'm weary, living in places is a drain. Let's keep this brief. We'll save the rich discussion of Flash's event-driven paradigm for another night. One musing I might as well kick out, while we're tackling things half-hearted, is the comments.
+
+Now, as far as features go, these are an emaciated appendix. No brawny kidney, no, not even a scrawny gall bladder. They need work, is what I'm driving at.
+
+One idea I've been tossing about is using Twitter's API to cull comments from Tweets as a replacement for the roughly hewn pig sty they exist as now. If I provide special hashtags for blog-related Tweets, I could potentially periodically poll for pertinent prose - sorry - then, and this is kluedgy, hand-sort the ones which are actually relevant, save those to the database for persistence, then drag 'em out for display as needed. It's, uh, it's crude. It's decidedly crude. But maybe.
+
+I mean, and sorry, I know we promised to keep this short, but what I like about that is that it's less synthetic. Right now, comments are entirely cordoned off from the rest of the world, but to me, the site itself is an organic part of my day - this is a place I come to, and this shocks me, unwind. Incorporating Twitter, a part of not just my routine but potentially those of others, it feels like, done well, it'd be, and here I struggle with the words, more natural for everyone involved. Like everything is tied together in a much greater scope.
+
+Of course, only one person, though admittedly one truly great person, has patronized me enough to test the comments - hi [Knut](http://twitter.com/#!/_knutaf)? - so maybe I'm over thinking this. Still, so much to create and so little time in the day.

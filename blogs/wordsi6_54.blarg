@@ -1,0 +1,202 @@
+title: destructured programming
+date: 12-13-2012
+
+Hey kids, you want to see something neat? Here, hold my beer.
+
+# i structure, u structure, we structure, de structure
+
+Okay. So, bit of preamble here. Like a lot of nice languages, Clojure supports destructuring. Destructuring is a fancy term for taking apart some value and grabbing the pieces you're interested in. So, like, if someone handed you some trail mix, you'd destructure that to pull out the M&M's because c'mon, who wants the rest of that?
+
+Some preamble for the preamble then.
+
+# stick it in some gull wings
+
+We've talked about this before, but in Clojure, a map looks like this:
+
+```
+{:a 1
+ :b 2}
+```
+
+Here the key `:a` has the value `1` and the key `:b` has the value `2`. Right?
+
+# break it down
+
+Now, we can destructure a map to pull out the values.
+
+```
+(let [{a :a, b :b} {:a 1, :b 2}]
+ (+ a b))
+```
+
+So, we're pulling out the values for the keys `:a` and `:b` and binding them to `a` and `b` so we can use them. We're taking apart the map to grab the values we're interested in.
+
+We don't have to bind `:a` and `:b` to `a` and `b`. We could just as easily write the destructuring like this:
+
+```
+(let [{bus :a, kitty :b} {:a 1, :b 2}]
+ (+ bus kitty))
+```
+
+However, chances are good that you'll want to bind keywords to symbols of the same name. Clojure even offers some special syntactic sugar to cover this.
+
+```
+(let [{:keys [a b]} {:a 1, :b 2}]
+ (+ a b))
+```
+
+# infer this
+
+Sweet. That's some hella good preamble there. Now, what are we going to do with it?
+
+So, okay. A function is a thing. A really boring function that increases whatever you give it by one might look like this:
+
+```
+(fn [x] (inc x))
+```
+
+With me so far?
+
+Now, at the moment, I've got this idea in my meat-potato brain where I might have a bunch of functions in a list and I want to go through and pass each of them the same map of data. The thing I'm kicking around in my head is a bit of game architecture, so this map of data might contain stuff like a list of entities, the graphics context, and the input state.
+
+Not all of the functions are going to use all of the data. Some are just going to want to look at the entities, while some are going to want to look at the entities and the graphics context.
+
+Given our friend destructuring up there, I might end up with some functions like this:
+
+```
+(fn [{:keys [entities]}] (do-some-entity-thing entities))
+
+(fn [{:keys [entities graphics]}] (draw-some-entities entity graphics))
+```
+
+But this is kind of suck, right? Because all of these functions will take the exact same argument, that blob of data, and then, in all likelihood, they'll destructure it in some way. And I'm lazy, right? I don't want to have to write out that destructuring step every time. That's a lot of hassle. In an ideal world, all I'd have to write is this:
+
+```
+(fn [entities] (do-some-entity-thing entities))
+
+(fn [entities graphics] (draw-some-entities entity graphics))
+```
+
+And then, y'know, *something* figures out the destructuring step for us. Some magic process looks at the arguments the function needs and is smart enough to pull them out of the data blob.
+
+So the problem's nice here because it's well-structured and regular. It's so simple we could even probably tell a computer how to do it. I mean - hey, actually, why don't we do that? Let's get the computer to do it!
+
+# wait what
+
+Before going ahead, I want to make sure we're on the same page. What we want to be able to do is write functions that require the data blob to be destructured and its values passed on, but we don't want to have to write the destructuring ourselves. We just want to declare the arguments the function needs and let the system figure out the intermediate destructuring step.
+
+It's not totally superficial either. What we're doing, by boiling the function definition down to only the argument it expects, we're making the intention clearer and separating the structure of the function from the context in which it might be used. This is good stuff.
+
+# meta cheese
+
+Okay. An important piece going ahead is Clojure's [metadata](http://clojure.org/metadata) system. This lets you attach arbitrary information to something. It doesn't change the value or how it operates in the system, but it's something you can hook onto for, well, whatever.
+
+So that sounds good, eh?
+
+We've actually got a nice case for metadata here. The functions we're defining should behave like functions, y'know? At the end of the day, you call them and values come out. However, we want to be able to inspect the functions to examine their arguments. If we can do that, then we can start on the actual destructuring layer.
+
+With that established, what we're going to do is attach the list of a function's arguments to the function as metadata. Like, the actual names of the arguments. Here, look at this:
+
+```
+(with-meta
+ (fn [x] (inc x))
+ {:arg-list [:x]})
+```
+
+Okay? So, with the function that takes `x` and increments it, we have an `arg-list` that says the function takes a single argument, `:x`. We're using the keyword `:x` just because it's easier to write, but it'll work out the same. The point is, we've now just attached the function's argument list to it as metadata. Cool!
+
+Obviously this is a bit of a mouthful. We don't want to have to write all that every time we make a function. Luckily, it's pretty easy to write a macro to handle this:
+
+```
+(defmacro fn|arg-list
+ [args & body]
+ (let [arg-list (vec (map keyword args))]
+  `(with-meta
+    (fn ~args ~@body)
+    {:arg-list ~arg-list})))
+```
+
+This macro just does the junk we wrote by hand up above. Check it:
+
+```
+(fn|arg-list [x] (inc x))
+```
+
+This'll create the incrementing function and attach the arg-list `[:x]` to it as metadata. Hella hip!
+
+# one warped wrap
+
+Let me be blunt: this next bit is the butts hardest part of this. We get into dynamic, run-time function generation. Shit be mad whack.
+
+Working from the other end, given a list of arguments, we want to create a wrapper function which, when called with another function and a data blob, destructures the data blob and feeds the values to the function.
+
+What.
+
+Okay, hang on. We're looking for something like this:
+
+```
+((make-wrapper-fn ['x])
+  (fn [x] (inc x))
+  {:x 1}))
+```
+
+`make-wrapper-fn` produces a wrapper function which destructures a blob to pull out `x`. When we feed the wrapper function the increment function and the data blob, it destructures the data blob and calls the increment function with `x`.
+
+Whew. How're you holding up?
+
+The code for `make-wrapper-fn` is actually insultingly simple.
+
+```
+(defn make-wrapper-fn
+ [symbolic-arg-list]
+ (eval
+  `(fn [f# {:keys ~symbolic-arg-list}]
+    (f# ~@symbolic-arg-list))))
+```
+
+Right? Pretty much what you would expect. The resulting function takes two arguments, the function `f#` and the data blob. The data blob is then destructured using the argument list `symbolic-arg-list`. Then, with the argument values bound, `f#` is called with its argument list.
+
+And, well, we have to `eval` the whole thing into existence because this is black magic, but it's fuckin' rad, so whatever.
+
+# wrap it harder make it better
+
+Now we can more or less put the two big pieces together. Here's a function, `inference-wrapper`. You pass it a function. If the function includes the `arg-list` metadata, it gets wrapped in a destructuring function. Otherwise, the function is returned as normal.
+
+```
+(defn inference-wrapper
+ [f]
+ (if-let [arg-list (-?> f meta :arg-list)]
+  (let [symbolic-arg-list (vec (map #(-> % name symbol) arg-list))]
+   (partial
+    (make-wrapper-fn symbolic-arg-list)
+    f))
+  f))
+```
+
+Make sense? If we've got the metadata, build the wrapper function and partially apply it with `f` so that's it's ready to accept the data blob. Otherwise, assume the function is willing to handle the whole data blob, so just return it. We can call this function like so:
+
+```
+((inference-wrapper
+  (fn|arg-list [x] (inc x)))
+ {:x 1})
+```
+
+Or, if the metadata isn't supplied:
+
+```
+((inference-wrapper
+  (fn [{x :x}] (inc x)))
+ {:x 1})
+```
+
+Neat.
+
+# and then the computer does it
+
+So, I mean, that's it. That's all it takes. With a macro that can infer the argument list metadata and a function that can create a destructuring wrapper for an argument list, we've got it all.
+
+The cool thing about this is how easy it was. Actually writing the code took no time at all. Trying to explain it took, like, half the night. Such is the nature of macros, right?
+
+Still, it's pretty hip. This scheme makes it possible to define clean, simple functions which are simple to read and use, but retains the argument processing required so that everything can be homogeneously supplied with the same data blob. The real win here is that the functions are decoupled from the context in which they're used. How smart is that?
+
+Check out the full code [here](https://gist.github.com/4283258) and some tests [here](https://gist.github.com/4283264).

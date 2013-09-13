@@ -1,0 +1,28 @@
+title: vertebral column
+date: 7-22-2011
+
+Bon-diggity-do, yo, let's wrap up yesterday's blog. *Fo shizzle.*
+
+A few words about [Backbone.js](http://documentcloud.github.com/backbone/) were edged out of the previous post by my rapidly closing eyes. It was sort of like that bit in *Indiana Jones* with the rolling stone, if, instead of being [Harrison Ford](http://images.ctv.ca/archives/CTVNews/img2/20100115/320_cp24_harrison_ford_100115.jpg) in his prime, it was his asthmatic and endearingly rotund cousin Harold Ford and, instead of sliding effortlessly through the quickly closing door, he arrived a little too late, then shrugged his shoulders dejectedly, slumped to the floor, pulled a peanut butter and jelly sandwich out of his Transformers lunchbox and waited for the end.
+
+FYI, my own Transformers lunchbox might be my most prized possession.
+
+So, Backbone is javascript's answer to the [Model-View-Controller](http://en.wikipedia.org/wiki/Model-view-controller) software design pattern - or, at least, the Model-View part of it. It's something used in my waking life profession and, honestly, it's a real nice piece of work. Clean design, separation of concerns, and gams that just won't quit. Gimmee some space to gush here.
+
+In brief, the Model-View-Controller pattern draws very strong lines between three facets of a system. The model represents the data and the methods concerning its manipulation - it's, uh, it's kind of like your bones and squishy bits, dear reader, a rickety comparison to draw, but stay with me. The View is the point of interaction and, commonly, the GUI. It's - and here the analogy stretches thin - like a person's clothes - the nice layer the outside world sees and ready to be changed as needed. The Controller provides the actual, well, control. It processes interaction with the View and directs the Model as needed. Gosh, just like your big ol' brain, right?
+
+*Simile get.*
+
+Right, good. What Backbone does for us, in part, is provide a very clean way to build Models and Views. A browser's JS engine effectively works as the controller, so that's squared away. Ah, as a quick catch-me-up, javascript is the stuff on a website that makes it dance and sing. We can talk about the beautiful HTML/CSS/javascript trifecta another time, but knowing that if a website moves, it's probably JS is going to get us through today.
+
+Anyway, the main thing with the Backbone Model is that it wraps up a chunk of data, including its processing, nice and tight. As a particular talent, it can be used as a piggybank for information retrieved asynchronously from the server, eg, from a database query. That is, the Model is an easy means of handling data stuff.
+
+Backbone's Collection is more or less an extension of the Model idea. It's a pretty straightforward concept - the Collection just holds Models and adds functionality to manipulate them as a group. A single Model is good, but the Collection stitches them together. As an example near and dear to my heart, a single comment is a Model with data about the poster and comment body. A comment collection simply retrieves a bunch of comments and adds some stuff to, say, load more comments. Gee, wonder where that would ever be used?
+
+The View is just a representation of a Model. Backbone's implementation is a tremendously sophisticated thing in its outward simplicity. It hides away most of the element selection that turns JS into a rats nest and, with a few intuitive functions, it lets Views render their associated Models - or Collections - in a snap, an expression which can never be allowed to die.
+
+Wow, we, uh, we are getting up there in the word count and we still haven't made it to the point, namely that the strong cleft between data, control, and presentation of the MVC architecture is love incarnate. Glomming these guys into one is a recipe for disaster, or indigestion at the least. Separating concerns provides some very key points of design leverage. Changes are isolated to one pillar of the system alone - you can change the View without affecting the underlying Model. Concurrent work on (sort of) independent sections is made easier so long as interfaces between are defined. And, more than anything, MVC is kind of like *Marvel vs. Capcom*, a series in which [Phoenix Wright](http://cultofmac.cultofmaccom.netdna-cdn.com/wordpress/wp-content/uploads/2010/05/phoenix-wright-objection.jpg) could, conceivably, fight [Doctor Doom](http://geektyrant.com/storage/post-images-2011/SVR__Doctor_Doom_by_PandaFace.jpeg?__SQUARESPACE_CACHEVERSION=1310323266412) and that's fine by me.
+
+Welp, what've we learned today? Model-View-Controller is good because of reasons. Backbone is good because more reasons. Yeah. Lotta words and I don't know if we gained any ground but hey, that's fine by me too.
+
+Also, holy cow, [*Indiana Jones and the Philosopher's Stone*](http://en.wikipedia.org/wiki/Indiana_Jones_and_the_Philosopher's_Stone) was a thing. My head is spinning with the possibilities of our fearless archaeologist embarking on adventures, whip in one hand, wand in the other. Mystic artifacts are recovered; sorting hats are punched. Stay tuned.

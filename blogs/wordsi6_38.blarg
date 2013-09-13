@@ -1,0 +1,146 @@
+title: a special kind of generic
+date: 1-21-2012
+
+Boopity-boop, *templates.*
+
+Recently, [a tweet](https://twitter.com/#!/_knutaf/status/158028163237154816) from the always lovely [Knutaf](https://twitter.com/#!/_knutaf) about [partial template in C++](http://www.learncpp.com/cpp-tutorial/146-partial-template-specialization/) rekindled my interest in some genericized quirkiness.
+
+As a quick rundown, templates in C++ and [generic programming](http://en.wikipedia.org/wiki/Generic_programming) in, er, general is about writing code that is abstracted from the type of data it acts on. So, as a great example, following this paradigm, you could write the code for some generic `List<typename T>` which will contain some type. The operations of the list - getting the first element, returning the size, removing all of the elements, etc. - are independent of what type the list holds, so it makes sense to separate those ideas. Later on down the line, when you decide you want a list of seahorses, you can instantiate a list of that type - `List<SeaHorse> l` - and get all the power of your nice generic list to use with that particular case.
+
+Anyway, C++'s templates also let the programmer specify patterns with integers instead of types, which got me to thinking about creating nice, generic vectors for *Guncrawl*. Now, terminology is going to be tricky business here because when I talk about vectors, I'm not referring to the well-established [C++ vector](http://en.wikipedia.org/wiki/Sequence_container_(C%2B%2B)#Vector) of some renown, but instead, the mathy [vector](http://en.wikipedia.org/wiki/Sequence_container_(C%2B%2B)#Vector) which describes, let's go straight to [the source](http://en.wikipedia.org/wiki/Sequence_container_(C%2B%2B)#Vector) here, "an element of a vector space." So, for example, if we're talking the physical separation between you and I on the surface of the earth, we're looking at a two-dimensional vector describing the difference in latitude and longitude between us. Or something like that, my terminology's a little fuzzy.
+
+It's not a far jump to think that we could use C++'s templates to create a generic vector object. We get the basic vector structure down - operations like addition, magnitude, and dot products - and then, as the need arises, we instantiate a vector of a particular cardinality. The position of an entities in the world, for example, could be tidy little `Vector<2>`. Okay, cool, here's some code to that effect to get us up to speed.
+
+```
+template <int CARDINALITY>
+class Vector {
+public:
+	// member variables
+	float				dimensions[CARDINALITY];
+
+	// constructors/destructors
+	Vector( float d[CARDINALITY] ) {
+
+		for ( int dim = 0; dim < CARDINALITY; ++dim )
+			dimensions[dim] = d[dim];
+	}
+
+	~Vector() {}
+
+	// some vector operators
+	Vector<CARDINALITY> operator=( Vector<CARDINALITY> other ) {
+	
+		for ( int dim = 0; dim < CARDINALITY; ++dim )
+			dimensions[dim] = other.dimensions[dim];
+	}
+
+	Vector<CARDINALITY> operator+( Vector<CARDINALITY> other ) {
+
+		Vector<CARDINALITY> newVector;
+		for ( int dim = 0; dim < CARDINALITY; ++dim )
+			newVector.dimensions[dim] = dimensions[dim]
+										+ other.dimensions[dim];
+		return newVector;
+	}
+
+	float dot( Vector<CARDINALITY> other ) {
+
+		float sum = 0;
+		for ( int dim = 0; dim < CARDINALITY; ++dim )
+			sum += dimensions[dim] * other.dimensions[dim];
+		return sum;
+	}
+};
+```
+
+Cool. Awesome. Awesome-beans. So, check it, yo, you can see where we use templates to specificy the vector's cardinality with, well, CARDINALITY. Then we've got the array of floats `dimensions[CARDINALITY]` that represent the values of the vector in the different dimensions, a constructor taking in an array specifying the vector's initial values, and a couple of example operations. Right on, and it works great. But then I got greedy.
+
+As a matter of convention, the dimensions of a three-dimensional vector are referred to as X, Y, and Z. What I wanted was a way to refer to those dimensions of my generic vector by those names while keeping the clean iteration over the dimensions array used in most operations. Like it or not, C++ does allow this by way of references. See, references are essentially just a way of providing an alias for an existing variable. Whereas pointers point to the address of a variable, references, by magic, *are* the variable. Okay, this one's going to hurt.
+
+```
+template <int CARDINALITY>
+class Vector {
+public:
+	// member variables
+	float				dimensions[CARDINALITY];
+	float				&x, &y, &z;
+
+	// constructors/destructors
+	Vector( float d[CARDINALITY] )
+	: x( dimensions[0] )
+	, y( dimensions[1] )
+	, z( dimensions[2] ) {
+
+		for ( int dim = 0; dim < CARDINALITY; ++dim )
+			dimensions[dim] = d[dim];
+	}
+
+	~Vector() { }
+};
+```
+
+Now, listen, straight up, introducing a *second* way of referencing a class's own variables is, really, a dick move. Like, that is going to shoot your program's understandability right to all hell. But whatevs, since it's for my project alone, I'm not too worried about it. We got bigger problem fish to fry.
+
+This works great for vectors of size three and up, but what about a two-dimensional vector? What happens with that z? Well, I'll tell you, that z is going to refer to some chunk of memory beyond the array and trying to use it will make things, to put it succinctly, *hella whack*. So here's where the trouble gets underway. What I want is to only expose X and Y for two-dimensional and X, Y, and Z for three-dimensional vectors. The good news it that this is possible, if maybe frowned upon, by template specialization.
+
+Template specialization allows you to specify how a templated class behaves for a particular template value. With this, I can rewrite the definition of a `Vector<2>` and a `Vector<3>` to include the variable aliases as well as the direction of a two-dimensional vector on a plane or the cross product of two three-dimensional vectors. Success! Only problem is, I'm a jerk.
+
+In order for me to add our friends X, Y, and Z, I'd need to rewrite the class definitions for CARDINALITY 2 and 3. That in itself is no big thing, except that, as far as I know, it means that all of the class's functions have to be rewritten or, in this case, copied. As a matter of some stupid, obstinate principle, I want to get away with adding to the class's definition without rewriting the stuff like the operators which don't change. *A-dur*.
+
+I took a few stabs, but the most sophisticated attempt I made was some declarative wonderment. My intention was to write out the class methods as stubs, then define them in full later on, hopefully using the full definitions as a catchall for all of the template possibilities. Here, hang on, it was going to look something like this:
+
+```
+// general function
+template <int CARDINALITY>
+class Vector {
+
+	float				dimensions[CARDINALITY];
+
+	Vector( float d[CARDINALITY] ) {
+
+		for ( int dim = 0; dim < CARDINALITY; ++dim )
+			dimensions[dim] = d[dim];
+	}
+	~Vector() {}
+
+	// method stub
+	float dot( Vector<CARDINALITY> other );
+};
+
+// 2-dimensional specialization
+template <>
+class Vector<2> {
+
+	float				dimensions[2];
+	float				&x, &y;
+
+	Vector( float d[2] )
+		: x( dimensions[0] )
+		, y( dimensions[1] ) {
+
+		for ( int dim = 0; dim < 2; ++dim )
+			dimensions[dim] = d[dim];
+	}
+
+	~Vector() {}
+
+	// method stub
+	float dot ( Vector<2> other );
+};
+
+// and the full method definition
+tempate <int CARDINALITY>
+float Vector<CARDINALITY>::dot( Vector<CARDINALITY> other ) {
+
+		float sum = 0;
+		for ( int dim = 0; dim < CARDINALITY; ++dim )
+			sum += dimensions[dim] * other.dimensions[dim];
+		return sum;
+}
+```
+
+But long story short, no go. `dot` works for any vector size other than two, but no luck for the specialization. As a learning experience, I tried writing the specialized version of the function too, but, for whatever reason, it didn't do a thing for me. I'm not sure if it's a matter of syntax or the idea simply isn't supported and I can't be bothered to figure it out because hey, new solution time.
+
+I'll skip the bulk of it, but like [my good man Knut](http://barncover.blogspot.com/2012/01/are-template-partial-specializations.html), I ended up creating a `Vector2` class extending `Vector<2>` to add the X and Y aliases and all of the other lovely specialized nonsense. It took a bit of elbow grease and the better part of two days to get it working correctly (don't ask -it was dumb), but so far, it looks like we're doing well with this technique. And so there's that. It's as simple as extending the generic class to add all the specially goodness.
+
+It sits more than a little uncomfortably with me, because, hey, I like to reserve inheritance for polymorphism, but at the end of the day, it works. Really, if you want to be upfront about it, this is a loss since using a `Vector<2>` won't get you the extra goodness of a `Vector2`, but at this point, I'm not going to worry about it since I don't see anyone ever worrying about it except for me. Moreover, we're at a tremendous word count here, so let's end on that anticlimactic note.

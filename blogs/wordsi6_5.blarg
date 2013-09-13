@@ -1,0 +1,23 @@
+title: a vessel for the voices
+date: 5-14-2011
+
+Oh god, I must stop coding to the exclusion of food. Today I spent an amount of time any sane person could only call uncomfortable loafing around in my boxers and hammering away at the keyboard. Well, what have we gained?
+Comments, my imaginary friend, comments! Go ahead, try them out. You will have to click on the title of an entry to go to its own page before giving it a run, but still, they are there. And of course, that terrifies me.
+
+When you, dear reader, post your comment, two big things happen. The first is that the little dollop of cheer your vomited out gets saved. A couple of things, namely the comment's ID and, well, your name are stored in a database. The actual body of the content gets squirreled away somewhere else as its own file. This might not be the best way of storing it - it could, most certainly, go in the database itself. However, I am a pack rat with a mistrust of databases, so I like knowing exactly where the file goes.
+
+The big thing there is that any data going into the database has to be friendly. That is to say, nothing like instructions which might be anything other than raw information. Unfortunately, my old pal 'DELETE FROM table has got himself into some real trouble commenting on the wrong places. Anything going in then passes through a handy, if wordy function called "mysql_real_escape_string." This cute little fellow automatically escapes special characters to everything in the string winds up as dumb data. Neat, huh? Eh, maybe not. Regardless, we'll hope that's enough on that front.
+
+The other half of this is pulling the stored comment information back up for display. Since the data being saved is more or less unfiltered, folks could write just about anything. I tell you, if you're internet handle is <script type="text/javascript"> alert("Hi!"); </script>, you're not gunna be a popular guy.
+
+Right now, I'm handling this with a simple wrapper around another function, htmlentities, which escapes raw HTML elements. Again, hopefully that'll do. The big pain right now is that there isn't much a comment can be aside from a big heap of text. I'd like to get to a point where there can be links and, heck, even paragraphs. That'll just mean adding a little robustness to the sanitizing wrapper, whether only escaping some elements or writing my own pseudo language to demarcate images and other things people can use. Cranking out a more useful interface for writing is on the back burner right now, but is definitely something I have to do, for my sake if no one else's.
+
+Oh yeah, so, there's no real validation for comments right now. You don't even need a name. I could see that leading to a lot of spam, but I'm going to take a wait-and-see attitude. Heck, even if it is spam, it'd be nice to get a comment or two.
+
+Going ahead, there's a couple things I want to tackle. Searching by tags, pagination, a little bit of Javascript fluff to make things fly about. We'll see how far we get. This is, after all, only a side project and there are bigger fish to fry. Oh, another thing. I'm working on these, uh, these processors which format text a little nicer. It'll probably have a hand in the line break scheme we talked about. You know, the one where I don't have to start with a <p> every dang time? Cooler still, with a bit of luck I'll be using it for code examples. It's a little broken (read: a lot broken) right now, but hey, it's a start.
+
+```
+// Let's see some code!
+int x = 0, y;
+y = x + 1;
+```

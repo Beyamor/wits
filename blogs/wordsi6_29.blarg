@@ -1,0 +1,18 @@
+title: component proponent
+date: 9-19-2011
+
+Yesterday, my dear imaginary reader, we covered the conception of the component architecture at play. However, and this realization has irked me like a hook in a fish since I woke up, we discussed much of the *how* and very little of the *why*. Let's see if I can do a better job in that regard.
+
+*Spoilerz:* probably not.
+
+In the simplest terms, the idea at work is that we can compose entities in the game - walls, chests, the player character his- or herself - from components. Different components provide different types of data and functionality. For example, the *Spatial* component we covered yesterday is more or less a pure data component - all it does is provide the physical properties of an object so that it has a presence in space which might be manipulated or acted upon. The *PlayerIntent* component is responsible for reading the player's input and moving the *Spatial* it's related to accordingly.
+
+So, to reiterate, we can add aspects to an entity by adding these specialized components. The entity itself doesn't really do anything - it just holds onto the reins of these components and directs them to do their respective things. But so what? Who cares? Doesn't this just leave us with a big, messy pile of little pieces we have to take care of?  We've created a jigsaw puzzle out of something as simple as an in-game wall.
+
+Well, my fictional but persistently skeptical compatriot, yes, there is some overhead in building and maintaining the collection of components, but it has real gains in terms of extensibility and reusability, the holy grails of computer science. Because we define entities as collections and, more importantly, *we make no assumptions about its composition or restrictions on what we can construct*, we can create any sort of component that conforms to the interface and add it to any sort of entity we want. Because of this definition-by-aggregation, creating new types of entities is a simple matter of chucking together the right combination of components.
+
+By contrast, a traditional structure would involve an inheritance hierarchy. Parent objects would define their properties and behaviour and child subclasses would take on their parent's structure and add to it. So, maybe you'll have a basic *Entity* at the top, then, say, a *MovingEntity* which defines objects that move and an *ItemEntity* which defines objects that the player can collect. That's all well and good, but what if you want an item that moves? A coin that dances a merry jig, say? Which class does it inherit from? The usual solution is to move more behaviour into the parent *Entity* class, but this leads it towards a blobby mess made of most of the game objects' structures. At that point, it's hard to maintain, a nightmare to understand or change, and just real ugly.
+
+Enter the components. We build a moving component that's responsible for making our entities dance. We build an item component that lets our player get their grubby hands on other entities. And then, when we get around to making our moving item, we simply give it a moving component and an item component and send it on its merry way. No convoluted inheritance, no need to open up and touch the different systems if we want to change our jig to a waltz. There's a clear separation between the different types of components which means fiddling with one won't disturb the other and, again, making entities, no matter how diverse, is just a matter of sticking together the right pieces.
+
+Oh god. Did that work? Was that any more convincing? Hm. Components are good. Let's leave it with that for now.

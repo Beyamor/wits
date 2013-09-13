@@ -1,0 +1,18 @@
+title: good time text adventure
+date: 2-1-2012
+
+This last weekend was [Global Game Jam](http://globalgamejam.org/) which is like a thing that people do. There's, uh, games and caffeine and nerd sweat, it's this whole deal.
+
+Game jams are neat. They're this chance for folks to come together, rap about geek stuff, and maybe crank out something that looks like a video game. On multiple accounts, I am awful at game jams. Leave alone the encouraged socializing and prolonged proximity to breathers, but the very dynamic of it runs at perpendicular to who I am as a person. The beauty of a jam is its brief but brilliant energy, a mayfly weekend of fevered passion and excitement all bent to hacking together a monstrous but wonderful electronic mindchild. And me, well, I have the all the bustle of a glacier.
+
+Rather than go on at length about my sorrowful history at such events, let's real quickly cover what I got done at the latest. In full: not much.
+
+Over the forty-eight hour event, I, uh, let's see. I spent the first day chatting with friends I hadn't seen in a few days and watching other people play *Mincraft*. The second day was mostly about playing *You Might Be A Redneck D&D* courtesy of [Colton "I like it juicey" Phillips](https://twitter.com/#!/ColtonPhillips) and, uh, playing *Minecraft*. And the third boy? Oh boy, that third day.
+
+GGJ encourages games to be a built around [a theme](http://globalgamejam.org/news/2012/01/27/and-ggj-2012-theme). On top of that, they put out what they call "[diversifiers](http://globalgamejam.org/wiki/achievements-diversifiers)," a set of voluntary goals jammers can try to work into their games. Now, you and I, we read "voluntary," but my boy Phillips, well, he reads "CHEEVOES, SON, WE GOTTA GET THEM CHEEVOS." Literacy, certainly, has never been his foremost concern. Anyway, the man spent the better better of the fourty-eight hours yelling at me to get a couple of the diversifiers. Some passionate discussion led to me aiming for Connectivity - "this game somehow interacts with at least one other group's game" - and Eyes Wide Shut - "the game has no graphics." Sometime on Friday, the first day, I had promised I'd put something together, still optimistic at that point that I'd eventually get around to making a proper game.
+
+Enter Sunday and I had jack all accomplished. Like any good programmer, I entered "The Crunch" with full muster. A few hours of frantic C++ and some truly gut-wrenching if-statements later, I was ready to present *Colton and Tom's Good Time Text Adventure*, a woeful text adventure whose entire raison d'être is launching Phillip's pre-existing game to net us a couple of valueless achievements. God, that thing is a gumbo of quick hacks and sincere love. [Check it out](/blog/entries/ColtonAndTomsGoodTimeTextAdventue.zip).
+
+Let's end this brain dump with a couple of other things. I did spend a few hours working on other game ideas. Here's a man named [Frank Solomon](http://www.wordsinthesky.com/blog/entries/good-time-text-adventure/images/ggj12-frank.png). Also, there was a [podcast](http://soundcloud.com/gnarsound/gnarcast-episode-1-i-want-to) of some kind and *David Clarke.exe*.
+
+Speaking of *You Might Be A Redneck D&D*, that Gary the Cable Gygax joke was the most clever thing I've ever spat out.

@@ -1,0 +1,270 @@
+title: cloblog
+date: 5-24-2012
+
+Taking a well deserved break from Guncrawl and C++, I've started on a game (or, at least, game architecture) in Javascript. Man, this language, it's the cat's pyjamas. But we'll talk about that later, my imaginary reader.
+
+So, for those not in the know, Javascript is a scripting language and, as far as web stuff goes, it is THE scripting language. Every modern browser has a Javascript engine running this stuff and it's the language used to make the dynamic elements of a page, uh, not static - if the HTML is a rockin', some Javascripter came a knockin'. But we're not talking about Javascript today.
+
+Okay, well, maybe a little bit. Javascript does a bunch of cool stuff, truth be told, but HTML5 really gives it a place to shine as far as game-y stuff. And, again, we'll get around to talking about that. For now, the only thing to know is that all of the Javascript files a page uses have to be included on it in `script` tags. So, to include the files, you've got to have all these `script src="foo.js"` and `script src="bar.js"` elements on the page.
+
+No big. Thing is, some of these files inevitably depend on others. For example, most of my files use the stuff from my Util.js file. Because of this, a file must be included on the page only after all of the files it depends on. Easy enough to do manually, but even easier if I had a script to do it for me.
+
+Today, we're looking at a script written in Clojure that does just that. It looks at all of the Javascript files, figures out their dependencies by reading the lines `// requires file.js` at the start of the file, and puts them in the HTML page in the right order. And it's going to be a lot of words - I've been trying to write a blog about Clojure for a damn long time. And it's going to be rough - I've got to get this entry out, with an urge like a primal force, so overall clarity is secondary to, well, actually finishing the thing.
+
+Anyway, Clojure. It's a great language. I'm head over heels for this thing, just, like, every bit of its design is *good*. It makes sense. It feels right. Categorically, this is a dynamic, functional Lisp-derivative running on the JVM, which is a healthy chunk of words. I wrote a script using the language and we'll be running through it, covering the bare syntax of the language and some of its most basic mechanics.
+
+Let's get our hands dirty.
+
+# (learn-clojure)
+
+```
+(use 'clojure.java.io)
+```
+
+Okay. There it is. A line of Lisp. Get used to the parens. This line declares that the code following it will make use of the `clojure.java.io` namespace. Clojure's namespaces are actually a bit of a heady subject, so we'll ignore exactly what that means. Instead, if you haven't used a Lisp before, the thing to take away is the syntax. This thing, an s-expression, calls the function [`use`](http://clojuredocs.org/clojure_core/clojure.core/use) with the argument specifying the namespace.
+
+```
+(def root-dir "/home/beyamor/code/games/galilei/")
+(def page-file (str root-dir "index.html"))
+(def src-dir (str root-dir "src"))
+(def dependency-line-pattern #"^// +requires? +(\w+\.js)$")
+```
+
+More sexprs. Here we're just defining a bunch of symbols using [`def`](http://clojure.org/special_forms#def). The first symbol, `root-dir`, is defined with a literal string. The next two symbols, `page-file` and `src-dir` are defined by using [`str`](http://clojuredocs.org/clojure_core/clojure.core/str) to join strings. Finally, `dependency-line-pattern` is defined as a regular expression using the literal regex syntax. Yes, literal regexes - how kickass is that? Notice that these guys all have the form we saw before - function and arguments in parenthesis. Know it. Love it. Don't worry that `def` is a special form and not a function. The syntax is the same and it's not going to trip us today.
+
+# function?
+
+```
+(defn dependency-line?
+  "check for whether a line names a dependency"
+  [line]
+  (re-find dependency-line-pattern line))
+```
+
+Cool, cool. [`defn`](http://clojuredocs.org/clojure_core/clojure.core/defn) is like def, but specialized for defining a function. The first argument is an optional string documenting the function - this is available with [`doc`](http://clojuredocs.org/clojure_core/clojure.repl/doc). The next argument is a literal [`vector`](http://clojuredocs.org/clojure_core/clojure.core/vector), one of Clojure's native data structures. This vector holds the specifies the arguments the function takes - in this case, the single `line`. Finally, the last argument is the body of the function. 
+
+Here, [`re-find`](http://clojuredocs.org/clojure_core/clojure.core/re-find) is passed the regular expression describing the pattern of a line specifying a file dependency defined above as well as the line in question. The function returns the result of the attempt to match the pattern. In Clojure, anything other than `false` or `nil` evalutes as true, so a match `re-find` finds is returned and this result, which is actually a string, is taken as true. If no match exists, the find chucks out a `nil` and this is evaluated as false. In this way, `dependency-line?` checks whether a line specifies a dependency by checking against the dependency line pattern. Cool?
+
+# bound to bind
+
+```
+(defn parse-dependency
+  [line]
+  (let [groups (re-matches dependency-line-pattern line)]
+    (second groups)))
+```
+ 
+This function pulls the file name out of a line. It uses the `dependency-line-pattern` again, only this time with `re-matches`. A [`let`](http://clojuredocs.org/clojure_core/clojure.core/let) statement binds the result of the match to `groups` for the scope of its body. `let` statements are used to name values so they can be referred to later on. This is one of the few ways "assignment" is done in a functional language since the meat and potatoes of the program structure is function chaining.
+
+# i do declare
+
+```
+(defn pull-dependency-lines
+  [file]
+  (with-open [rdr (reader file)]
+    (loop [[line & lines] (line-seq rdr), dependency-lines #{}]
+      (if (and line (dependency-line? line))
+        (recur lines (conj dependency-lines line))
+        dependency-lines))))
+```
+
+Good lord. This nasty hunk of code introduces a ton of ideas - interop, destructuring, recursion. And so, like all things difficult in life, we'll deal with it later. I included it because the following code depends on it. In fact, Clojure allows for this too - the case where we need a named value so code can refer it, but its definition needs to be deferred. Looks something like this:
+
+```
+(declare pull-dependency-lines)
+```
+
+Okay. We'll come back to that.
+
+# order in my functional court
+
+```
+(defn dependencies-in-file
+  [file]
+  (let [dependency-lines (pull-dependency-lines file)]
+    (set (map parse-dependency dependency-lines))))
+```
+ 
+This function grabs the names of the Javascript file dependencies out of a file and returns them as a set. It does this by pulling the lines specifying the dependencies out of the file with `pull-dependency-lines`. Then, after binding this collection of lines to `dependency-lines`, it maps the function `parse-dependency` over the collection using [`map`](http://clojuredocs.org/clojure_core/clojure.core/map) and stuffs that into a set.
+
+"Mapping" is one of the most handy tools in the functional toolbox. This takes a function and a collection and makes a new collection by applying the function to each element of first. In this case, the `parse-dependency` function is mapped over the `dependency-lines` collection to build a new collection by parsing the dependency out of each line. `map` is what's known as a "higher order function" - it takes a function as an argument and does stuff with it.
+
+# putting the j in clojure
+
+```
+(defn source-file-name
+  [file]
+  (re-find #"\w+\.js$" (.toString file)))
+```
+
+This guy looks nice and simple, but introduces one of the big, scary ideas about Clojure - namely, Java. The purpose of the function is fairly straightforward - given a file, it grabs its name. But here's the thing - that file? It's a Java [`File`](http://docs.oracle.com/javase/1.4.2/docs/api/java/io/File.html). You feel that? It's the feel of your mind being blown like a marshmallow in a microwave.
+
+Clojure is a hosted language - it lives on the Java Virtual Machine. Like the rest of the JVM languages - Groovy, Scala, Rhino - this means interop. Clojure can talk to Java and Java can talk to Clojure. Clojure embraces its parent language and it gains a lot of strength by taking advantage of the existing libraries available to it by way of this interop. The short version is that if it exists in Java, you've got it in Clojure.
+
+This leads to a truly rich set of language features facilitating interop, but today, we'll just scratch the surface. With an instance of a Java class, its methods can be called in Clojure with `.method`, taking the instance as the first argument to the function. This keeps the Lisp-y syntax intact, but provides easy access to the power of Java's classes. It's cool stuff.
+
+# should've called it seqp
+
+```
+(defn source-files
+  [dir]
+  (let [files (file-seq (clojure.java.io/file dir))]
+    (filter
+      source-file-name
+      files)))
+```
+
+So, here's a rad function. [`file-seq`](http://clojuredocs.org/clojure_core/clojure.core/file-seq) takes a directory (again, a Java `File` instance) and returns a sequence of the files in that directory. But what's a sequence? Glad I asked.
+
+Clojure is a derivative of Lisp, an old and powerful language. Lisp operates on lists - moreover, Lisp *is* lists. This datastructure is the underpinning element of the language and is used just about everywhere. However, instead of using this concrete data structure, Clojure was built on the abstraction of a sequence. Like a list, this abstraction via the `ISeq` interfaces promises three things: `first`, which gets the first element in the sequence; `rest`, which gets the rest of the sequence; and `cons`, which joins elements to build up a sequence.
+
+The benefit of this abstraction is that functions written against the sequence interface can operate on a wide range of data structures. Clojure's native collections - lists, vectors, maps, and sets, among others - can all be manipulated in the same way by functions like `map` and `filter`, Furthermore, new types of sequences can be created and will benefit from the sequence functions.
+
+Anyway, long story short, `file-seq` creates a collection of the files in a directory and we use it to get `files`.
+
+[`filter`](http://clojuredocs.org/clojure_core/clojure.core/filter) is a higher-order function like `map`. It takes a function and a collection and applies the function to each element in the collection, keeping only the elements for which the function returns true. `source-file-name` is passed in as the function here. Remember, this guy returns the file name if it ends in .js and `nil` otherwise. If it's not too taxing, also remember that `nil` and `false` evaluate as false and anything else is true. So, this `source-files` grabs the collection of files in a directory and filters it to a collection of .js files. Boo-yah.
+
+# associated with :love
+
+``` 
+(defn naive-dependency-graph
+  [files]
+  (map
+    (fn [file]
+      {:file file
+       :dependencies (dependencies-in-file file)
+       :path (.substring (.toString file) (.length root-dir)) 
+       :name (source-file-name file)})
+    files))
+```
+ 
+Let's talk about what the function is trying to do first, then we can hit on the big ideas. Given a collection of files, it associates each file with the set of files it depends on. So, if I've written `// requires bar.js` in foo.js, this function will associate bar.js as one of the dependencies of foo.js.
+
+
+Okay. You see those guys starting with colons? `:file`, `:dependencies`, `:path`, and `:name`? Those are [keywords](http://clojure.org/data_structures#Data%20Structures-Keywords). They're just symbols that resolve to themselves and, as best as I can explain, they act like literal names. For example, where some languages tend to use strings as named keys in associative maps, it's idiomatic in Clojure to use keywords. Hey, speaking of maps.
+
+`{}` is the syntax for a literal map in Clojure and it's about as straightforward as you might hope, Key-value, key-value. Maps are pretty boss. While the language offers [sophisticated datatypes](http://clojure.org/datatypes), for casual use, maps are key. Much like Javascript's objects, associative maps are an easy way to group data and shoot it around. Got some data? Bundle it in a map, no big. It's simple, intuitive, and, thanks to the dynamic nature of the language, free of the hassle of defining some big, brittle class.
+
+Oh man, and at O(log32 N) lookups, these guys fly. Maps are awesome.
+
+Unfortunately, "map" is popular word, so this function maps file to maps.
+
+# the path to graph
+
+```
+(defn resolved?
+  [resolved-list candidate]
+  (let [resolved-name-set (into #{} (map :name resolved-list))
+        dependencies (candidate :dependencies)]
+    (reduce
+      (fn [in-set file] (and in-set (resolved-name-set file)))
+      true dependencies)))
+```
+
+In Clojure, predicates, functions which return true or false depending on whether their conditions are met, end with a question mark by convention. This function is a predicate answering whether a file map has had all of its dependencies resolved. As we'll see in a moment, the function's first argument, `resolved-list`, is a vector of file maps with the shape of the maps built in `naive-dependency-graph`. `candidate` is another one of those file maps. This function checks whether all of the candidate's file dependencies are already in the list of resolved files.
+
+A lot to tackle here. Let's look at how `resolved-name-set` is built. First, `#{}` is the literal syntax for a [set](http://clojure.org/data_structures#Data%20Structures-Sets). Second, keywords can actually act as functions of maps, returning the value associated with the keyword key. So, here we're pulling the file names out of the resolved list and putting them into a set. Not bad, eh?
+
+Maps are also functions of their keys, again returning the value associated with the key. `dependencies` is just the collection of file dependency names in the candidate map.
+
+[`reduce`](http://clojuredocs.org/clojure_core/clojure.core/reduce) takes a function, (optionally) an initial value, and a sequence. It calls the function with the initial value and the first element of the sequence, then calls the function again with the result of the first call and the *second* element of the sequence, continuing this through the sequence and returning the resulting value.
+
+[`and`](http://clojuredocs.org/clojure_core/clojure.core/and) is a Boolean and of its arguments, so we've got that. A set is a function of its elements, returning the element if it's in the set. So, given a file name, `resolved-name-set` returns whether that file name is in the set of resolved files.
+
+Putting the pieces together, the reduction returns true if all of the dependencies are in the resolved set.
+
+```
+(defn full-dependency-graph
+  [raw-dependencies]
+  (loop [unresolved raw-dependencies
+        resolved []]
+    (let [new-resolved (into resolved (filter #(resolved? resolved %) unresolved))
+          new-unresolved (remove (set new-resolved) unresolved)]
+      (if (or (not new-unresolved) (empty? new-unresolved))
+        new-resolved
+        (recur new-unresolved new-resolved)))))
+```
+
+Okay. The structures generated by `naive-dependency-graph` associate the file with the file dependencies listed inside of it. Note however that this set of dependencies is only those within the file itself - this does not account for the dependencies of *those* dependencies. If bar.js depends on baz.js and foo.js depends on bar.js, `naive-dependency-graph` will show bar.js as a dependency of foo.js, but it will not show that, implicitly, foo.js also depends on baz.js. The requirements could be changed so that all dependencies have to be explicit, but that's too much hassle to be of use.
+
+`full-dependency-graph` takes the naive collection of files and orders it such that files come after all of the files they depend on, implicitly or not. The algorithm I used for this is painfully simple. There are two collections - `unresolved`, the raw information generated by `naive-dependency-graph`, and `resolved`, an initially empty vector - one of Clojure's ordered data structures. Then, it simply iterates, moving an item from the the unresolved set to the resolved set when all of the dependencies of the item are already in the resolved set. Thus, items in the resolved collection are listed only *after* their dependencies. Good?
+
+Alright. Let's talk about [`loop`](http://clojuredocs.org/clojure_core/clojure.core/loop). This is Clojure's construct for, well, looping. It starts with some bindings - here, `unresolved` and `unresolved`. Following that is the body of the loop. Here, either some value will be returned *or* the loop begins the next iteration with a [`recur`](http://clojuredocs.org/clojure_core/clojure.core/recur), re-binding the loop values with the arguments to `recur`.
+
+Because the JVM does not support tail-call optimization, Clojure offers `recur`. This is an explicit point of recursion for functions or loops and must occur in the tail position of either. This explicit form allows recursion without consuming the stack.
+
+Inside the loop body, `new-resolved` is computed by moving all of the resolved entries in `unresolved` into it. That should be fairly straightforward. After that, the `new-unresolved` collection is built by removing all of the items in the set of resolved items.
+
+If the new unresolved set is empty (or `nil`), all items have been resolved and the ordered collection of resolved items is returned. Otherwise, the loop iterates with the new resolved and unresolved collections. Great. We're nearly done. The data's in place, we've just got to get it into the file.
+
+# putting it together
+
+```
+(defn split-page
+[file-name]
+(let [contents (slurp file-name)
+      groups (re-matches #"(?ms)(.*)(<!-- begin jsDepend -->.*<!-- end jsDepend -->)(.*)" contents)]
+  (rest groups)))
+```
+
+`split-page` [`slurp`s](http://clojuredocs.org/clojure_core/clojure.core/slurp) in the file contents and then breaks it into the part before the generated dependency content, the generated content, and the part after the generated content. The first entry in the regex matches is the whole page itself, so this is thrown away with `rest`.
+
+```
+(defn include-line
+  [file-data]
+  (str
+    "<script src='"
+    (:path file-data)
+    "'></script>\r\n"))
+```
+
+`include-line` takes one of the file information maps built above and returns a string for the HTML element including that Javascript file. The pieces of the element string are concatenated with `str`.
+
+```
+(let [[before _ after] (split-page page-file) 
+      gen-lines (map include-line
+                     (-> src-dir
+                       source-files
+                       naive-dependency-graph
+                       full-dependency-graph))
+      contents (str
+                 before
+                 "<!-- begin jsDepend -->" 
+                 (apply str gen-lines)
+                 "<!-- end jsDepend -->"
+                 after)]
+  (spit page-file contents))
+```
+
+And here we are. `before` and `after` are bound to the pieces of the page before and after the generated content and then the lines are generated.
+
+[`->`](http://clojuredocs.org/clojure_core/clojure.core/-%3E) is used to thread a value through functions. It takes the first argument and passes it to the second. It passes the result of this to the third and so on. Here, it takes the source directory, gets all of the source files, builds the naive dependency structure, and then the full dependency structure. It maps each file to the HTML script include string.
+
+The contents of the file are generated by piecing together the stuff before the generated content, the generated content, and the stuff after the generated content. Finally, this is [`spit`](http://clojuredocs.org/clojure_core/clojure.core/spit) back onto the page.
+
+# back it up
+
+Okay, one more. Thought we were done, right? Remember this guy?
+
+```
+(defn pull-dependency-lines
+  [file]
+  (with-open [rdr (reader file)]
+    (loop [[line & lines] (line-seq rdr)
+		 dependency-lines #{}]
+      (if (and line (dependency-line? line))
+        (recur lines (conj dependency-lines line))
+        dependency-lines))))
+```
+
+He shouldn't look too nasty, anymore. I hope.
+
+[`with-open`](http://clojuredocs.org/clojure_core/clojure.core/with-open) takes some bindings, executes the body, then closes the bound values. Here, a file is opened with a Java Reader and the dependencies are read from it.
+
+Another `loop`, but this one uses [destructuring](http://blog.jayfields.com/2010/07/clojure-destructuring.html). Destructuring is a way of pulling something apart and binding variables to its pieces. Here, with the sequence of line strings returned by [`line-seq`](http://clojuredocs.org/clojure_core/clojure.core/line-seq), `line` is bound to the first line in the sequence and `lines` is bound to the rest of the sequence. Cool? We're just naming the different parts of the sequence.
+
+Okay. `dependency-lines` is starts as an empty set. Then, if we have a line and it names a dependency, we add it to the set and recur through the next iteration. Once we've pulled all of the dependency lines from the start of the file, we return the set. Peachy.
+
+# wrap it up
+
+And there we are. This script takes all of the Javascript files in the directory, parses out their dependencies, and sorts them to include them in the HTML file in the right order. *Phew*. There's a few bits and pieces of Clojure I skipped over, but with a bit of luck, you got a feel for the basics of the language. What I might not have conveyed is how much fun it was to put this together. Clojure is a great language. If you've got a minute, login to [4clojure](http://www.4clojure.com/) and play around with it yourself. I promise, it'll be fun. See you in the next blog.

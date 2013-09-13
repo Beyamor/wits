@@ -1,0 +1,18 @@
+title: phlegm fatale
+date: 9-13-2011
+
+Lordy, lordy, a cold is not a thing worth obtaining and gosh, do I ever want to curl over and let my lungs gurgle out my mouth, but we have things to do, dear reader.
+
+In response to my whining about Eclipse, a [wise man](http://barncover.blogspot.com/) made mention that VIM, command line, and a spoonful of elbow grease were all he needed to get a project kicking. That set me wondering whether I'd be better off going without an integrated development environment at my beck and call. Then some thoughts happened.
+
+There's some big advantages to something like [VIM](http://en.wikipedia.org/wiki/Vim_(text_editor)), the command line text editor. For one, it's pretty portable and available just about anywhere. Moreover, if you take the time to master the keyboard shortcuts, you can make that thing *hum*. I've watched pros disregard the feeble propositions set forth by this universe's laws to fly across time and keyboard to get that code done. And heck, VIM even has [proper autocomplete](http://ehsanakhgari.org/blog/2010-03-18/c-autocomplete-feature-vim). It's *at least* as capable as any IDE's editor.
+
+So might as well use that, right? Mm. When I tried to figure out what it was that made me really care about using Eclipse, I realized it offers a couple of neat things, ranging from almost superfluous to essential. By and large, these are aspects of "hand holding," things that aren't critical and could easily be dismissed by the hardcore programmer as "sugar," but things that I would elect to not live without.
+
+We could start with a stupid one. Like, dumb, for reals. Do you happen to know what the -I command does when you're compiling with g++? I can rarely remember. However, Eclipse knows it "[specifies] an include path" for the project so I don't have to. It's easy enough to look up, but the IDE saves me the time and hassle by presenting it plainly and within the context of my work space. Or I could just check the man page, but whatevs.
+
+Let's try this. There are some plugins which back off Eclipse. A few of the cool ones, like visual editors, entirely depend on the program, but some others simply consolidate a bunch of stuff into the environment. For example, there's an Android Development Tools plugin for Android development. It's entirely possible to develop without and I watched someone do just that, but compared to the trivial button presses offered by the fully integrated SDK, it was like watching a halfhearted waterboarding session. So, the IDE brings everything together and tucks away the rough edges which is kind of cool. Better than scrambling to find a maximal workflow.
+
+The most definitive thing in my mind is the makefile automatically generated for my project as I develop. In a C/C++ project, the makefile(s) describes how the whole thing should be built at compile time. However, it's kind of a bore to write. File dependencies have to be described, objects listed, this whole rigmarole. And, no matter how simple it is, it does offer another place where human error can be introduced. Drop a file name and the whole thing breaks. Yes, I'd rather not have to write it myself because I'm lazy, as any programmer is, but if automation can circumvent my errors, I'll support it entirely because I distrust my own code, as any good programmer should.
+
+At the end of the day, an IDE does exactly what it was developed for. *Dur*. It reduces the cognitive load on the programmer so they can dedicate themselves to *programming*. I think it's important to understand what's happening - if you can't make a makefile, you need to stop and take a hard look at what's going on around you - but I can't help but see these as things that only distract from what I want to be doing.

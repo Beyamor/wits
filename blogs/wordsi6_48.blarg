@@ -1,0 +1,12 @@
+title: sapce
+date: 6-23-2012
+
+Last weekend [UVIc GameDev](https://twitter.com/#!/UVicGameDev) had a tiny little game jam, lovingly labelled "NoJam2012" by me and me alone. The jam's themes of this bad boy were "juice," "emergent behaviour," and "kill streaks." Michael Pattie drank about a dozen Dr. Peppers and Bearded Rob taught us how to say raunchy things in Spanish.
+
+My tender little gift to the world is a game called *sapce*. As an idea, it's this sort of evolution sim with spaceships because if there's anything Charles Darwin was big on, it was spaceships. Anyway, to be honest, the game is basically [BoxCar 2D](http://boxcar2d.com/) that looks like [Captain Forever](http://www.captainforever.com/captainforever.php) but whatevs.
+
+You should go play those, by the way. Like, now.
+
+I wrote the thing in Python with [Pygame](http://www.pygame.org/news.html) and [Pybox2D](http://code.google.com/p/pybox2d/). And, unfortunately, I had so much fun doing so that I didn't stop. So, I'm still writing code for this dinky little side project and I feel bad because there's a dozen other projects I should tackle, but damn if this isn't enjoyable. This is the new hotness. If you want, you can [check out the gross, uncommented code](https://github.com/Beyamor/sapce).
+
+![some image](http://i.imgur.com/gqj29.png)

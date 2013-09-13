@@ -1,0 +1,22 @@
+title: some of the whole nine yards
+date: 9-6-2011
+
+And we're off with a bang. Kind of. At least a "b."
+
+buhhhhh
+
+In light of report submitting, resume writing, and game dev club recruiting - an exhausting task resulting in, though maybe not requiring, my own enthusiastic leaping off of chairs - I've barely written half a class today. But then again, that's kind of what I'm aiming for.
+
+Jonathon Blow, the man behind *Braid*, suggested [here](http://the-witness.net/news/2011/06/how-to-program-independent-games/) that the best course of action for an indie developer is getting a vertical slice of the game out the door, amongst a number of unassailable ideas, all of which I find myself responding to by nodding sagely in accordance. Produce something playable, even if doesn't have all of the fancy features. Create a product which can be seen.
+
+To get that depth then, I think I have to tackle the system in breadth. That is, my tentative strategy is to lay down the barest skeleton framework of all the pieces of the backbone architecture immediately. By contrast, I've tried to finish each section of every system sequentially in the past and bogged myself with details to the detriment of the big picture.
+
+So if all I managed today is the main game loop, so be it. I'll get there.
+
+![some image](/images/blog/gc-main-game-loop.png)
+
+To be fair though, the half a class I mentioned above is the *InputWatcher*, an important beast in its own right. Okay, maybe nothing terribly special, but it's a [singleton](http://en.wikipedia.org/wiki/Singleton_pattern) that wraps SDL's keyboard stuff and makes it easy to get at by mapping the actual keys to enumerations like 'Up' and 'Quit.' Quit here is the important one - the only reason I stopped to flesh out this guy instead of sketching out the main game states is because I got dang tired of force-quitting the application. Anyway, there's that.
+
+Adding that layer of indirection between my application and whatever external library I use is one of those intrinsically *right* things that's so easy to overlook. The first time I tried making games with C++, I bound my system pretty tightly to GLUT. Down the road, when I decided I wanted to switch to SDL, I had to spent a few aggravating days gutting the GLUT. If you can isolate yourself from whatever you're piggybacking on *and* adapt it to the context of your application, might as well go hog wild.
+
+Feels good to be back in the C++.

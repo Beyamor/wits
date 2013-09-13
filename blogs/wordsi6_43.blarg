@@ -1,0 +1,62 @@
+title: drop it already
+date: 2-26-2012
+
+Well, my imaginary friend, compared to our [previous adventure](http://wordsinthesky.com/blog/entries/interesting-is-just-a-synonym-for-horrifying), today's showing is, in most regards, a poor one. Of course, if the blogs thus far have somehow failed to diminish your expectations, how can that lowly sentence alone hope to convince you of my insurmountable unimpressiveness? Let's get to 'er.
+
+It seems a trivial thing, said aloud. Pick up an item. Put it down. Those simple verbs have taken a tsunami of drudgerous time to find themselves into our *Guncrawl* but at last, I think we're more or less there. Two quick ideas to explain and we can let this one rest.
+
+# space cadet
+
+What does it mean for an item to be in an inventory? Well, sure, it means it can be equipped or used, but that's just one dimension of an item. What about the rest? Does it still have a physical presence in a level? Probably not - it doesn't make much sense to collide with something you've already slipped into your pocket. Ditto rendering the object - if something's found its home in one of the cotton caves of your trouser topography, it'd be mighty foolish to keep drawing it onscreen. Effectively, the item is removed from the world.
+
+A few cognitive leaps and where do we land? Good question. Let's talk *entity spaces*. It's a simple enough concept, really. An entity - anything from a wall to a gun to the player himself - exists in a space. What's a space? It's a place in which entities exist, *dur*. The inventory component is one, but so is the proper game level itself. *Bingo*.
+
+The entity space is responsible for the entities it contains. First and foremost, that means the space is responsible for keeping track of the references to the entities in it. Delete an inventory and the entities it contains go with it. Second, the space keeps its entities healthy and happy, which is to say, it's responsible for updating the entities. If the space isn't updating its entities, the entities aren't being updated, right?
+
+That gets us most of the way there. Picking up an item means removing it from the level space and adding it to the inventory space. Putting it down again removes it from the inventory and adds it to the level. Exactly what you would expect. Heck, it's hardly worth looking at the code. In fact, [here](http://robservations.ca/wp-content/uploads/2011/02/happy-cat1.jpg)'s a happy cat instead. Of course, for the sake of padding out this watery blog entry, we can take a look at the message that gets popped off with the gun item's `drop` method, called by the inventory when it, well, drops an item.
+
+```
+class GunDroppedMessenger :
+	public AbstractComponentMessenger,
+	public ComponentMessenger<Body> {
+private:
+	Vector2 position;
+
+public:
+	GunDroppedMessenger( Vector2 position ) :
+		position( position ) {
+
+	}
+
+	void visit( Body* body ) {
+
+		body->position = position;
+	}
+};
+```
+
+It's an implementation of the messenger type discussed in the last blog that sets the physical position of an entity in the level space to be the same as the entity it was dropped from. Figured it might be interesting to take a look at that in action, but this talk of physics slides us into the next question with a modicum of grace.
+
+# a matter of circumstance
+
+We've gone over how an entity gets passed around, but what about the components in it? What does it mean to go from one space to another? A `Body` has a special place in the level space, but in the inventory, which has never heard of a `PhysicsEngine`, let alone instantiated one, where does it find itself? And heck, how's the poor `Body` to know what kind of space it's inhabiting anyway? Seems to me, it could use a bit of context.
+
+The `Context` object is a damn simple idea. It's just a bunch of accessors to, well, more contexts, like the `PhysicsContext` and the `GraphicsContext`, as well as checks for whether the context actually has these, uh, subcontexts. And then of course, the subcontexts in turn have accessors for things like the `PhysicsEngine`.
+
+Phew.
+
+Really, the context is just a description of what's available in an entity space. Each space creates its own context, settings the fields  values as appropriate. When an entity is added to a space, its components disengage from the previous context and, I struggle with the terminology here, come to terms with the new one? So, for example, the `Body` removes itself from the old `PhysicsEngine` and adds itself to the new one, if it's present in the new context.
+
+The qualifies in that last sentence really illustrates how nicely the idea of a context works. Naturally, the inventory lacks any sense of physics, so when the `Body` gets added to it, goes looking for the `PhysicsContext` in the new `Context`, and, finding it absent, it sits back and twiddles its thumbs. Easy-peasy.
+
+Originally, I had made the references to the different context-y stuff available through the entity spaces themselves, but mixing the access to that sort of thing with the entity management simply didn't sit well with me. What I like about the context is how idiot-proof it is as an idea. Want to add a new aspect to the game? Add it to the context and let that get passed down to the components. Simple enough, no mucking about with the entity management stuff. Everything's in one convenient place.
+
+# our semi-annual celebration
+
+In more boring news, by my count, suspect though it may be, it's been about six months since I started working on *Guncrawl*, if we can count a week or two of forethought before laying down the code. Yes, the [circle and pair of squares](http://www.wordsinthesky.com/blog/entries/guess-a-little-physics/images/physics-demo1.png) that I've come to love so well are really telling of my aptitude as a programmer. Oh boy.
+
+Despite the seeming lack of *any* progress, I'm feeling okay with what I've done so far. From the [conception](http://wordsinthesky.com/blog/entries/left-hoarse-by-saddle-climbing), through [components](http://wordsinthesky.com/blog/entries/finding-your-c-legs) and [physics](http://wordsinthesky.com/blog/entries/guess-a-little-physics) to, heaven help me, [the menus](http://wordsinthesky.com/blog/entries/contain-your-excitment), I feel like most of the big questions about the core design have been answered. There's a few more to go before work on the real game gets underway - setting up serialization and getting a proper drawing structure spring to mind - but this is a satisfying point for me.
+
+However, as much as I'm still enjoying this project, I've been thinking about taking a breather and working on some other stuff. I've been entertaining the idea of cranking out a few mini games, as a start. More than a little frustrated with C++, I've been playing with the breathtakingly lovely [Clojure](http://clojure.org/) and thinking I could do something with that. And this fair site here could use some TLC. Of course, there's always more *Guncrawl*.
+
+Yeah, I'm okay with that.

@@ -1,0 +1,22 @@
+title: guess a little physics
+date: 10-18-2011
+
+We were doing this blog thing at some point, weren't we, my dear fictional reader?
+
+Last week was Physics Week. And god, it sucked.
+
+I am a fan of physics, from the simple elegance of kinematics all the way up to - or, er, down to, if you take a mass-centric perspective - the terrifying uncertainty of quantum mechanics. I am too a fan of software, as you may have inferred from my lavish geekiness. The two together, however? No chocolate-in-my-peanut-butter joy. No, it is a beast most chimeran in nature, with the head of a goat and the body of terrible incompetence.
+
+Anyway. Making a smooth transition from the sulty curves of real world physics to the brusque world of discrete computation with a physics engine is something I've always struggled with. To that end, I borrowed somewhat liberally from Wildbunny's [Physics Engines for Dummies](http://www.wildbunny.co.uk/blog/2011/04/06/physics-engines-for-dummies/comment-page-1/#comments) - as you may have taken from the title, this is an article catering heavily to exactly my demographic. You can read about the algorithms at work on the site proper and I'll leave the elegant explanation to the original writer. In brief, it uses this idea of "speculative collision" - movement calculations based on where objects are *expected* to be - to sort everything out intelligently and, with a bit of math, realistically.
+
+And, uh, oh boy, the math. Back in high school I was a junkie for the stuff. Algebra, geometry, all that numbery jazz. Hitting university, I kind of ODed on the stuff - I've taken four courses on calculus alone - and in doing so, burned myself out a bit. Jumping back in with this physics engine, I've realized just how awful at the stuff I've become. The speculative collisions used by the engine's algorithms feed on the calculation of the closest point of contact between two bodies and dang, it's proving to be kind of a pain for hammer out the math for that.
+
+To give you a sense of perspective of my shortcomings in this regard, consider that it took me a solid two days to shake out the point of collision between two arbitrary squares in space.
+
+And it's still kind of broken.
+
+So, I guess one thing to reflect on is that while computer science itself isn't necessarily a mathy thing - beyond a bit of counting, the average programmer might be able to push that under the surface - physics certainly is. And if I'm going to insist on writing this engine myself, these calculations are going to prove a real choke point for me. I've implemented circular and square solid bodies and it took a week. Extending the math to arbitrary polygons might kill me. An answer to this might be using an existing library - [Box2D](http://box2d.org/), maybe - but we'll look at that in time. Right now, I've gone through this trouble to get a better sense of how a professionally made engine works and hot damn did I get that. We'll put this whole thing down to yet another learning process.
+
+Damn, yo, sorry. This blog was much more of a train of thought than even the standard entry. Very little in the way of concrete demonstrations of progress or even examples of the code at work. Hell, I've barely touched on what a physics engine is - something that implements motion, collision, and all the other physics goodness in the game space - or exactly what I've managed by adding this to the game - uh, now our circle hero can walk into square walls, huzzah - but, well, it's been a while since I wrote *anything* and I'd like to get back into the habit. Ah, what the heck, I'll throw you a bone and toss in a picture. Maybe we can talk about it next time.
+
+![some image](/images/blog/physics-demo1.png)

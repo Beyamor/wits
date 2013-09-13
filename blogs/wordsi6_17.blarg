@@ -1,0 +1,26 @@
+title: dropping a phat beat
+date: 7-25-2011
+
+Phew. It's so dang easy to just power down the ol' thinking noodle and watch the [good doctor](http://newsimg.bbc.co.uk/media/images/45343000/jpg/_45343633_jex_256761_de27-1.jpg) make wacky with some aliens. Lost some time and momentum but hey, like your interest here, dear imaginary reader, we were pretty much dead in the water from the get go.
+
+Alright, what've we created of late? Some damn fine chili, I tell you what. Full of color and heat, quite unlike the rather bland puddle of code that has pooled in my lowly text editor. A few scant classes and, as is required of any project great or small, a bit of "hello world" text.
+
+Mm. Well, never mind that. It's steps towards what the optimist in me hopes might be a decent structure. The game I got in my feeble coelecanth cranium is a sort of paced affair with some chatting here and puzzling there. I like my poorly designed game like I like my women, short and linear.
+
+*These are the sort of things I must take pains to edit out.*
+
+Anyway, near as I can figure, a game that is, essentially, a gussied up regex tutorial doesn't stand to take up all too many precious minutes, so short and linear is fine by me, besides which, motivation to hammer away at this thing is in fair slim supply.
+
+Right. But so. Structurally, I reckon there'll be a sort of Level-Beat hierarchy. Levels are little more than thematic collections of events, here lovingly labelled Beats. That is, a Level could have a DialogBeat, then a WalkingBeat, then a GoodGodWeGetItSaySomethingMoreInterestingBeat. 
+
+It's a terribly rigid approach, but that compliments the terribly rigid design. The nice thing about the Beats - or some more appropriately titled cousin - allow Levels to be viewed as aggregates of highly compartmentalized objects. High cohesion, low coupling fools. *Represent.* On top of that, it seems like it'd be pretty easy to use the [decorator pattern](http://en.wikipedia.org/wiki/Decorator_pattern) to extend the idea of a Beat.
+
+The decorator pattern is a fine piece of work. One subclass "wraps" another and add greater richness to its methods or behaviour. Uh, so, for example, consider a regular person. That's the rather boring subclass. Now, consider, purely as an example, Batman's bat-ensemble. Nothing by itself, but it decorates the functionality of the object it wraps, here our ever-dapper [Adam West](http://www.chicagonow.com/an-improvised-blog/files/2011/07/tn2_adam_west_1.jpg), transforming the throw of a pedestrian boomerang into a proper batarang's launch.
+
+Here, I'd picture something more in line with, mm, for example, wrapping a DialogBeat in a WalkingBeat. Or GorillaFightingBeat. Y'know. Something. Then we can, potentially, handle all of the talking stuff in the innermost level. On top of that, we've got a layer to add some action to the scene. Yeah? Maybe. *Yeah.*
+
+Did I mention the decorator pattern is designed to stack decorators on top of each other? *Enter [goofy Bat-armor](http://farm5.static.flickr.com/4145/5082387823_011f34b993.jpg)*.
+
+My, that's more than enough for today. Yawn-worthy code so far, but hey, it's what I got. Y'know what? I might make links on this here site electric blue. Go for something wild. *Who knows where this azure madness will take me.*
+
+ 

@@ -1,0 +1,106 @@
+title: the n-complete problem
+date: 11-7-2011
+
+Long, long ago, sometime around the point in my life where I was still playing with Beyblades - the later years of highschool, if memory serves - I first learned of *[Gadsby*](http://en.wikipedia.org/wiki/Gadsby_(novel)), the novel written by Ernest Vincent Wright *entirely* without the letter "e." I don't know if you've picked up on this over the course of your life, dear reader, but "e" is a tremendously valuable letter. You'll find it rearing its head in everything from "cheese" and "spleen" all the way through "elephantine," which, I'm sure you'll concede, are essential elements of any vocabulary. Anyway, at the time, I was floored by this feat and I immediately vowed to forfeit the use of "e" for an entire day.
+
+I almost made it to lunch.
+
+Anyway, a recent assignment tasked us with writing a C or Java program which would read input, count the number of lowercase "n's" and determine whether that number is a [twin prime](http://en.wikipedia.org/wiki/Twin_prime) - that is, the number is a prime that differs from another by two. To test it, we were to feed the program its own source code as the input. As proof of correctness, we were also supposed to print out the code and highlight the "n's." Now, (with small numbers) this is an almost insultingly trivial undertaking. However, taking umbrage with the need to take pen to paper for a programming assignment, a friend suggested we write the program without using "n."
+
+Which, obviously, is a stupid thing to do.
+
+And a really neat challenge.
+
+The first great obstacle is the main function - that is, the mai__n__ function. See, by convention, every C program must have a function called *main*. This is where the program actually starts executing, the point where everything kicks off. Traditionally speaking, without a function called main, you can't have a program that runs. Well, that's a bother.
+
+Some internet sleuthing dug up [a solution](http://in.answers.yahoo.com/question/index?qid=20090502113050AAxwtay) at [the last bastion of the inquisitive mind](http://www.yahoolaughs.com/). See, you can use the *-nostartfiles* with GCC to tell the compiler that you don't want to use the standard startup files and will instead specify your own entry point for the program. Then, you can set your starting point by writing a *_start* function, which, thankfully, doesn't have an "n." So, with some sketchy code, we're underway:
+
+```// override start place of program
+_start() {
+
+	// the primary call
+	mai();
+	_exit( 0 );
+}```
+
+Cool. So, mai() is where we actually start our program. From there, we want to read in the input. With C, when you want to use external functions, you need to import the libraries they're defined in using the *include* directive. So, if, for example, you were, for some unknowable reason, craving a [McGriddle](http://3.bp.blogspot.com/_0CgMz426mRU/TJpfP6hnduI/AAAAAAAABA4/r3-9GS0mwck/s1600/sausage-mcgriddle.jpg) in your C program, you'd need to include the McDonalds library like so:
+
+```
+#include "mickey_ds.h"
+```
+
+Clearly, *i__n__clude* is going to be a problem for us. However, the IO functions in *stdio* are part of the C standard libraries and so are *implicitly* included because these libraries are automatically linked when compiling. That means that we can use the IO functions to read in the input to the program without directly including them. *Phew*. Almost. Normally, we might use *scanf* to read from standard input and *printf* to print to standard output but, well, you can see the problems there. *Scanf* isn't too much of a setback. With the trusty if inelegant *getchar*, we can read from standard input to our hearts' content.
+
+```
+// calculate sum of characters
+while ( (c=getchar()) > 0 ) {
+	if ( c == subject ) i++;
+}
+```
+
+See if you can work out what *subject* is. *Printf* is a little more of a problem. In C, when you want to print, you use *printf*. That's it. That's how it goes. Hell, "Hello World" starts with a printf. Thankfully, tacky though it may seem, we've still got *putchar*, a dinky little function that prints to the screen one character at a time. Welp, nothing to it but to write a function for printing null-terminated strings - er, *ull-termiated strigs* - to the screen.
+
+```
+//  displays 0-marked phrases
+void pritf( char *s ) {
+
+	while ( *(s) != 0 ) {
+
+		// escape character
+		if ( *s == '!' && *(s+1) == '!' ) {
+
+			putchar( subject );
+			s += 2;
+		}
+	
+		// escape character
+		else if ( *s == '!' && *(s+1) == '*' ) {
+
+			putchar( subjectPrime );
+			s += 2;
+		}
+		
+		else {
+			putchar( *s );
+			s++;
+		}
+	}
+}
+```
+
+You'll notice the escape characters !! and !* which respectively denote places where we want to insert "n" and "N" into the string. Of course, since explicitly writing those characters is off-limits, we've got *subject = 0x6e* and *subjectPrime = 0x4e* to hold the actual ASCII values.
+
+There's a few other wrinkles, but the last big leap was getting values back from functions. See, normally you can make a function spit out a value by specifying it's *return* value. However, once again we run into our old frienemy "n," so that's no good. Instead, the function is supplied with an additional parameter - the address of the variable where we want to store the result. After the function finishes, this variable should hold the value calculate by the function.
+
+```
+// checks whether a value is prime
+void checkIfPrime( char m, char *isPrime ) {
+
+	char i = 0;
+	*isPrime = 1;
+
+	// prime must be 2 or greater
+	if ( m <= 1 ) {
+
+		*isPrime = 0;
+	}
+
+	else {
+
+		for ( i = 2; i < m/2; i++ ) {
+
+			if ( m%i == 0 ) {
+
+				*isPrime = 0;
+				break;
+			}
+		}
+	}
+}
+```
+
+Boom. Look at that. Functions without returns. Output without *printf*s. Main functions without *main*s. Baby, we're ready to soar. We've done it - an entire program that doesn't use the letter "n" once. How cool is that? I really liked this - it made me think much more about exactly how my program was operating, not just the functions, but the actual structure of its execution. All told, it was a truly enjoyable experience. Here's hoping you got something out of this nonsense - or should I say *no-n-sense*.
+
+No, no I probably should not.
+
+You can find the full source [here](/blog/entries/mai.c).

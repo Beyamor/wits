@@ -1,0 +1,69 @@
+title: java map
+date: 11-24-2012
+
+I'm working at a Java job right now. Great place, great people. But Java. Java is just so - so Java, you know?
+
+So, and this isn't true of Java alone by any means, eventually you get tired of writing the same *create-a-y-for-each-x-in-a-collection* boilerplate. You know, create a new collection (the codomain), interate through the original collection (the domain), and for each element of the domain, apply some transformation of the domain element to produce the codomain element, then add that to the codomain collection.
+
+My brain went numb writing that. You've got to be catatonic by this point. We're just talking about a for loop here, people.
+
+```
+List<Character> ys = new LinkedList<Character>();
+
+for (final Integer x : xs) {
+
+	Character y = someTransformationOf(x);
+	ys.add(y);
+}
+```
+
+Not too bad and a hell of a lot prettier than the assembly of yore. Still, some languages have a pretty handy concept for doing exacty this. You might have heard of it? Map. Ringing some bells? Yeah, the same one from [math](http://en.wikipedia.org/wiki/Map_(mathematics)).
+
+It's actually in most languages I care to name, but given Java's lack of first-class functions, it hasn't really caught on here, at least as far as I know. There is, to be fair, there is [FunctionalJava](http://functionaljava.org/), but whatever. We're *real* programmers here, let's just write the damn thing ourselves.
+
+```
+// Our handy map class.
+public static class Map {
+
+	// The "function" object.
+	public static interface Fn<IN, OUT> {
+
+		public OUT call(final IN in);
+	}
+
+	// The actual map function.
+	public static <IN, OUT> List<OUT> map(
+			List<IN> xs,
+			Fn<IN, OUT> fn) {
+
+		final List<OUT> ys = new LinkedList<OUT>();
+
+		for (final IN x : xs) {
+
+			ys.add(fn.call(x));
+		}
+
+		return ys;
+	}
+}
+```
+
+Okay. Uh. The inner `Fn` class describes, well, our mapping function. Give it some input `x` and it'll spit out some output `y` by calling its `call` method. The `map` method takes a list of `xs` and a mapping function and, by calling the mapping function for each `x` in `xs`, it produces the mapped output `ys`. Hooking these things up with Java's generics, we can make them operate with any input type `IN` and output type `OUT`. Pretty simple, right? And hey, I'll bet it's a lot easier to use than that tacky for loop stuff!
+
+```
+List<Integer> xs = new LinkedList<Integer>();
+for (int i = 0; i < 10; ++i) xs.add(i);
+
+List<Character> ys = Map.map(xs, new Map.Fn<Integer, Character>() {
+
+	public Character call(final Integer x) {
+
+		// 0 -> A, 1 -> B, etc.
+		return new Character((char)('A' + x.intValue()));
+	}
+});
+
+for (final Character y : ys) System.out.println(y);
+```
+
+Oh. Okay. That's y'know, that's a bunch of boilerplate. Well. Still, uh, still Java then. Alright. That's about it for me today. Full code's available [here](https://gist.github.com/4141059).

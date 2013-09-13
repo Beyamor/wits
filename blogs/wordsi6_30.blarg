@@ -1,0 +1,54 @@
+title: and the template of doom
+date: 9-19-2011
+
+I'm absolutely elated right now. Elated, and terrified.
+
+I was sitting down to write a simple rendering component when I ran into a stumbling block. Or, well, a musing block. A problem, sure, but a chance to think. Like we established, now and again one component is going to need to reference another. In this case, the *Renderer* needed to know about the *Spatial*. No sweat, right? I'd already done the same for the *PlayerIntent* component. I cracked that guy open to see how I'd done it and was met with some grossness.
+
+```
+shared_ptr<Component> sharedNeighbour = neighbour.lock();
+Component* rawNeighbour = sharedNeighbour.get();
+Spatial* spatial = dynamic_cast<Spatial*>( rawNeighbour );
+if ( spatial )
+	this->spatial = spatial;
+```
+
+Okay, it looks nasty, but is it really so bad? Just a quick copy-paste and I'm on my way. I mean, if I need to change the type of referenced component, I just need to tweak this a little, so that's no big deal. And if I decide I want to change how the underlying reference works? Some better handling of that raw pointer there? I just need to change, uh, every file that uses this pattern, but I could, well, maybe I could make a script to do that?
+
+Yeah, not so good.
+
+There's some unpleasantness at work with the *dynamic_cast* - it breaks the abstraction pretty harsh, but with strongly typed variables, that sort of thing is, unless I come up with a better method of type inference, pretty inevitable. Worse is the hunk of convoluted code with no good means of reuse. There are a few appalling methods I could have used to try to tackle this - I briefly flirted with the idea of eldritch macros - but I found my way to a solution I think works pretty well.
+
+C++ has, as one its pillars, the idea of [templates](http://en.wikipedia.org/wiki/Template_(programming)), a method of defining functions and classes around generic objects, then specifying exactly what it is they work with when using them. Since they can be put to use with any sort of object, they're great for reusing the same code across different classes. Sounds a bit like what we were looking for with the component references - a way to encapsulate the casting logic to work with whatever type of component we might want to work with.
+
+Let's take stock of the objectives once more just to be sure we have a clear idea of what it we're after. First and foremost, we need some way to reference specific types of components. To do this, we need to be able to determine types and use them as necessary. Second, whatever method we use, it should be suitable for any type of component and shouldn't require adding additional cases for new types. Third, it should be simple to use. I'm, as you'll recall, lazy. In this field, I assure myself, that's a good thing. Enter the *comp_ptr*.
+
+In action, the *comp_ptr* is pretty much just a pointer to a component. However, it uses templating to specify the type of component it refers to. For instance, using this guy, a variable that refers to a *Spatial* component is defined as follows:
+
+```
+comp_ptr<Spatial> spatial;
+```
+
+So what? Well, assignment to a *comp_ptr* is done through a function which wraps up the type inference necessary to build a proper reference. It's a little inelegant right now, but the idea is there:
+
+```
+void trySet( weak_ptr<Component> component ) {
+
+	shared_ptr<Component> sComponent = component.lock();
+
+	if ( sComponent ) {
+
+		Component* rawComponent = sComponent.get();
+		T* cast = dynamic_cast<T*>( rawComponent );
+
+		if ( cast )
+			ref = cast;
+	}
+}
+```
+
+Sorry, I probably haven't worked out tabs in the code yet, so it'll be left-aligned. Uh, bear with me. You can see above where we check whether a particular component is of type T, where T is whatever type of component the *comp_ptr* has been defined with. All the magic happens inside this poorly-named function. From the outside, we just have to chuck in a component and let the *comp_ptr* figure it out. *Neat*. That's exactly what we were after! Problem solved and in less time than it took to type all this out.
+
+There's a few things to sort out. Uh, using a raw pointer in there instead of a *weak_ptr* like we do elsewhere kind of sucks. There's a tremendous amount of overhead doing that *dynamic_cast* for every component. And right now, it's just ugly. Heck, we could maybe even overload the = operator to replace that unsightly *trySet* call. But still. I think this works.
+
+Okay, well, that's a good deal more than enough of that. I've put far too many words into such a little thing, but I've never really made practical use of templating before and I had no idea it would work, let alone with so little hassle. I'm going to sleep on this before moving ahead because I feel there's a few issues some perspective could shine light on, but if this works, it's, well, dang, it's nice.

@@ -1,0 +1,32 @@
+title: pattern aisle
+date: 11-11-2012
+
+So, a couple days ago I sketched out a thing to do a thing. The second of the things to which I loftily referred could be better described as "procedurally generating a level". The first is, like, a regular grammar for level terrain or something. Cool. Well.
+
+Imagine you're building a hallway here, okay, putting down furniture and stuff as you go. And you build this thing one section at a time, right? Starting at the left side, you build a bit, then build it a bit more, and build a bit more on the end of that. Now, when you go to build the next section of the hallway, you have to figure out what to put in it. To do this, you look back at what you just built behind you and pick something that'll look good with it.
+
+So, how do you know what "looks good with it"? Well, in my case, patterns. I define a pattern of tiles three "slices" wide and the resulting slice of tiles that should be produced if the pattern is matched. Hang on, let's take a look.
+
+![some image](http://i.imgur.com/AhOnI.png)
+
+The three columns left of the red line describe the pattern to be matched against. The column right of the red line is the result. The gray squares represent empty tiles, the black ones are wall tiles, and the asterisks are wildcard "any" tiles. So, how is this rule used? When building the hallway, we look back at the previous three columns. If there's a wall above the ground, we put down two wall tiles adjacent to it.
+
+With a bunch of these rules, we've got a description for how the hallway is built. When putting down the next column, look back at the previous three. Check all of the rules to see if they match those columns, then select, at random, one of the rules that match and put down its result.
+
+Did that make sense? Well, good. How's it look?
+
+![some image](http://i.imgur.com/rIp6T.png)
+
+Hey, look at that! It's, uh, it's okay. I've got about five rules right now and it works pretty much mostly. With only a handful of rules, there's some pretty good output. It's a lot of fun to set up too. Spit out a few rules and give it a run. Tweak and go again. Really cool.
+
+However, it's not all sunshine and flowers. Check it.
+
+![some image](http://i.imgur.com/nYK7u.png)
+
+As it stands right now, it's a little too easy to get lengths of terrain that are sparse or, what's worse, repetitive. Just the nature of patterns, man. But what's cool is that this is mitigated somewhat just by adding more rules. What's less cool is that rules are a little hard to get right. It takes a bit of forethought to prevent, for example, inescapable pits. Ah well.
+
+There's also a kind of weird directional bias to the levels right now where it looks like everything's leaning right. I'm convinced it's a matter of thinking through the rules a bit more, but the nature of the regular grammar - only being able to look backwards, rather than ahead - is somewhat limiting.
+
+Still, all told, I'm pretty pleased. Generating content by way of rules is a neat idea because it means that you can put control of those rules in someone's hands - namely, your end user's - and let them shape the nature of the algorithm. Furthermore, here, the rules are quick any easy to create and test, so I get to spend a lot of time playing around with it.
+
+Check out the hacky prototype code [here](https://github.com/Beyamor/pattern-aisle) and look at a particular level generator [here](http://wordsinthesky.com/projects/pcg/pattern-aisle/) (A/D/left-arrow/right-arrow to move around).

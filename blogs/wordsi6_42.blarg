@@ -1,0 +1,136 @@
+title: interesting is just a synonym for horrifying
+date: 2-5-2012
+
+The mileage you get out of this may well depend on how much of an OO purist you consider yourself.
+
+You know it's gunna be a good one when we start like that.
+
+# collision collusion
+
+I've been trying to figure out what should happen when two object collide. Not the physics of it - good god, not the physics of it - but how they communicate with each other. Obviously, some kind of message passing needs to take place. If a being walks on fire, say, the fire needs to be able to tell the being that it's encountered some [hot hot heat](http://www.youtube.com/watch?v=eR_LsMzd6Hw). Taking some fire damage, maybe. However, since the entities are collections of generic components, there isn't a public-facing "take fire damage" method one entity might call on another. Instead, that method might be buried somewhere inside the entity if it has a health component. So, that gets us to a point where we need to get specific information to specific components. Okay, got your head around the problem? Let's do it.
+
+There's kind of two ways to model this situation. Either the messages passed to an entity are pure data and the components pull them apart and act on them *or* the components are more data-y and the messages call methods on the components. I can't for the life of me figure out how to do the former, so by process of elimination, we're looking at the latter. A message interacts with a component by, effectively, bossing it around, albeit *appropriately*. The paragraph above outlined a decent example. Some kind of "take fire damage message," when it finds a "health component," tells it to take fire damage. Cool.
+
+From there, we have to figure out how to get the message to a component, which takes us back to our friend [the visitor pattern](http://wordsinthesky.com/blog/entries/on-the-subject-of-knock-knock-jokes). Remember how well that went last time? Well, surely second time's the charm! Pop off a message/visitor to a component collection and let it figure out who it should be talking to. Sweet, good to go.
+
+Except?
+
+Well, here's the thing about the visitor pattern. It takes an absolute buttload of work to extend the class hierarchy because for every visitable element you add, you've got to give it an `accept` method *and* you've got to add a `visit` method to the visitors. Open/closed principle is off having a hissy fit over this. To mitigate the damage, you can get away with just adding NOOP methods to the base visitor class an overriding them as needed, but that's the second snarl - if one of these message visitors only visits one or two components, if feels like a big waste to load it up with visit methods for *every* dang type. It's just, it's gross. You've got to deal with the permutations of all combinations of visitors and components and that's unpleasant if for no other reason that it gloms all these different dimensions together, through thick and thin and recompile.
+
+Okay. Now what?
+
+# the acyclic picnic
+
+Here's a thing called the [acyclic visitor](http://www.google.ca/url?sa=t&rct=j&q=acyclic%20visitor&source=web&cd=1&sqi=2&ved=0CCIQFjAA&url=http%3A%2F%2Fwww.objectmentor.com%2Fresources%2Farticles%2Facv.pdf&ei=YCIvT5eIJ4HJiQKH0bHLCg&usg=AFQjCNGMyoy2E1JAuc_3CHEZnsq_nS8H4Q). I'd recommend reading the article, but let me see if I can describe it. On the visitor side of things, you've got some sort of general `AbstractVisitor`. Much like the regular visitor pattern, an `Element` has an `accept` method to receive the `AbstractVisitor` and again, this is implemented in derived classes so they can specify type information. However, instead of adding methods for every type of derived `Element` in the `AbstractVisitor`, a complimentary visitor class is created for each derived `Element` type - `DerivedElement` - with a method to visit it. Let's call this specialized visitor class, well, a `SpecializedVisitor`. To reiterate, the `SpecializedVisitor` implements `visit( DerivedElement* element )`.
+
+Got that? The `AbstractVisitor` gets accepted. The `SpecializedVisitor` visits. The behaviour of the visitor has been broken into two entirely separate classes. Notice that neither one of these inherits from the other. Why?
+
+Well, my imaginary friend, I'm glad you asked. Y'see, to create a complete, useful visitor class, the object must inherit from both the `AbstractVisitor` and the `SpecializedVisitor`. One parent gives it the ability to be accepted by an `Element`'s `accept` call. The other lets it visit that type of element. Let's call this guy a `ConcreteVisitor`.Okay, now here's the dicey bit: when a `DerivedElement` implements its `accept` method, it takes in the `AbstractVisitor` and then, through something like `dynamic_cast`, tries to cast the `AbstractVisitor` to a `SpecializedVisitor`. If the cast succeeds, ie, the types match, then the `DerivedElement` calls the `SpecializedVisitor`'s `visit` method. *Phew*.
+
+The beauty of this of this is that it means that new types can be added without messing around with *any* of the existing classes. A `SpecializedVisitor` is only concerned with only the one `DerivedElement` it was written for. And hey, if you want to specialize a visitor for multiple types, well, just derive the `ConcreteVisitor` from multiple `SpecializedVisitors`. Each `DerivedElement` will try to cast the `ConcreteVisitor` to the type that matches itself.
+
+We'll back up for a second and discuss the biggest wrinkle in the plan - the `dynamic_cast`. Bring up dynamic casting and you'll hear an uproar from two directions. OO dedicates will cringe from the perverted work against polymorphism while folks looking to crank every cycle out of the CPU will languish over the relative cost of using the function. As far as the first, well, it's not really a worry for me here. Dynamic casts are monstrous when used in conjunction with a huge nest of if-statements, but in this case, it does more to keep classes sealed than not. With the second, it's a legitimate concern, but at this point, without much context for what it'll eat in the way resources when everything's up and running, I'm not going to sweat it. Whoo!
+
+# template my typecast, cap'n
+
+By no means have I committed to this technique. We're defs in the planning stages here. However, today I wrote up some code implementing the ideas above to see how it felt. Wanna give it a look?
+
+```
+// declaration of visitor type
+class AbstractComponentVisitor {
+public:
+	// every object needs at least one method?
+	virtual ~AbstractComponentVisitor() {}
+};
+```
+
+The `AbstractComponentVisitor` is boring as porridge. Movin' on.
+
+```
+// the top level component
+class GenericComponent {
+public:
+	virtual void accept( AbstractComponentVisitor* visitor ) {
+		// noop
+	}
+};
+```
+
+The GenericComponent sits at the top of the component hierarchy. It doesn't do jack squat with the visitor, but whether that's the best way to handle this case is a straight up guess. However, implementing this method means that components which never meant nothing to nobody don't have to supply an `accept` method. It's a nice fallback, anyway. Okay, things are going to get choppier.
+
+Examining the acyclic visitor, you can see that though the visitor specializations act on different classes, the pattern of operation is the same. Abstracting the algorithm from the types involved? Well gang, looks like we're talking C++ templates. We'll start with the visitor itself - ideally, we can use templates to create the different specializations. Shouldn't be too hard.
+
+```
+// a specialized visitor class
+template<typename COMPONENT_TYPE>
+class ComponentVisitor {
+public:
+	virtual void visit( COMPONENT_TYPE* component ) = 0;
+};
+```
+
+Hey, neat! So, a concrete visitor inherits from a `ComponentVisitor` specialized to a type of component. That's simple enough. Now my hardheadedness wants to hide away the implementation of this visitor method stuff as much as possible. That is, I'd rather not have to worry about writing out the `accept` method for each visitable component. Templates, again, are going to to be used here, but it's a little hackey - er, unorthodox. We'll get the code out of the way first:
+
+```
+// the actual visitable component
+template<typename COMPONENT_TYPE>
+class VisitableComponent : public GenericComponent {
+public:
+	void accept( AbstractComponentVisitor* abstractVisitor ) {
+
+		// pull out the visitor type		
+		typedef ComponentVisitor<COMPONENT_TYPE> TypeVisitor;
+		TypeVisitor* visitor;
+		visitor = dynamic_cast<TypeVisitor*>( abstractVisitor );
+
+		// if types match, visit
+		if ( visitor ) {
+
+			// downcast to the actual component type
+			COMPONENT_TYPE* realThis
+				= static_cast<COMPONENT_TYPE*>( this );
+
+			visitor->visit( realThis );
+		}		
+
+		// otherwise, handle mismatch
+		else {
+
+			// noop?
+		}
+	}
+};
+```
+
+Okay, by and large that looks like what you'd expect. It accepts a visitor and does the cross-cast. But what's up with the downcasting? Well, the only way to add stuff to a template class, as we covered before, is either specializing it or subclassing it. Specialization isn't an option here - we're talking a greatly varied collection of components and cramming them closer together isn't going to work. Instead, we'll take the inheritance route. The `VisitableComponent` sits in between a derived component and the `GenericComponent` at the root of the tree. Squirrelled away in that niche, it adds all the visitor stuff to the subsequently derived class. The downcast just takes us from this more-or-less useless class to the actual derived one. Trendy.
+
+The hell of it is that for this to work, the derived component must use *itself* as the template parameter for the super class. It's a bizzarre syntax that looks like this:
+
+```
+class SomeComponent : public VisitableComponent<SomeComponent>
+```
+
+This bugged me enough to write a couple of macros that add more context to what's happening.
+
+```
+#define DECLARE_VISITABLE_COMPONENT(component_type) \
+	public VisitableComponent<component_type>
+
+#define REGISTER_COMPONENT_VISITOR(component_type) \
+	public ComponentVisitor<component_type>
+```
+
+With these fellas, the class definitions look more like this:
+
+```
+class SomeComponent : DECLARE_VISITABLE_COMPONENT(SomeComponent)
+
+class SomeComponentVisitor : public AbstractComponentVisitor
+	, REGISTER_COMPONENT_VISITOR(SomeComponent)
+```
+
+You can take or leave the syntactic sugar of the macro. It's weird, but I think the added information makes the intent of the code much clearer. It's strange though. [But it works!](/blog/entries/acyclic-visitor-messages.cpp)
+
+Mostly. There's a few qualms to be had, certainly, perhaps the worst of which is only one class in a branch can be registered as visitable. That is, if a `DrawShape` class is made visitable, the further derived `DrawSquare` can't be. Of course, the same is true of the basic visitor pattern.
+
+Like I said, I haven't committed to this ploy, but it's a neat idea regardless. Everything aside, I like the ease of use. Inheirit and go, just that simple. I've had a few other ideas, but none quite so straightforward in the result. That, above all else, is my main goal. One of the guiding quotes of my software career is [this one](http://www.goodreads.com/quotes/show/44564) by Oliver Wendell Holmes Sr. Whatever hell it takes getting this in, I want it to be simple coming out.

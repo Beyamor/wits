@@ -1,0 +1,40 @@
+title: putting the envy in inventory
+date: 12-31-2011
+
+Heaven help me, but it has been some time. Fear not, dear imaginary pal, for I have stood stalwart against the twin armies of friendship and *Skyrim* to defend the petty kingdom of my productivity over this winter break, though the battle has not been without its share of losses. In less flowery prose, I'be been pretty procrastinating like a champ over the last couple weeks, but hey, we've squeezed out a couple of lines of code.
+
+I decided to sit down and start to address the inventory system used to keep track of what items an entity has and which they have equipped. The optimistic, but hopelessly hapless part of me dreamed this would a brief departure from some of the more pressing concerns. After all, in the last [update](http://wordsinthesky.com/blog/entries/guess-a-little-physics), we were practically there, right? I guess I never got around to talking about that [last picture](http://www.wordsinthesky.com/blog/entries/guess-a-little-physics/images/physics-demo1.png), but you can see we already sort of had a gun and, let's put any semblance of humbleness aside, bullets freakin' *galore*. Add a list for the player's items and bingo-bango, Bob's your uncle, we've got an inventory.
+
+Mm, funny, that.
+
+I didn't really think about everything doing the inventory would require, but so far, it's touched on just about every area I've been putting off thinking about. Uh, let's see. We've got (non-trivial) inter-entity interaction and communication between their components. Tweaking the way the game's states work so we can enter the inventory management state more easily. The menus used for that same item management. Loading textures to decorate those menus. And let's not forget, a giant's handful of other problems along the way.
+
+So, I've been fighting these thorny issues one by one. Truth be told, I'm only about halfway through the menu framework and I've got a ways to go, so don't expect anything too interesting yet, but I've got to air out these musty thoughts of mine. So far, you can equip and unequip a gun by clicking on the white square in this swanky menu:
+
+![some image](/images/blog/inventory-first-look.png)
+
+But let's take a few steps back and look at how we got here. Today's topic is simply the idea of items in an inventory because that actually has some neat stuff to it. Naturally, the inventory itself is another type of component, one whose role is keeping track of an entity's items and providing a means of accessing them to other components. As it stands, the inventory is little more than a raw list containing the items and a publically accessible reference to the equipped gun, but the fact is, it probably won't need to be too much more. Other components can more or less just use it as a cheat sheet to see what's available. The PlayerIntent component, for example, asks the inventory if it has a gun equipped and tells it to fire if the mouse is pressed.
+
+```
+	if ( input->isDown( mbLeft ) && inventory->weaponIsEquipped() ) {
+
+		inventory->getEquippedWeapon()->fire(
+				spatial->position,
+				spatial->direction
+			);
+	}
+```
+
+What I do like about this is that I think I'll be able to reuse the inventory component, which thus far caters to beings like the player's character, for chests and the like. I mean, it's just a list of items, no big thing. With the component system, however, I can just attach the component and let 'er go so it's, like, an even less big thing. Kind of cool.
+
+But what does it mean for an item to be in an inventory? How does the work exactly? Well, so far, it works with a bit of kludge. It would be easy enough to maintain a list of entities in the inventory (quick referesher: an entity is a collection of generic components), but that has a terrible cost - the loss of specialization for the different types of item in the inventory. See, if the generic entities are used, there's no quick way of knowing what's what and a gun looks the same as a cookie from the inventory's perspective. Then, when interacting with the inventory, it makes as much sense to equip a cookie as it does to eat a gun. From a management perspective, that's less than ideal, never mind the health and safety concerns.
+
+The solution I've got in place is an intermediary of sorts between the inventory and the items in it, something playfully called the InventoryItem component. The InventoryItem specifies the behaviour of an item in an inventory and the inventory, of course, keeps a list of these guys instead of references to the whole items. Then, when interacting with the items in an inventory, these components specify how their items act and what they can and cannot do.
+
+Okay, kind of fluffy in the abstract. As a more concrete example, the GunItem just says, "if you select me in the inventory, the gun I represent will be equipped." The (thus far fictional) CookieItem says, "if you select me, you eat the cookie." Each of these InventoryItems wraps up the purpose of the item in the inventory. They'll also do the things like supplying the menus and buttons needed for the inventory management menus, but we'll dwell on that later.
+
+One hangup I've got with this solution is that it means writing a new InventoryItem for every new type of entity or, at least, every new type of item. However, that's just, well, *necessary*. I mean, each InventoryItem specifies a particular type of behaviour. If you make a new type of behaviour, well, you're going to need a new expression for that behaviour. Just makes sense, really.
+
+What's maybe a thornier issue is creating these separate components just to describe other components. There's an argument to be made that, instead of writing the GunItem component, I could fold its functionality into the GunLogic component which is, uh, the gun proper. After all, every gun is going to have both and no other entity is going to need a GunItem in its component pool. However, I make some gains in clarity and code reuse by inheirating from the InventoryItem. Moreover, it's a decent seperation of concerns. If I want to change how the inventory works, I only need to change the InventoryItem family instead of tearing all over the place hunting down the components I've shoehorned the functionality into.
+
+Gosh, there's a few other criticisms to make here, but we're over a thousand words at this point and my boat is pulling into the terminal. Guess we'll leave this for today, but for whatever assuaging of the mind it might provide, however shakey this might look on paper, so far, it works and, well, that's something.

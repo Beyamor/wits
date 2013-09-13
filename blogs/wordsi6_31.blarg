@@ -1,0 +1,67 @@
+title: on the subject of knock-knock jokes
+date: 9-21-2011
+
+There are a few things I have to work out in life. Cooking with tofu. Growing a full beard. And, perhaps the most pressing, making abstractions which survive scrutiny - or, at least, don't [leak](http://www.joelonsoftware.com/articles/LeakyAbstractions.html) so much that I find myself up to my knees in, uh, encapsulation fluid? Whatever it is abstraction leak.
+
+I approached the component-based architecture with a few goals in mind. We already discussed the big ones, my dear imaginary reader. Extensibility, low coupling, buzz words. However, I also set about with an objective much more specific to my homely little project. From the perspective of the factory, I wanted components to be homogenous. That is, the factory should require no knowledge about what makes one component different from another - they just need to know what pieces to put together and, in a perfect world, not what that means.
+
+And, I mean, that's good. That's still what I'm shooting for. But, gosh, it ain't going quite so smooth as that. The problem is that different components are reliant on different subsystems. *Renderers* with the graphics system, *Spatials* with the physics system. And see, that's swell and all, but at some point, these connections have to be set up. There, in putting these things together, is where it all falls apart.
+
+The root in the problem lies in a few conflicting ideas. First, composition should be general - all components are, ideally, created and bound together without special cases based on the type of component which is added. Second, some components are special cases - for instance, they need to be registered with specialized subsystems. Third, and this is more nitpicky and can be somewhat relaxed as a condition, is that the components should, insofar as possible, not have any knowledge about the process by which they're joined together or any larger scope than that with which they immediately concern themselves. Ugh.
+
+One way to go about this would by creating a much broader interface at the top of the hierarchy. That is, implement the base component with *all* of the functions that the update pulse requires - the pre-move, post-move, and draw steps. So, with this method, *everyone* gets a *draw()* method and as we iterate over all the components, we ask each one to draw. Most of them won't do anything, but the *Renderers* will still get their kick. There's a lot I don't like here. The base component ends up as this stubbed-out blob, for one, to make no mention of the fact that there's the overhead of making all these calls and I can't really see how to do this in a way which doesn't ultimately sacrifice the exact properties of a component that make it so desirable. Still, it stands as a solution of sorts.
+
+Maybe the best idea, at least the most straightforward, and the one I'm sadly *not* using at the time of writing, is turning the responsibility of subsystem-registering over to the components. They have knowledge about what they are and where they need to go - it makes sense to give them a means of sorting things out for themselves. They could be supplied with information about the available set of subsystem engines on construction or, heck, those engines could be made into [Singletons](http://en.wikipedia.org/wiki/Singleton_pattern) so we don't need to supply *any* superfluous information to components that don't need it - they can register themselves. However, this couples the components to the creation process in a manner I'm trying to avoid and so, for the time being, I'm labelling this plan a "B."
+
+What I'm thinking about instead is using a pattern that I'm sure will be a staple of this project. The [visitor pattern](http://sourcemaking.com/design_patterns/visitor) is a neat idea well suited to heterogeneous aggregations. See, normally, when iterating through a collection of objects, you're restricted to a uniform set of operations, something like this:
+
+```
+for ( i = 0; i < collection.size(); i++ )
+	collection[i**].doSomething();
+```
+
+With the visitor pattern, we create an object that visits each of the elements of the collection and performs an operation based on what type of object they are - the eponymous *Visitor*. It works as a sort of boomerang call - the objects, we'll call them *Visitables*, implement an interface with an *accept()* method that receives the *Visitor*. The *Visitable* then, in effect, tells the *Visitor* what it's visiting so the *Visitor* can act on that knowledge and do whatever it thinks is appropriate for the particular *Visitable*. Here, dig this:
+
+```
+class Visitable {
+	virtual void accept( DeliveryMan deliveryMan ) = 0;
+}
+
+class NormalPerson : Visitable { 
+	void accept( DeliveryMan deliveryMan ) {
+
+		deliveryMan.visitNormalPerson( this );
+	}
+}
+
+
+class Vegetarian : Visitable {
+	void accept( DeliveryMan deliveryMan ) {
+
+		deliveryMan.visitVegetarian( this );
+	}
+}
+
+class DeliveryMan : Visitor {
+
+	void visitNormalPerson( NormalPerson* person ) {
+
+		deliverBaconPizza( person );
+	}
+
+	void visitVegetarian( Vegetarian* person ) {
+
+		deliverEggplantPizza( person );
+	}
+}
+```
+
+Awesome. And, my dear imaginary reader, we'll ask the question that will haunt us throughout our journey together - who cares? Well, my intention here is to use the "visitor" as a "builder." The illustrious *CompBuilder* will encapsulate the specifics of component assembly. It holds the information about, for example, the active engines and level information and as it visits each new component, it can do, well, whatever it that needs to be done. If it visits a *Spatial*, say, it can say, "Oh man, hey, I'm gunna hook you up with my pal *PhysicsEngine* over here. I think you two will get along."
+
+Yeah, there's the tang of overengineering in the air, but this accomplishes what we were after. The components don't need any awareness about the building process and from factory's perspective, it's just a matter of telling the *CompBuilder* to do its thing for each of the components in the collection. If we want to change how the component/system connections are made, the only class that needs to be poked at is the builder. It's kind of an uneasy tradeoff between local and system-level complexity, but for the time being, I can't think of a cleaner solution.
+
+However.
+
+Between this and the funky *comp_ptr* we hammered out, the idea that these components aren't general enough to conform to a single interface drags itself closer to the spotlight. Maybe it's no more than an implementation lacking in refinement on my part. I'm hard pressed to believe that this aggregation ploy, no matter how aggravating, *can't* work. That said, there are currently some indisputably rough edges. However, I am going to make a Bad Decision™. I could fritter away a lot of time trying to make this work seamlessly, but I know me and I know that line of thought - it leads to me stalling a project indefinitely. Right now, the abstraction fracturing is isolated to the building process alone - otherwise, I think things will hold together. Yes, it's trending towards kludge, but for the time being, we're going to sweep that under the rug.
+
+Momentum, baby. Let's not lose it.

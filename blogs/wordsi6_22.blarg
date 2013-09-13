@@ -1,0 +1,24 @@
+title: steam ship disk
+date: 8-8-2011
+
+For some people, computer hardware is an obsession. For them, an enslaving joy seethes force in the face of hertz and cryptic model names. These people are the first true cyborgs, already at one with the machine.
+
+Conversely, I weep like a child.
+
+Realizing I've been accruing a surprisingly robust bank balance, I've decided to fritter it all away as ludicrously as possible. This will be no apple fritter, however - I'm after a PC.
+
+**badum-tish**
+
+Hardware doesn't interest me. Heck, I switched from mechanical into software engineering to get away from the stuff. Computer hardware in particular leaves me exasperated. There's all of the tedium of biology's phylum and genus, only none of the hardware did anything cool like evolving a glowing lure to attract prey.
+
+[But then again.](http://www.pacificgeek.com/productimages/xl/BLU-CLRCAS-3LED-N.JPG)
+
+Anyway, it's a pain for me, but maybe a necessary one. Much as I'll sing the praises of software, I'll concede, albeit bitterly, that it doesn't amount to much without hardware to run on. Going in, I only really had one aspiration - a faster hard drive. Now, truth be told, I could probably just swap out by current one if that's really all I need, but c'mon, let's live a little.
+
+My hunt thus far has taken me to [HP's ProBook 4530s](http://www.newegg.com/Product/Product.aspx?Item=34-157-821&SortField=3&SummaryType=0&Pagesize=100&PurchaseMark=&SelectedRating=-1&VideoOnlyMark=False&VendorMark=&IsFeedbackTab=true&Keywords=%28keywords%29#scrollFullInfo). It's kind of a modest machine and, honestly, it's a few hundred less than I thought I'd be in for, but it does have a few nice things going for it. The 7200rpm drive is slick enough for traditional drives. I haven't looked too closely, but the i5 looks like it'll hold up well enough compared to the i7 and I'm okay with the price kickback there.
+
+The big hangup is the integrated video card. Dedicated is pretty much the bees knees here, not in the least because it offers the opportunity to change things up down the road. I like to leave my relationships an exit window. However, it seems like most laptops with dedicated cards are using [Nvidia's Optimus technology](http://www.nvidia.com/object/optimus_technology.html) which, like all good things great and small, doesn't seem to have official Linux support. And, again as with things great and small, [there's an opensource fix](https://github.com/MrMEEE/bumblebee). However, that only seems to be good for a handful of distros and since I had my geeky eye on some more niche contenders, that doesn't seem like it'll work out. That, in turn, wipes out a bunch of machines in favor of something that *just works.*
+
+Jesus, maybe I should just get a Mac.
+
+So, in summation, hardware's a drag, Linux is a drag, and let me tell you, my imaginary reader, co-op reports are a [double drag](http://blog.media-freaks.com/wp-content/uploads/2011/06/best-iphone-apps-for-kidss-7.jpg).
