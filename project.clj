@@ -9,7 +9,9 @@
                            [enlive "1.1.1"]
                            [markdown-clj "0.9.21"]
                            [clout "1.1.0"]
-                           [org.clojure/data.json "0.2.2"]]
+                           [org.clojure/data.json "0.2.2"]
+                           [mysql/mysql-connector-java "5.1.6"]
+                           [korma "0.3.0-RC5"]]
             :plugins [[lein-ring "0.8.3"]]
             :ring {:handler wits.handler/app}
             :profiles {:prod {:ring {:port 13994}}})
