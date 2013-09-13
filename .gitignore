@@ -13,3 +13,4 @@ pom.xml.asc
 *.sw[op]
 /.sass-cache/
 /resources/
+db.conf
