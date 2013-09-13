@@ -1,0 +1,32 @@
+title: evolute
+date: 09-06-2013
+
+A while ago, I read Steven Levy's [Artificial Life](http://www.amazon.com/Artificial-Life-Frontier-Computers-Biology/dp/0679743898). It's a neat book which provides a history of works in artificial life. It doesn't require any technical understanding, so it's a good recommendation for anybody with even a passing interest in the field.
+
+Anyway, one of the things the book talks about is Richard Dawkins' [biomorphs](http://www.rennard.org/alife/english/biomintrgb.html). A biomorph is some geometry defined by its genome. Different biomorphs have different genomes and so, are drawn differently. Dawkins' program allows the user to browse through genetic variations at will. The user's whim serves as the evolutionary force, driving selection of the most favorable genome.
+
+I wanted to try making something similar. The biomorph program is cool because the user doesn't need any ability to draw to produce interesting shapes. Me, I'd love to make music, but I've got no aptitude for it. So, for me, it'd be hip to have a program that allows me to selectively evolve songs.
+
+So, okay. How's this going to work? I want to start with an initial stock of songs, then pick my favourites and breed them to create a new generation. After selectively breeding through several generations, I should end up with something that sounds okay.
+
+For the breeding to work, every song must be defined by its genome. A new song can then be produced by combining the genomes of its parents. Simple biology, right?
+
+Well, what's our genome? Originally, I had thought to try a tree-like structure. The leaves would be notes and rests. The inner nodes would be music operators - play in series, play in parallel, repeat. You could then breed two songs by swapping a random branch between them. A song might then look something like this:
+
+![Evolute tree](/images/evolute1.png)
+
+However, the rigidity of the operators ended up being a uncomfortable. For example, strictly repeating a segment sounds, well, repetitive. Furthermore, the length of songs was wildly inconsistent since something like a repeat node high up in the tree could *double* a song's length.
+
+I ended up going with a simpler genome. The simplest, in fact. A song is defined by nothing than its series of notes and rests. So, the song above ends up looking like this:
+
+![Evolute series](/images/evolute2.png)
+
+Simple, right? Now, how do we breed something like this? The parents' notes and their ordering should be preserved during breeding, but we want to interleave notes from both parents and allow the total length of the song to vary.
+
+Okay, well, imagine we had two full stacks of notes, one for each of the parents. We also have two more (initially empty) stacks, one for each of the two children we're going to produce. Now, to breed the parents, we randomly select one of the parents, pop off its top note, randomly select one of the children, and push that note onto its stack. We repeat this until both parents are empty. Got it? Something like this:
+
+![Evolute series](/images/evolute3.png)
+
+Groovy. So, we can start off with an initial stock of random series of notes and (hopefully) breed it towards something that sounds, well, better. How's that work out for us? Well, give it [a listen](http://www.youtube.com/watch?v=9hdVk_QTIxo).
+
+Yeah, practically Mozart, right? Eh, so not great.
