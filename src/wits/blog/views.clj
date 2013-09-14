@@ -3,7 +3,6 @@
         [hiccup.util :only [escape-html]]
         [hiccup.page :only [html5 include-css include-js]]
         [wits.web.html :only [sections html->hiccup html->enlive]]
-        [wits.blog.core :only [blog->url]]
         [markdown.core :only [md-to-html-string]]
         [wits.util :only [-#> -#>>]])
   (:require [markdown.core :as md]
@@ -59,7 +58,7 @@
   ([classes link-contents blog]
     (link-to
       {:class (->> classes (interpose " ") (apply str))}
-      (str "/blog/entries/" (blog->url blog)) link-contents)))
+      (str "/blog/entries/" (:url blog)) link-contents)))
 
 (defn blog-preview
   "Creates a view of a preview of a blog for the blog roll."
@@ -79,31 +78,35 @@
   ["/js/lib/syntax-highlighter/brushes/shBrushClojure.js"
    "/js/lib/syntax-highlighter/brushes/shBrushCoffeeScript.js"])
 
-(def blog-page
+(def base-blog-page
   {:css
    blog-css
 
    :js
    blog-js})
 
-(defn blog-roll
-  [blogs pjax?]
+(defn blog-page
+  [{:keys [blogs previous-page next-page]} pjax?]
   (pjax/page
     pages/main pjax?
     (merge
-      blog-page
+      base-blog-page
       {:title "Blog"
        :content
-       (->> blogs
-         (map blog-preview)
-         (interpose html/content-separator))})))
+       [:div.page
+        [:div.blogs
+         (->> blogs
+           (map blog-preview)
+           (interpose html/content-separator))]
+        (when previous-page (link-to (str "/blog/page/" previous-page) "Previous page"))
+        (when next-page (link-to (str "/blog/page/" next-page) "Next page"))]})))
 
 (defn blog-entry
   [blog pjax?]
   (pjax/page
     pages/main pjax?
     (merge
-      blog-page
+      base-blog-page
       {:title (blog :title)
        :content (full-blog blog)
 
@@ -111,5 +114,5 @@
        ; but whatever #WorstDev
        :script
        "$(function() {
-          SyntaxHighlighter.highlight();
+       SyntaxHighlighter.highlight();
        });"})))

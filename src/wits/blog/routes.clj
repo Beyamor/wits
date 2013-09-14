@@ -10,12 +10,12 @@
                 []
                 (->
                   (load/page 1)
-                  (view/blog-roll pjax?)))
+                  (view/blog-page pjax?)))
            (PJAX ["/blog/page/:page", :page #"[0-9]+"]
                  [page]
                  (->
                    (load/page (Integer. page))
-                   (view/blog-roll pjax?)))
+                   (view/blog-page pjax?)))
            (PJAX "/blog/entries/:blog-url"
                 [blog-url]
                 (->

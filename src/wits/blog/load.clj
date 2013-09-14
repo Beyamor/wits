@@ -16,15 +16,31 @@
     (select blog-list)
     (with-db data/wits-db)))
 
+(defn- total-number-of-pages
+  []
+  (->>
+    (select blog-list (aggregate (count :*) :count))
+    first :count
+    (with-db data/wits-db)
+    (* (/ blogs-per-page))))
+
 (defn page
   "Loads a page of blogs"
   [page-number]
-  (let [page-number (dec page-number)]
-    (->>
-      (select blog-list
-              (offset (* page-number blogs-per-page))
-              (limit blogs-per-page))
-      (with-db data/wits-db))))
+  {:blogs
+   (->>
+     (select blog-list
+             (offset (* (dec page-number) blogs-per-page))
+             (limit blogs-per-page))
+     (with-db data/wits-db))
+
+   :previous-page
+   (when (> page-number 1)
+     (dec page-number))
+
+   :next-page
+   (when (< page-number (total-number-of-pages))
+     (inc page-number))})
 
 (defn by-url
   "Returns the blog whose url matches the one provided."
