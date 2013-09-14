@@ -2,6 +2,7 @@
   (:use hiccup.element
         [hiccup.page :only [html5]]
         [hiccup.util :only [escape-html]]
+        [markdown.core :only [md-to-html-string]]
         [wits.util :only [-#> -#>>]]
         [wits.web.html :only [sections]])
   (:require [wits.web.pages :as pages]
@@ -100,4 +101,5 @@
        [:div.project-container-container
         html-representation
         (when source (link-to {:class "source" :target "_blank"} source "source"))]
-       [:div.description (html/str->p description)])}))
+       [:div.description
+        (-> description (.replace "\n", "\n\n") md-to-html-string)])}))

@@ -22,10 +22,11 @@
 
 (defn canvas
   "Returns the HTML representation of a game."
-  [& {:keys [width height js canvas-id]
-      :or {canvas-id "game-canvas"}}]
+  [& {:keys [width height js id background-color]}]
   (list
     (->> js
       flatten-lists
       (map (-#> (str ".js") include-js)))
-    [:canvas {:id canvas-id :width width :height height}]))
+    [:canvas
+     {:id (or id "game-canvas") :width width :height height
+      :style (str "background-color:" (or background-color "white") ";")}]))

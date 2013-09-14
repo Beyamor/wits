@@ -7,7 +7,7 @@
 
 (defmacro defproject
   [title & {:as properties}]
-  (swap! all-projects conj (merge {:title title} properties)))
+  `(swap! all-projects conj (merge {:title ~title} ~@properties)))
 
 (defn- load-projects
   [& projects]
@@ -21,7 +21,8 @@
   "chomp"
   "fruit-flies-attack-surprise"
   "colton-and-toms-good-time-text-adventure"
-  "neptune-ocean-explorer")
+  "neptune-ocean-explorer"
+  "midpoint-displacement-armor")
 
 (def all @all-projects)
 

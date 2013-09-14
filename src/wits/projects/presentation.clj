@@ -41,11 +41,13 @@
 
 (defn for-canvas
   "Prepares a project for, y'know, a canvas."
-  [{{:keys [js] [width _ height] :dimensions} :implementation}]
+  [{{:keys [js id background-color] [width _ height] :dimensions} :implementation}]
   (apps/canvas
     :js js
     :width width
-    :height height))
+    :height height
+    :id id
+    :background-color background-color))
 
 (defn add-properties
   [{:keys [title] :as project}]
