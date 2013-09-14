@@ -85,6 +85,20 @@
    :js
    blog-js})
 
+(defn all-blogs
+  [blogs pjax?]
+  (pjax/page
+    pages/main pjax?
+    (merge
+      base-blog-page
+      {:title "Blog"
+       :content
+       [:div.page
+        [:div.blogs
+         (->> blogs
+           (map blog-preview)
+           (interpose html/content-separator))]]})))
+
 (defn blog-page
   [{:keys [blogs previous-page next-page]} pjax?]
   (pjax/page
@@ -99,8 +113,8 @@
            (map blog-preview)
            (interpose html/content-separator))]
         [:div.pagination-links
-          (when previous-page (link-to {:class "previous"} (str "/blog/page/" previous-page) "Previous page"))
-          (when next-page (link-to {:class "next"} (str "/blog/page/" next-page) "Next page"))]]})))
+         (when previous-page (link-to {:class "previous"} (str "/blog/page/" previous-page) "Previous page"))
+         (when next-page (link-to {:class "next"} (str "/blog/page/" next-page) "Next page"))]]})))
 
 (defn blog-entry
   [blog pjax?]

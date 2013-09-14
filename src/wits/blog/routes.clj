@@ -11,6 +11,11 @@
                 (->
                   (load/page 1)
                   (view/blog-page pjax?)))
+           (PJAX "/blog/all"
+                 []
+                 (->
+                   (load/all)
+                   (view/all-blogs pjax?)))
            (PJAX ["/blog/page/:page", :page #"[0-9]+"]
                  [page]
                  (->
