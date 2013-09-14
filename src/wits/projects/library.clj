@@ -22,7 +22,8 @@
   "fruit-flies-attack-surprise"
   "colton-and-toms-good-time-text-adventure"
   "neptune-ocean-explorer"
-  "midpoint-displacement-armor")
+  "midpoint-displacement-armor"
+  "space-colonization-tree")
 
 (def all @all-projects)
 

@@ -33,6 +33,14 @@
      "Download links:"
      [:div (when windows (link-to {:class "not-pjax"} windows "Windows"))]]])
 
+(defmethod html-representation :html-page
+  [{{[width _ height] :dimensions :keys [url]} :implementation}]
+  [:iframe
+   {:src url
+    :width width :height height
+    :class "project-container"
+    :scrolling "no"}])
+
 (defn full-project
   "Prepares a project for viewing in full."
   [project]
