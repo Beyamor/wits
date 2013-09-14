@@ -67,7 +67,7 @@
     (update-in [:content] prepare-blog-content)
     (update-in [:content] truncate-by-paragraphs 3)
     (update-in [:title] blog-link blog)
-    (update-in [:content] concat [(blog-link ["read-more"] "read more..." blog)])
+    (update-in [:content] concat [[:div.read-more (blog-link "read more..." blog)]])
     blog-view))
 
 (def blog-css
@@ -98,8 +98,9 @@
          (->> blogs
            (map blog-preview)
            (interpose html/content-separator))]
-        (when previous-page (link-to (str "/blog/page/" previous-page) "Previous page"))
-        (when next-page (link-to (str "/blog/page/" next-page) "Next page"))]})))
+        [:div.pagination-links
+          (when previous-page (link-to {:class "previous"} (str "/blog/page/" previous-page) "Previous page"))
+          (when next-page (link-to {:class "next"} (str "/blog/page/" next-page) "Next page"))]]})))
 
 (defn blog-entry
   [blog pjax?]
