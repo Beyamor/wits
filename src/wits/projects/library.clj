@@ -25,7 +25,8 @@
   "midpoint-displacement-armor"
   "space-colonization-tree"
   "game-of-life"
-  "pattern-aisle")
+  "pattern-aisle"
+  "words-in-the-sky")
 
 (def all @all-projects)
 

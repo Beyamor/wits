@@ -41,6 +41,9 @@
     :class "project-container"
     :scrolling "no"}])
 
+(defmethod html-representation :this-site
+  [_]) ; Nothing!
+
 (defn full-project
   "Prepares a project for viewing in full."
   [project]
