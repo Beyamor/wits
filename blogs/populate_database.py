@@ -39,10 +39,13 @@ for blog_file_name in blog_file_names:
 			else:
 				content += line
 
+	url = title
+	url = re.sub(" ", "-", url)
+	url = re.sub("[^\w\-]", "", url)
 	title = db.escape_string(title)
 	content = db.escape_string(content)
 	date = date.strftime("%Y-%m-%d")
 
-	cur.execute("replace into blogs set title=\"%s\", date=\"%s\", content=\"%s\"" % (title, date, content))
+	cur.execute("replace into blogs set url=\"%s\", title=\"%s\", date=\"%s\", content=\"%s\"" % (url, title, date, content))
 
 db.commit()

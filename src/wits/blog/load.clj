@@ -18,6 +18,7 @@
   "Returns the blog whose url matches the one provided."
   [url]
   (->>
-    (all)
-    (filter #(= url (blog->url %)))
+    (select blogs
+            (where {:url url}))
+    (with-db data/wits-db)
     first))
