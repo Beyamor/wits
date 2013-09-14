@@ -38,7 +38,7 @@
     [:div.title title]
     [:div.summary
      [:p short-description]]
-    (link-to {:class "check-it-out"} url "check it out")]])
+    [:div.check-it-out (link-to url "check it out")]]])
 
 (defn collection
   "A preview of some collection of projects."
@@ -59,27 +59,28 @@
 
      :content
      (list
-       (showcase (first projects))
+       [:div (showcase (first projects))]
 
-       [:div.collection
-        [:div.categories
-         (for [[category id] [["all" "all"]
-                              ["games" "games"]
-                              ["procedural generation" "pcg"]]]
-           [:div
-            {:id (str "collection-category-" id)
-             :class (str "category" (when (= "all" id) " selected"))}
-            category])]
+       [:div
+        [:div.collection
+         [:div.categories
+          (for [[category id] [["all" "all"]
+                               ["games" "games"]
+                               ["procedural generation" "pcg"]]]
+            [:div
+             {:id (str "collection-category-" id)
+              :class (str "category" (when (= "all" id) " selected"))}
+             category])]
 
-        [:div.previews
-         (for [i (range (count projects))
-               :let [{:keys [url thumbnail title category]} (nth projects i)]]
-           [:div.preview
-            {:data-category category
-             :data-id i}
-            [:div.preview-image
-             (link-to {:class "not-pjax"} url
-               (image {:title title} thumbnail))]])]])}))
+         [:div.previews
+          (for [i (range (count projects))
+                :let [{:keys [url thumbnail title category]} (nth projects i)]]
+            [:div.preview
+             {:data-category category
+              :data-id i}
+             [:div.preview-image
+              (link-to {:class "not-pjax"} url
+                       (image {:title title} thumbnail))]])]]])}))
 
 (defn full-project
   "Returns a view for playing a project."

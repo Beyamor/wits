@@ -33,9 +33,13 @@
 			}
 
 			.check-it-out {
-				position: absolute;
-				right: 0px;
-				bottom: 0px;
+				position: relative;
+				margin-top: 60px;
+				a {
+					position: absolute;
+					right: 0px;
+					bottom: 0px;
+				}
 			}
 		}
 	}
