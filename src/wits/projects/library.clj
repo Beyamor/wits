@@ -20,7 +20,8 @@
   "endless-mazes"
   "chomp"
   "fruit-flies-attack-surprise"
-  "colton-and-toms-good-time-text-adventure")
+  "colton-and-toms-good-time-text-adventure"
+  "neptune-ocean-explorer")
 
 (def all @all-projects)
 
