@@ -1,6 +1,5 @@
 (ns wits.blog.load
-  (:use wits.blog.core
-        korma.core
+  (:use korma.core
         [korma.db :only [with-db]])
   (:require [wits.data :as data]))
 
