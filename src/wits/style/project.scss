@@ -6,6 +6,11 @@
 	text-align: center;
 	width: auto !important;
 	@include centered;
+
+	.download-links {
+		margin-top: 20px;
+		:first-child { margin-top: 15px; }
+	}
 }
 
 .project-container {

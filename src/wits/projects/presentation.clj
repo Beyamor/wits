@@ -1,5 +1,6 @@
 (ns wits.projects.presentation
   (:use [hiccup.page :only [include-js]]
+        [hiccup.element :only [link-to image]]
         [hiccup.util :only [escape-html]]
         [wits.util :only [flatten-lists assoc-if-missing]])
   (:require [wits.web.html :as html]
@@ -8,7 +9,7 @@
 (defmulti html-representation
   "Based on the type of the implementation,
    this returns the content for the project itself."
-  #(-> % :implementation :type))
+  (comp :type :implementation))
 
 (defmethod html-representation :canvas
   [{{[width _ height] :dimensions} :implementation :keys [url]}]
@@ -23,6 +24,14 @@
     :swf swf
     :width width
     :height height))
+
+(defmethod html-representation :download
+  [{{{:keys [windows]} :urls} :implementation :keys [title]}]
+  [:div
+   (image (str "/images/projects/" (html/urlify title) ".png"))
+    [:div.download-links
+     "Download links:"
+     [:div (when windows (link-to {:class "not-pjax"} windows "Windows"))]]])
 
 (defn full-project
   "Prepares a project for viewing in full."
