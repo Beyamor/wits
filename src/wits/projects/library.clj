@@ -24,7 +24,8 @@
   "neptune-ocean-explorer"
   "midpoint-displacement-armor"
   "space-colonization-tree"
-  "game-of-life")
+  "game-of-life"
+  "pattern-aisle")
 
 (def all @all-projects)
 
