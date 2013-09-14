@@ -1,6 +1,9 @@
 (defproject
   "Space Colonization Tree"
 
+  :category
+  :pcg
+
   :implementation
   {:type :html-page
    :dimensions [800 :by 400]

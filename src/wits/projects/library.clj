@@ -23,7 +23,8 @@
   "colton-and-toms-good-time-text-adventure"
   "neptune-ocean-explorer"
   "midpoint-displacement-armor"
-  "space-colonization-tree")
+  "space-colonization-tree"
+  "game-of-life")
 
 (def all @all-projects)
 
