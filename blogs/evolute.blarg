@@ -1,11 +1,11 @@
 title: evolute
-date: 09-06-2013
+date: 09-15-2013
 
 A while ago, I read Steven Levy's [Artificial Life](http://www.amazon.com/Artificial-Life-Frontier-Computers-Biology/dp/0679743898). It's a neat book which provides a history of works in artificial life. It doesn't require any technical understanding, so it's a good recommendation for anybody with even a passing interest in the field.
 
-Anyway, one of the things the book talks about is Richard Dawkins' [biomorphs](http://www.rennard.org/alife/english/biomintrgb.html). A biomorph is some geometry defined by its genome. Different biomorphs have different genomes and so, are drawn differently. Dawkins' program allows the user to browse through genetic variations at will. The user's whim serves as the evolutionary force, driving selection of the most favorable genome.
+Anyway, one of the things the book talks about is Richard Dawkins' [biomorphs](http://www.rennard.org/alife/english/biomintrgb.html). A biomorph is some geometry defined by its genome. Different biomorphs have different genomes and so, are drawn differently. Dawkins' program allows the user to browse through genetic variations at will. Thus, there's this sort of artificial selection where the user "evolves" the biomorph towards something that looks better.
 
-I wanted to try making something similar. The biomorph program is cool because the user doesn't need any ability to draw to produce interesting shapes. Me, I'd love to make music, but I've got no aptitude for it. So, for me, it'd be hip to have a program that allows me to selectively evolve songs.
+Cool idea, right? Naturally, I wanted to try making something similar. The biomorph program is neat because the user doesn't need any ability to draw to produce interesting shapes. Me, I'd love to make music, but I've got no aptitude for it. So, for me, it'd be hip to have a program that allows me to selectively evolve songs.
 
 So, okay. How's this going to work? I want to start with an initial stock of songs, then pick my favourites and breed them to create a new generation. After selectively breeding through several generations, I should end up with something that sounds okay.
 
@@ -27,6 +27,8 @@ Okay, well, imagine we had two full stacks of notes, one for each of the parents
 
 ![Evolute series](/images/evolute3.png)
 
-Groovy. So, we can start off with an initial stock of random series of notes and (hopefully) breed it towards something that sounds, well, better. How's that work out for us? Well, give it [a listen](http://www.youtube.com/watch?v=9hdVk_QTIxo).
+Groovy. So, we can start off with an initial stock of random series of notes and (hopefully) breed it towards something that sounds, well, better. How's that work out for us? Well, turn down your volume and give it [a listen](http://www.youtube.com/watch?v=9hdVk_QTIxo).
 
-Yeah, practically Mozart, right? Eh, so not great.
+Yeah, practically Mozart, right? Eh, so not great. Not *too* awful, but not great. That said, I'm actually kinda pleased with it. There's an easy charm to sitting back and growing a song from a raggedy collection of notes. In the case of the song above, I was breeding for that quirky dance of notes near the beginning. Given a few more generations, maybe I could've bred a better ending too. 
+
+Anyway, I want to spend more time thinking about the idea of selectively evolving content. Maybe come back and refine this idea, maybe do something new. In the mean time, you can play around with the (very, very rough) app [here](/projects/evolute) or check out the source [here](https://github.com/Beyamor/evolute).

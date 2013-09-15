@@ -26,7 +26,8 @@
   "space-colonization-tree"
   "game-of-life"
   "pattern-aisle"
-  "words-in-the-sky")
+  "words-in-the-sky"
+  "evolute")
 
 (def all @all-projects)
 
