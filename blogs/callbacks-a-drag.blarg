@@ -1,0 +1,139 @@
+title: callback's a drag
+date: 09-16-2013
+
+A few months ago, the Clojure/core team came out with [core.async](http://clojure.com/blog/2013/06/28/clojure-core-async-channels.html), a library designed to make asynchronous programming simpler. By making use of channels and smart syntax, the library provides a ladder out of callback hell. This is a particular godsend in world of browser programming where GUI events and AJAX requests make any program a labyrinthine mess. 
+
+And while that all sounds great, it didn't mean much to me. It sounded neat, but I didn't get much of a sense of the value just by reading about it. To the end of understanding what core.async really brings to the table, I decided to play around with it a bit. Let's walk through a small app and see what the deal is.
+
+Get your hype on, pal, because this is cool stuff.
+
+# app in a box
+Okay, let's define our problem. We're creating a super great app. It's going to be a box, right? And the user can click on it and start dragging it around and then let it go. Maybe something like this:
+
+<iframe src="/blog/entries/callbacks-a-drag/app.html" width="400" height="150" scrolling="no" class="embedded-app"></iframe>
+
+We're going to make millions. Fat stacks. Scrooge McDuck's gunna look like Chump McNomoney.
+
+Simple enough, right? Except, y'know, we've got to program user interface. If that doesn't make you cringe and beg for a command line, you've got a few screws loose. Well, whatever. We're big boys and girls here. We can build a GUI.
+
+# call me maybe
+Now, when it comes to GUI stuff, there tends to be a lot of asynchronicity, right? The user's generating a bunch of events by poking and prodding the interface. Traditionally, this has been handled by setting up callbacks for the events. In something like Java, that'll be some event listener class; in something like Javascript, it'll be functions.
+
+The problem with defining all these callbacks is that it's suddenly very difficult to define sequential flows. For our box app, we'd like to define a very straightforward flow:
+
+* If the user clicks down inside the box, start dragging.
+ * While dragging, the box snap's the mouse's position.
+ * When the mouse is released, stop dragging the box.
+
+We translate this to CoffeeScript as follows:
+
+```coffeescript
+watchForDragging = (box, el) ->                
+        isBeingDragged = false
+        el.bind "mousedown", (e) ->
+                pos = relativePos e, el
+                if box.containsPoint pos 
+                        isBeingDragged = true
+                        box.setPos pos
+        
+        el.bind "mousemove", (e) ->                  
+                if isBeingDragged
+                        box.setPos relativePos e, el
+        
+        el.bind "mouseup", (e) ->
+                isBeingDragged = false
+```
+
+Simple enough, right? But see how we have to create that `isBeingDragged` variable to keep track of the current state? Because we have to coordinate the different callbacks, we're forced to introduce this state management. While one little variable isn't going to bring us to our needs, it's easy to see that with more complicated flows, our intention will be further clouded by juggling the state smeared across the different callbacks. Ideally, we could write something closer to the flow as we defined it.
+
+Another issue here is that we're tying our logic directly to our event sources. This, of course, is a nightmare to test, right? Like, what're you going to do, create an element and trigger a few events on it? Grody. What we want to do is decouple the consumption of messages from their production so we can test in isolation. Right, c'mon, that's like software engineering 101. Unfortunately, doing so tends to come down to ad hoc solutions which is, y'know, the sort of thing they preach against in software engineering 102.
+
+So, how're we going to do better?
+
+# core.those-flows
+Okay, let's talk about core.async. At the heart of this guy are channels. A channel is, well, it's just a queue, if we're going to be honset with ourselves. You put stuff in the back with `>!`, `>!!`, and `put!` and get stuff out of the front `<!` and `<!!`.
+
+Without getting too lost in the differences between those dirrent forms, let's look at a short example. We'll create a buffered channel, put three values into it, and take one out. We'll use [`>!!`](http://clojure.github.io/core.async/#clojure.core.async/>!!) to put a value in and [`<!!`](http://clojure.github.io/core.async/#clojure.core.async/<!!) to get a value out.
+
+```clojure
+(let [channel (chan 3)]
+  (>!! channel 1)
+  (>!! channel 2)
+  (>!! channel 3)
+  (<!! channel))
+
+; => 1
+```
+
+Simple, right? Now, `>!!` and `<!!` will block the current thread until they complete. You can think of them like the `println` and `read-line` in your language of choice.
+
+Now, this blocking is problematic in the JavaScript world where we only have one thread. Obviously, if we block our only thread, execution halts forever. Because of this, ClojureScript doesn't offer `<!!` and `>!!`. Instead, we can use another function - [`put!`](http://clojure.github.io/core.async/#clojure.core.async/put!). This guy puts a value on a channel in an asynchronous, non-blocking fashion. Cool, right?
+
+For our box app, we're going to want to look at the mouse events - click down, click up, and move - as well as the position of the mouse at each event. So, we want something kind of like this sequence of values:
+
+```clojure
+[[:mouse-down {:x: 0, :y 0}]
+ [:mouse-move {:x 314, :y 235}]
+ [:mouse-move {:x 92, :y 32}]
+ [:mouse-up {:x 43, :y 823}]]
+```
+
+To create a channel with these event values, we need to listen to an HTML element's events. We'll define a function which creates a new channel and binds mouse events to pushing values into it, then returns the channel.
+
+```clojure
+(defn watch-mouse-events
+  [el]
+  (let [channel (chan)
+        push-event
+        (fn [event-type]
+          #(put! channel
+            [event-type (relative-pos % el)]))]
+    (doto el
+      (bind "mousemove" (push-event :mouse-move))
+      (bind "mousedown" (push-event :mouse-down))
+      (bind "mouseup" (push-event :mouse-up)))
+    channel))
+```
+
+Groovy. Now that we've got our event data defined, we can build our box app to consume it.
+
+# go forth and go
+While channels are neat on their own, core.async really kicks it into gear with the [`go`](http://clojure.github.io/core.async/#clojure.core.async/go) macro. This thing is hella wizardry. Remember the state management we had to do to coordinate the callbacks? `go` effectively takes care of that for us.
+
+Given a body of code which pushes into channels with `>!` and pulls from them with `<!`, `go` will transform the code into something which *acts like* it blocks on those calls. Unlike `>!!` and `<!!`, however, it doesn't *actually* block the thread. Instead, it takes care of the state management to ensure these *asynchronous* calls occur in a sequential order as they are written. `go` returns a channel which will hold the value of the body's expression when it completes.
+
+A lot to wrap your head around, I know, but in practice, what this means is that we can write our flows sequentially.
+
+Let's define a function which will consume mouse events from a channel forever. When it encounters a click down inside the box, it'll start dragging the box, then go back to consuming events once that's finished.
+
+```clojure
+(defn watch-for-dragging
+  [box mouse-events]
+  (go (loop [[event-type pos] (<! mouse-events)]
+        (when (and (= :mouse-down event-type)
+                   (in-box? pos @box))
+          (<! (drag-box box mouse-events)))
+        (recur (<! mouse-events)))))
+```
+Two things here. First, see where we're pulling a value out of a channel but not doing anything with it in `(<! (drag-box box mouse-events))`? That "blocks" execution to ensure that we don't go on consuming the mouse events until we've finished dragging the box.
+
+Second, see how this code doesn't depend on the actual HTML element which produces the events; it just pulls values out of a channel. If we wanted to test it, it'd be trivially easy to load a channel up with some event values and pass it in.
+
+Anyway, let's also define the dragging function. This will consume mouse events and move the box until it hits a click up event. At that point, control will return to the calling function.
+
+```clojure
+(defn drag-box
+  [box mouse-events]
+  (go (loop [[event-type pos] (<! mouse-events)]
+        (swap! box set-pos pos)
+        (when-not (= :mouse-up event-type)
+          (recur (<! mouse-events))))))
+```
+
+Okay. Wow. This is cool, right? Right?
+
+Alright, the magic of this is hard to see. After all, it's just regular, plain old code right? But that's the point. That's entirely the magic. Despite the fact that the values in the channel can come sporadically, at any point in time, we can write code that appears to directly consume them one after another. Moreover, it does so *without* blocking the executing thread and there's not a callback in sight.
+
+C'mon. Not bad. We defined our flow in the code pretty much as we described. That's the magic of core.async and [CSP](http://en.wikipedia.org/wiki/Communicating_sequential_processes) in general. We've got a means of abstracting away the complications of asynchronous programming and writing simple, direct code. Callback heaven, baby.
+
+To get the inside scoop on box dragging, check out the full [CoffeeScript](https://gist.github.com/Beyamor/6586504) and [ClojureScript](https://gist.github.com/Beyamor/6586500) files.

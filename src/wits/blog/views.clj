@@ -24,6 +24,7 @@
 (defn prepare-blog-content
   [content]
   (-> content
+    escape-html
     md-to-html-string
     html->hiccup
     add-code-tags))

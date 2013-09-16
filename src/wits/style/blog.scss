@@ -32,6 +32,16 @@
 		@include centered;
 		display: block;
 	}
+
+	.embedded-app {
+		@include centered;
+		display: block;
+		border: {
+			width: 1px;
+			style: solid;
+			color: $very-light;
+		}
+	}
 }
 
 .blog-separator {
