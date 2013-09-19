@@ -19,13 +19,13 @@ $content-width: 600px;
 
 @mixin content-container {
 
-	border-radius: 4px;
-	background-color: $very-dark;
+	border-radius: 0px;
+	background-color: $very-light;
 	color: white !important;
 	.title {
 		color: white !important;
 	}
-	padding: 10px;
+	padding: 1px;
 	@include centered;
 	display: block;
 }
