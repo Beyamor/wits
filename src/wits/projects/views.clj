@@ -98,7 +98,7 @@
      (list
        [:h1 (escape-html title)]
        ; haha this is so dumb
-       [:div.project-container-container
+       [:div#app.project-container-container
         html-representation
         (when source (link-to {:class "source" :target "_blank"} source "source"))]
        [:div.description
