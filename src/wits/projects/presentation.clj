@@ -66,4 +66,5 @@
     (assoc :thumbnail (str "/images/projects/" (html/urlify title) "-thumbnail.png"))
     (assoc :showcase (str "/images/projects/" (html/urlify title) "-showcase.png"))
     (assoc :url (str "/projects/" (html/urlify title)))
-    (assoc-if-missing :short-description (-> project :description clojure.string/split-lines first))))
+    (assoc-if-missing :description "")
+    (#(assoc-if-missing % :short-description (-> % :description clojure.string/split-lines first)))))

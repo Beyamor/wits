@@ -27,7 +27,8 @@
   "game-of-life"
   "pattern-aisle"
   "words-in-the-sky"
-  "evolute")
+  "evolute"
+  "poplar")
 
 (def all @all-projects)
 
