@@ -28,7 +28,8 @@
   "pattern-aisle"
   "words-in-the-sky"
   "evolute"
-  "poplar")
+  "poplar"
+  "face-rater")
 
 (def all @all-projects)
 
