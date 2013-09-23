@@ -29,7 +29,8 @@
   "words-in-the-sky"
   "evolute"
   "poplar"
-  "face-rater")
+  "face-rater"
+  "dabber")
 
 (def all @all-projects)
 
