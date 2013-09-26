@@ -1,0 +1,42 @@
+title: the bad in hyderabad
+date: 09-25-2013
+
+One of my software buds, [Jeremy Mohr](https://github.com/Jemeyr), does cool stuff, which is a lot more than I can say for myself. Among his cool stuff is [Malka](https://github.com/Jemeyr/Malka), a Java-based game engine to which he has steadily push a commit a day for nearly a hundred days now.
+
+Anyway, it got me thinking it might be nice to have my own project to tinker on. Not a game exactly, but something which I could gradually refine towards that classification. Start with a bare bones engine and see how far my evanescent enthusiasm carries it. I'm not gung ho enough to try for a commit a day, but a longstanding project to fill my down time would be great.
+
+Maybe make something to fill the over-engineered void in my soul that [Guncrawl](http://localhost:3000/blog/entries/left-hoarse-by-saddle-climbing) left behind, though I pray to all gods of heaven and demons of hell to spare me from getting down and dirty with C++ again.
+
+So, I brushed up on [component-entity-systems](http://www.reddit.com/r/gamedev/comments/1f83c5/3_articles_about_component_entity_systems/), kicked up [cljsbuild](https://github.com/emezeske/lein-cljsbuild), and started writing [Hyderabad](https://github.com/Beyamor/hyderabad).
+
+A few days of bashing my head against physics later and I'm left in a rough spot. No, not with the physics, though I've got a headache bigger than Einstein's hair. It's, the performance of those physics. My engine must be running close to the speed of light, because its passage of time is slowing to a crawl.
+
+That was, uh, a relativity joke.
+
+Which I probably screwed up.
+
+# how slow can you go
+
+Hyderabad is written in ClojureScript, right? Remember ClojureScript? That's the implementation of Clojure which transpiles to JavaScript. Dig it.
+
+That's all great, because ClojureScript's bringing a lovely, expressive language to the browser, but viewing this in the context of games, some alarm bells have got to be firing. A functional language emphasizing immutability running on a browser's interpreter? This is a field of our trade where folks grimace about the overhead of *C++*. Interpreted FP is going to have kids getting into conniptions about the performance hit.
+
+Well, it turns out they're not *totally* wrong.
+
+Check it. Here's where Hyderabad's at at the time of writing. WASD to move, arrrow keys to shoot.
+
+<iframe src="/blog/entries/the-bad-in-hyderabad/app/index.html" width="800" height="600" scrolling="no" class="embedded-app"></iframe>
+
+Now, if you do a bit of shooting, you'll notice something. No, not the crappy physics - I'll, uh, I'll fix that. Discrete vs. continuous engines, yadda yadda yadda. No, it's that your browser slows to all heck as the game eats up every bit of CPU like me with a pizza on a lonely Friday night.
+
+Sorry about that, by the by. I probably should've warned you.
+
+The easy answer here is that my terribly written code is at fault. Certainly, I do write terrible code, but let me try to convince you that's not the only issue here. Running the profiler, about half the total time is spent running the physics code.
+
+I've already done some optimizations there - precalculating and caching some calculations as well as making heavy use of [transients](http://clojure.org/transients), Clojure's solution for performant mutable data - but I'm at a point where I think most of the incidental performance overhead is coming from Clojure's higher abstractions.
+
+A lot of time is being spent in things like iterating over sequences. Whereas in raw JavaScript, you'll find yourself iterating through plain old arrays with bog standard index-incrementing for-loops, in Clojure, you'll do iteration over [sequences](http://clojure.org/sequences). While it's a useful abstraction, this carries with it considerably more overhead.
+
+So, what can a poor programmer do? Well, thankfully, ClojureScript has a great interop story, so it wouldn't be hard to drop down close-to-the-metal JavaScript. However, to get the performance I'm after, I think I'd have to use regular, mutable JavaScript arrays and objects for at least my entity management, if not more. Since that's basically the core of the engine, I'd be pretty well building everything on top of a gooey, mutable center and in doing so, sacrificing much of what Clojure offers - from simplicity to accessible persistent data structures to, well, a lot of the core library.
+
+That said, I think I can cover up a lot of the nitty-gritty with macros and, I mean, I'd have to deal with that mutability in any other language I'd choose to use, so it's not as though I'm that much worse off with ClojureScript, assuming I can squeeze that performance out of it.
