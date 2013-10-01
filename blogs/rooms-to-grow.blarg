@@ -1,0 +1,90 @@
+title: rooms to grow
+date: 10-01-2013
+
+I was thinking about a riff on [Spelunky](http://spelunkyworld.com/), so I broke out the coffee and started coding up a prototype called A Sky Full of Gumption.
+
+Now, Spelunky, of course, features some lovely procedurally-levels. If you spend enough time in that subterranean wonderland, you'll come to feel uniquely at home amid the sturdy geometry of those square walls. Each of the infinite number of levels feels almost hand-crafted, though of course it's a computer's digital digits that are doing the sculpting. 
+
+Though it's honed to near perfection, the broad strokes of Spelunky's procedural generation are [splendidly simple](http://makegames.tumblr.com/post/4061040007/the-full-spelunky-on-spelunky). I needed to produce the same kind of levels, so rather than reinvent the wheel, I implemented something with more than a passing resemblance to Yu's work. Let's rap about what I got going on in the ASFoG right now.
+
+# a room in bloom
+
+Ages ago, we realized pure randomness it pretty much the pits as far as enjoyable experiences go. Some kind of order has to be imposed on the randomness to make it fun.
+
+For example, if you were procedurally generating a level, you could say every tile has a one in three chance of being a wall. Great, you've got a unique, random level, but chances are good you'll end up making something completely unplayable. Hell, you could end up encasing the player in walls. Not the kind of thing we want to do anywhere outside of Stuck Simulator 2013.
+
+![stuck simulator 2013](http://i.imgur.com/YBVpHoI.png)
+
+A really handy solution to this is the idea of constructing a level by connecting randomly selected rooms from a set of hand-designed templates. These templates describe the room layout and, often, how the room might be augmented with random content. For example, [this article](http://tinysubversions.com/2010/01/tutorial-modding-spelunkys-level-generator/) outlines how Spelunky's room templates contain things like instructions to insert a random obstacle into the room.
+
+Right now, ASFoG's room templates are much simpler. They are described in terms of walls (W), possible walls (w), ladders (L), and empty space ( ). For example, here's a sample room definition:
+
+```
+WWWWWWWWWW
+W        W
+W        W
+W        W
+w        W
+     ww  W
+         W
+WWWW  WWWW
+```
+
+This has a solid ceiling and right wall, holes left and down, and a platform which may or not be created. Simple enough, right? Here, the random augmentation is provided by the possible walls making up that platform. A computerized coin flip determines whether or not they spawn.
+
+The nice thing about hand-crafting these rooms is that we can make certain guarantees. In the room above, we know it'll always be passable to the left and downwards. The random augmentation also provides us a way to reuse generic structures while still offering a lot of variation. Cool.
+
+# floored by floors
+In ASFoG, you climb up rather than Spelunky's down. Creative, right?
+
+Spelunky's levels are created by placing down a 4x4 set of rooms. For ASFoG, I wanted to be able to generate something less discrete - if not infinite in height, at least a lot taller, so the player can climb up towards the heavens. To do this, I generate a single floor at a time rather than a trying to create the entire tower of rooms. In my mind, anyway, that makes it easier to a) load partial sections and b) stack different types of floors sections since the height of each section can always assumed to be a floor one room high.
+
+Constructing each floor does, however, depend on two pieces of information: the place where the room connects down to the room below and the place where it connects up to the room above.
+
+![special places](http://i.imgur.com/dcf9uDs.png)
+
+Connect between those two points, make sure the player can go up and down, and fill in the remaining spaces with random rooms, and you've got yourself a floor.
+
+# tag it and bag it
+So, we have a few constraints on a floor. The player must be able to:
+
+1. reach it by coming up from the floor below.
+2. reach the next floor by going up.
+3. traverse from the down point to the up point.
+
+All well and good, but I want rooms which may not be accessible from one side or another. Remember the room we defined above?
+
+```
+WWWWWWWWWW
+W        W
+W        W
+W        W
+w        W
+     ww  W
+         W
+WWWW  WWWW
+```
+
+Clearly, that's blocked off to the right and from above. Not a good choice if we're going to place this on our up point, right?
+
+To solve this, the rooms in ASFoG are tagged. These tags include the cardinal directions - `connects-left`, `connects-right`, `connects-up`, and `connects-down` - as well as things like, well, just being a `regular` room that can be placed wherever. So, the room above might have the tags `connects-left` and `connects-down`.
+
+```
+WWWWWWWWWW
+W        W
+W        W
+W        W
+w        W
+     ww  W
+         W
+WWWW  WWWW
+[connects-left, connects-down, regular]
+```
+
+A floor is initially constructed with *possible* rooms. Then, as the floor's layout is established, tags are added to the possible rooms to constrain the selection of rooms which can actually be placed. The possible room at the down point gets tagged with `connects-down`, the room at the up point gets tagged with `connects-up`, and the rooms connecting the up and down points get tagged with `connects-left` and `connects-right` as appropriate.
+
+The possible rooms are then realized by selecting from all possible room templates only those which satisfy the tags. In this way, we can ensure that the correct connections are always created. Untagged rooms default to `regular`, so the rooms which aren't on the critical path can become, y'know, whatever. Something cool.
+
+What's neat is that we can also automatically generate room templates based on the tags. For example, because the room above connects left, we know we can mirror it horizontally and get a room which connects right. That saves a bit of time, huh?
+
+So, what we have is a nice, solid system for procedural generation. Hand-crafted rooms give us things that are fun to play, random room selection and augmentation gives us variety, and tag-based constraints make it easy to ensure the rooms we choose are always a good fit. I don't know if I'll finish A Sky Full of Gumption, but man, I'm sure as heck going to generate more levels like this.
