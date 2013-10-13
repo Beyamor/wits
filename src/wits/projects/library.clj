@@ -30,7 +30,8 @@
   "evolute"
   "poplar"
   "face-rater"
-  "dabber")
+  "dabber"
+  "breedxel")
 
 (def all @all-projects)
 
