@@ -6,7 +6,11 @@
             [wits.projects.library :as projects]
             [wits.projects.presentation :as presentation]
             [wits.web.apps :as apps]
-            [wits.web.pages :as pages]))
+            [wits.web.pages :as pages]
+            wits.projects.backends.message-in-a-bottle))
+
+(defroutes project-backends
+           wits.projects.backends.message-in-a-bottle/all-routes)
 
 (defroutes all
 
@@ -33,4 +37,6 @@
                   projects/by-url
                   presentation/add-properties
                   presentation/for-canvas
-                  pages/content-wrapper)))
+                  pages/content-wrapper))
+
+           project-backends)
