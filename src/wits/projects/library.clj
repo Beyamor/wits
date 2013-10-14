@@ -31,7 +31,8 @@
   "poplar"
   "face-rater"
   "dabber"
-  "breedxel")
+  "breedxel"
+  "ruin")
 
 (def all @all-projects)
 
