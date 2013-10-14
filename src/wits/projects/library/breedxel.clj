@@ -12,6 +12,7 @@
   :description
   "Select a mother and father image by left-clicking on them. Together, they will breed a new generation of images.
   Right-click an image to open it as a .png.
+  Press 'R' to reset.
   This is actually kind of lame, but whatever."
 
   :source
