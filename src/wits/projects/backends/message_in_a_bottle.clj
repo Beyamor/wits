@@ -24,7 +24,7 @@
   [ip message]
   (with-db data/wits-db
            (insert-message ip message)
-           (let [other-messages (select all-messages)]
+           (let [other-messages (get-other-messages ip)]
              (if-not (empty? other-messages)
                (let [other-message (rand-nth other-messages)]
                  (:message other-message))
