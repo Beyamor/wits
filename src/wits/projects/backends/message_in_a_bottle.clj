@@ -7,7 +7,7 @@
 (defentity messages
            (table :miab_messages))
 
-(def all-messages (select* messages))
+(def all-messages (-> (select* messages) (where {:seen false})))
 
 (defn get-other-messages
   [ip]
@@ -27,6 +27,9 @@
            (let [other-messages (get-other-messages ip)]
              (if-not (empty? other-messages)
                (let [other-message (rand-nth other-messages)]
+                 (update messages
+                         (set-fields {:seen true})
+                         (where {:id (:id other-message)}))
                  (:message other-message))
                "Whoa, no messages"))))
 
