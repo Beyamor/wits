@@ -1,6 +1,9 @@
 (defproject
   "Ruin"
 
+  :category
+  :game
+
   :implementation
   {:type :html-page
    :url "/projects/ruin/index.html"
