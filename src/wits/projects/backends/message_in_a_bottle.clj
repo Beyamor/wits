@@ -37,10 +37,12 @@
 
 (defroutes all-routes
            (GET "/projects/message-in-a-bottle/submit"
-                {{:keys [message]} :params ip :remote-addr}
-                (if-not (empty? message)
-                  (trade-messages ip message)
-                  {:status 400 :body "Dude, I dunno."})))
+                {{:keys [message]} :params :keys [remote-addr headers]}
+                (let [ip (or (get headers "x-forwarded-for")
+                             remote-addr)]
+			(if-not (empty? message)
+			  (trade-messages ip message)
+			  {:status 400 :body "Dude, I dunno."}))))
 
 (def fortunes
   ["“Welcome” is a powerful word."
