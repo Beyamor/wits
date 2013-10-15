@@ -7,7 +7,7 @@
 (defentity messages
            (table :miab_messages))
 
-(def all-messages (-> (select* messages) (where {:seen false})))
+(def all-messages (-> (select* messages))) ; (where {:seen false})))
 
 (defn get-other-messages
   [ip]
