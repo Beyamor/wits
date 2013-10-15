@@ -32,7 +32,8 @@
   "face-rater"
   "dabber"
   "breedxel"
-  "ruin")
+  "ruin"
+  "message-in-a-bottle")
 
 (def all @all-projects)
 
