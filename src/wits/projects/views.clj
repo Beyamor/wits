@@ -33,13 +33,13 @@
   [{:keys [title short-description url] showcase-image :showcase}]
   [:div.showcase
    [:div.screenshot
-    (link-to url
+    (link-to {:class "project-link"} url
       (image showcase-image))]
    [:div.info
     [:div.title title]
     [:div.summary
      [:p short-description]]
-    [:div.check-it-out (link-to url "check it out")]]])
+    [:div.check-it-out (link-to {:class "project-link"} url "check it out")]]])
 
 (defn collection
   "A preview of some collection of projects."

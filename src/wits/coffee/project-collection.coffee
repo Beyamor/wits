@@ -36,10 +36,8 @@ whenPageLoads '/projects', ->
 				data = projectCollection[$preview.data('id')]
 
 				$('.showcase > .screenshot img').attr 'src', data['showcase']
-				$('.showcase > .screenshot > .check-it-out > a').attr 'href', data['url']
+				$('.showcase .project-link').attr 'href', data['url']
 				$('.showcase > .info > .title').text data['title']
 				$('.showcase > .info > .summary > p').text data['short-description']
-				$('.showcase > .info > .summary > p').text data['short-description']
-				$('.showcase > .info > .check-it-out > a').attr 'href', data['url']
 
 				scrollToTop()
