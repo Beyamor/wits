@@ -33,7 +33,8 @@
   "dabber"
   "breedxel"
   "ruin"
-  "message-in-a-bottle")
+  "message-in-a-bottle"
+  "herrera")
 
 (def all @all-projects)
 
