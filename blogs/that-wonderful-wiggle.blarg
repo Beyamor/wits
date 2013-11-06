@@ -1,0 +1,69 @@
+title: that wonderful wiggle
+date: 11-06-2013
+
+Y'see kids, guns are cool.
+
+I mean, no, not real guns. Real guns are horrifying. Jesus Christ, gang, are you kidding me? Hand-held death machines any would-be supervillain can grab with a quick skip down to Walmart. Yeesh.
+
+Still, they make a great piece of loot, amiright?
+
+# limitless lots of loot
+So, we've talked about procedurally creating loot [before](/blog/entries/midpoint-fashion), but to restate the problem:
+- Generating the stats for loot is so easy it gives your mama a run for her money.
+- Generating the visual representation of that same loot is as hard as, well, making a tasteful *your mama* joke.
+
+*Borderlands* is probably the ungendered kingqueen of this game. There's a huge variety to their bloody ocean of firearms and while you'll probably see twins, triplets, and even centuplets over the course of your adventure, there's more than enough variation to keep things interesting.
+
+Though it works very well, the technique *Borderlands* uses is the oldest in the procedural generation handbook. Guns are created by selecting each part from among a set of predefined variants, then gluing the selections together. There's actually a [super neat guide](http://borderlands.wikia.com/wiki/Gun_Component_Charts) which shows the individual components all nicely laid out.
+
+There are a few reasons to use this technique:
+- It's simple to implement.
+- Its results are guaranteed to look good.
+- It creates a combinatorial possibility set (i.e., a lot of bang for your buck).
+
+The downside is that the results are very much limited to what a designer explicitly creates. That is, designing one of these variants only introduces *one* extra possibility for that part.
+
+Obvious, I know, but hang on, I think we can do better.
+
+# jellygons
+Ideally, we can take the benefits of combining predefined pieces and spice it up with just a dash more variation. This, it turns out, is as easy said as done. Let's run with a simple idea: we hand-design some piece, then describe how it can be tweaked to introduce greater variety.
+
+This can be done by defining a model in terms of primitive polygons (in this case, triangles, quads, and rectangles), then describing the amount of "wiggle" in the vertices of those polygons - namely, how much random displacement can be applied to them. Some constraints on the model ensure that it keeps its general shape instead of becoming a chaotic mess.
+
+Got it? Okay, so, for example, a gun's body might look like this:
+
+![gun body](http://i.imgur.com/gaQxq4W.png)
+
+Not exactly a thing of beauty, but hopefully you get the general idea. It's just a bunch of rectangles and things, right? No big.
+
+The constraints we talked about are here in two forms:
+- First, rectangles ensure that, no matter where their vertices end up, their edges retain that lovely perpendicularity.
+- Second, some vertices are pinned to others. This ensures that, for example, no matter how they wander, the edges of those polygons at the top of the gun remain aligned.
+
+These simple constraints go a long way. Even when all the vertices have a ton of wiggle, the body is pretty recognizable:
+
+![all wiggle](http://i.imgur.com/JGW4Hfu.png)
+
+However, "pretty recognizable" isn't exactly going to win any awards. A set of controls lets us describe how each shape's polygons might wiggle around. This gives finer control over the results.
+
+![wiggle controls](http://i.imgur.com/n2Xfm7u.png)
+
+Some playing around (plus a bit of paint) gives much better results.
+
+![defined wiggle](http://i.imgur.com/LrDPU5v.png)
+
+Cool. The general shape is the same, but no two are exactly the same (hopefully). Now, given a couple of barrels and another body variant, we have more possibilities than I care to count:
+
+![gun variants](http://i.imgur.com/LHKNNG2.png)
+
+Awesome.
+
+# gunning for gold
+
+Alright, so, where's that get us? Well, I think this idea of *implicit* designs, designs of *possibilities* instead of static pieces, works okay. It's easy enough to put together, integrates well with traditional techniques, and does help mitigate the problem of stagnation. Moreover, it's something that potentially works with any type of procedural model.
+
+That said, looking at those screenshots, it's obvious that a lot of samey-ness comes from the "paint" on the guns. Selecting from a very small set of possible colours creates a sense of deja vu. The next big step here would be a more interesting procedural paint job.
+
+Furthermore, a few pixels of wiggle here and there really doesn't make for drastic changes. I wonder if a better solution might be combining predefined pieces at a much finer granularity. For example, split the body up further into, I don't know, quadrants and stitch those together instead.
+
+Anyway, the long and short of it is that this vertex wiggle technique works well for introducing small variation, but it best used to compliment a more substantial technique like parts swapping.
