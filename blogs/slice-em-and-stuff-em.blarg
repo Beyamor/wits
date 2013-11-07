@@ -1,0 +1,77 @@
+title: slice 'em and stuff 'em
+date: 11-06-2013
+
+There comes a point in every young programmer's life when said programmer needs to procedurally generate some dungeons. Consider it a rite of passage. We learn to type; we grok pointers; we write some truly god-awful C++; we make some dungeons.
+
+No, not everyone? Just me? Well, whatever. Forget you guys, dungeons are cool.
+
+A good dungeon is made out of rooms. Seems pretty obvious, really. Without rooms you've just got, what, corridors? Listen, corridors are the bread of the dungeon sandwich; necessary, but nowhere near as interesting as the stuff in between.
+
+# meaty rooms
+So, rooms. How do you make 'em? Well:
+- Purely procedural. A bunch of options here. Combine shapes or place random vertices or whatever.
+- Prefabs. Hand-designed rooms which can be dropped into place.
+- Hand-designed, procedurally augmented rooms.
+
+Obviously the third choice is my preference. You get the quality of hand-crafted content with the variety procedural generation brings. C'mon. No brainer.
+
+Some dungeon generation techniques don't care much about the layout of the rooms themselves; they'll happily punch holes in rooms until things are Swiss cheese-y enough that the player can get from one end to the other. Me, I find that a little too brutish for my liking. No, a dungeon should be crafted with delicate care.
+
+In much the same way we did with the *[A Sky Full of Gumption](/blog/entries/rooms-to-grow)* prototype, we're going to determine the direction of the entrance and exits of each room, then select something that matches that specification. With *ASFoG*, I was hand-tagging rooms as being open to certain directions. That's fine, I guess, but being programmers, we're lazy. Lazy enough to write a level editor to do that tagging for us.
+
+A little bit of work got me a clunky, if useful room editor. With it, I could lay out a room like this:
+
+![some room](http://i.imgur.com/hvurr3I.png)
+
+The white tiles are floors; the grey, walls; the green, potential entrances; and the blue, potential exits. This room can be entered from either the south or the west and exited to the north and the east. When an entrance or exit is chosen, the rest become walls so that the room doesn't end up with holes. Duh.
+
+The editor does scans from each edge inward to determine which directions have potential entrances and exits. That saves us from having to explicitly describe the rooms which is great because, let me tell you, I'm yawning just thinking about doing that work by hand.
+
+Now, this is just one possible orientation of the room, right? We could rotate it 90&#176; 180&#176; or 270&#176; and mirror any of those rotations horizontally or vertically. This means that any one room layout gives us a bunch of possible candidates to choose from. Thankfully, the editor pumps out all of these different orientations for us so we don't have to.
+
+I ended up choosing a very simple method of procedural augmentation. I just slice out rows or columns of tiles at random. This allows the layout to shrink and distort to keep things interesting. Well, *smalltalk-with-friends-of-friends* interesting. It'll keep the conversation going, but you could hope something better comes along.
+
+Anyway, potential slices can be drawn out in the editor:
+
+![sliced room](http://i.imgur.com/5zNib2C.png)
+
+Cool. That gets us rooms. Now, what do we do with 'em?
+
+# all stuffed up
+Inspired by Sean Howard's [musings on using sets for room layouts](http://www.squidi.net/three/entry.php?id=163), the features in a room are determined by grabbing sets of tiles and filling them with features.
+
+Starting with each floor tile in the room as the top-left, areas of floors tiles, each a rectangle ranging from 1x1 up to 10x10, are created. Regions which contain non-floor tiles or are too big or small to be filled by a feature are discarded. The rest are added to a set of possible feature spaces.
+
+Having figured out where features can go, we start placing them. While there are still areas in the set, we select one at random and fill it with a random feature. Any areas which contained tiles in the selected area are removed from the set so that we don't double-stuff them with features. Delicious for Oreos, disastrous for rooms. Repeating this eventually fills the room with as many features as we can place.
+
+What does a feature looks like? Well, here's the code for a square hole ringed by floor tiles:
+
+```coffee
+canFill: (area) ->
+	area.width >= 7 and area.height >= 7
+
+fill: (area) ->
+	minX = 2
+	maxX = area.width - 3
+	minY = 2
+	maxY = area.height - 3
+
+	for i in [minX..maxX]
+		for j in [minY..maxY]
+
+			isEmptySpace = i > minX and  i < maxX and
+					j > minY and j < maxY
+
+			if isEmptySpace
+				area.set i, j, " "
+			else
+				area.set i, j, "W"
+```
+
+Not too terrible, eh? It's a pretty light description: the minimum size of the area and how to fill it.
+
+The great thing here is that we can happily create both rooms and features independently of one another. We can design rooms that embody good flow and features which create good gameplay and trust that, however we layout both, this algorithm will always put them together in a way that works.
+
+Right. Okay. Cool. This is all pretty straightforward stuff, but I think it makes for dungeons which are both varied and well-crafted. At the time of writing, we're only working with four rooms and three features, but things are [feelin' good](/projects/herrera#app).
+
+Of course, the dungeon layout itself is pretty miserable and we desperately need more interesting features and and and
