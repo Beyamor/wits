@@ -9,7 +9,7 @@ Though it's honed to near perfection, the broad strokes of Spelunky's procedural
 
 # a room in bloom
 
-Ages ago, we realized pure randomness it pretty much the pits as far as enjoyable experiences go. Some kind of order has to be imposed on the randomness to make it fun.
+Ages ago, we realized pure randomness is pretty much the pits as far as enjoyable experiences go. Some kind of order has to be imposed on the randomness to make it fun.
 
 For example, if you were procedurally generating a level, you could say every tile has a one in three chance of being a wall. Great, you've got a unique, random level, but chances are good you'll end up making something completely unplayable. Hell, you could end up encasing the player in walls. Not the kind of thing we want to do anywhere outside of Stuck Simulator 2013.
 
