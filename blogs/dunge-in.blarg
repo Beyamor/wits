@@ -1,0 +1,71 @@
+title: dunge-in
+date: 11-14-2013
+
+Recently, we  talked about [room generation in Herrera](/blog/entries/slice-em-and-stuff-em). Good read, right? Safe to say I rocked your world with that one. I'm sure since then, you've spent many a night lying awake, mind afire with the light of my brilliance.
+
+Well, turns out it's kinda crap. Sorry.
+
+Okay, "crap" is a little harsh, but right now, my use of prefabricated rooms is deeply flawed. Between the prefab rooms and the current layout technique, the dungeons are about as predictable as my historically unfunny self-depreciating humour. That's no good. Fortunately, however, we are, so we'll sort this out.
+
+# definiteon
+What comprises a dungeon? Well, practically speaking, there should be a beginning, an end, and maybe some stuff in between. Pretty obvious really; in fact, I'm surprised you had to ask.
+
+Unlike many of the dungeons in more traditional roguelike dungeons, I'd like to steer away from a sprawling soup of terrain; instead, I'd like more directed experiences: a definite path from beginning to end, augmented with detours to keep things interesting. There are a couple of reasons for this:
+- It makes [puzzle tree](http://www.squidi.net/mapmaker/musings/m110318.php) construction easy.
+- It affords fine-grained control over the player experience (e.g., throwing in a miniboss halfway through a level).
+- It reduces backtracking (at the expense of the feeling of open exploration).
+
+Creating a dungeon like this can be done very easily. We start by representing it as a grid of spaces for rooms:
+
+![empty dungeon](http://i.imgur.com/4vmYR72.png)
+
+We can then drop the starting room somewhere:
+
+![starting room](http://i.imgur.com/wEo7M4p.png)
+
+Extend the path by adding more rooms, each connected to the previous one, with a miniboss thrown in for good measure:
+
+![extended path](http://i.imgur.com/GjQ07ml.png)
+
+Add the ending room:
+
+![ending room](http://i.imgur.com/JTSFvqe.png)
+
+And finally, add a couple of detours:
+
+![detours](http://i.imgur.com/gJ1UWcW.png)
+
+At this point, we plug in suitable prefab rooms and call it a day. A boring, repetitive day.
+
+# mini-doughngeons
+Now, I really like the grid-based approach because it makes laying out rooms incredibly easy:
+- Rather than guessing-and-checking for space for a room, we just look for a free grid cell.
+- Creating neighbouring rooms just means placing a room one cell over.
+- We can easily ensure traversability between adjacent cells by leaving space for a path between them.
+
+However, with this approach, we're not going to get as interesting a layout as something like [this dungeon](http://www.pygame.org/shots/2007.png) since everything must conform to the grid. The reliance on the prefab rooms certainly doesn't help either.
+
+Ideally, we could retain the simple plugability of the grid with the more organic layout of those free range dungeons. With that in mind, I'm toying with the idea of what are effectively mini-dungeons, organic layouts within the grid.
+
+In theory, it's pretty straightforward. We lay out the dungeon on the grid as normal:
+
+![completed dungeon](http://i.imgur.com/gJ1UWcW.png)
+
+Then, we take a look at the rooms we placed. We merge any adjacent, regular rooms (i.e., not the beginning, end, or a special room like the miniboss) together into super-rooms:
+
+![super rooms](http://i.imgur.com/YOB4sV7.png)
+
+We can then carve our organic dungeon layouts into the area claimed by the super-rooms:
+
+![mini dungeons](http://i.imgur.com/EKdhi8i.png)
+
+How we carve out the mini-dungeon doesn't really matter as long as we still get the paths to the neighbours of the cells the mini-dungeon sits on ([Noel Berry's method](http://noelberry.ca/2013/06/procedural-generation-the-dungeons) is pretty much what I had in mind).
+
+# dunge-out
+I certainly haven't committed to this stuff, but I think it's worth considering. Using the grid lets us easily lay out the macroscopic features of the dungeon. Creating the mini-dungeons then gives us a more varied and, hopefully, more enjoyable dungeon while respecting the paths and boundaries we laid out at the higher level.
+
+One obvious downside is that we're writing double the dungeon code. That's, uh, that's a lot of code. At the end of the day, it might be easier to write everything in the off-the-grid style. The additional work to ensure we can build our critical path might be, comparatively, nothing.
+
+So, I dunno. We'll do something. Or maybe nothing. I mean, the dungeons we've got right now ain't bad and just a few more prefab rooms would probably go a long way.
+
+Yeesh. Who knows. Not me, that's for sure.
