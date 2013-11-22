@@ -1,0 +1,139 @@
+title: web working for the weekend
+date: 11-21-2013
+
+I'd like to think I'm a patient guy. I'm pretty good about waiting for things. One time, I spent over half an hour waiting for a kettle to boil. Turns out it wasn't plugged in. Maybe not too bright, but patient.
+
+You know who is in much need of this most precious virtue? Web browsers, for one. If your script takes just a little too long to finish, the browser throws up this big [hissy fit](http://windows.fyicenter.com/mozilla_firefox_unresponsive_script_warning.jpg). *Ridiculous*.
+
+Anyway, being the kind and considerate folks we are, let's see if we can't assuage that impatience some.
+
+# just five more minutes
+Games like Herrera which procedurally generate their levels often need to set aside a healthy chunk of time for the building process. To keep the users happy, you'll want to throw a progress screen over this. To keep the browsers happy, you'll want to do the work without blocking the main thread.
+
+In the JavaScript world, doing work in a non-blocking manner used to be a difficult proposition. Since things were only operating on a single thread, you'd have to do a bit of work, save your state, take a break so the rest of the world got some time to shine, then pick up where you left off.
+
+Yeah, it was a bit of a mess.
+
+Lucky for us, browsers are now offering [web workers](https://developer.mozilla.org/en-US/docs/Web/Guide/Performance/Using_web_workers). A web worker is effectively a separate thread which runs in the background and can communicate with the main window via message passing. Cool, right?
+
+So, hey, that puts us in a pretty good place. We can foist the level construction off on a web worker and display a nice progress screen until it finishes. We're talking about something like this:
+
+![web worker process](http://i.imgur.com/6cgGBR8.png)
+
+Sound good?
+
+# spotlight on the background
+It took a bit of, uh, twiddling, but it turns out, this isn't too hard.
+
+Transitioning from the existing, blocking code to the web worker stuff required a bit of rewriting, as we'll discuss later, but for the most part, it was just a matter of calling the level construction stuff from inside a web worker instead of the main thread. Simple as that.
+
+So, we create a web worker by giving it a script to run. Easy enough:
+
+```coffee
+worker = new Worker 'js/game/levels/build-script.js'
+```
+
+Once it's been created, the worker will automatically execute the contents of the given script. Hey, what's say we take a look at that script?
+
+```coffee
+importScripts '../../require.js'
+
+pendingLayout = null
+self.onmessage = (event) ->
+	pendingLayout = event.data
+
+require {
+		urlArgs: 'bust=' + (new Date()).getTime(),
+		baseUrl: '../../',
+	},
+	['game/levels'],
+	(levels) =>
+		construct = (layout) =>
+			postMessage(levels.construct layout)
+			self.close()
+
+		if pendingLayout?
+			construct pendingLayout
+		else
+			self.onmessage = (event) =>
+				construct event.data
+```
+
+Inside the worker, `importScripts` is used to load additional scripts. Thankfully, [require.js](http://requirejs.org/), the module manager I'm using, is all set to work inside of a web worker already, so once that was imported, we could just require modules as normal.
+
+```coffee
+importScripts '../../require.js'
+```
+
+Awkwardly, the path is relative to the location of the executing script, not the web page, hence the brittle `..`. Oh well. At this point, we can `require` the `levels` module (which, in turn, will require stuff like the `rooms` module).
+
+```coffee
+require {
+		urlArgs: 'bust=' + (new Date()).getTime(),
+		baseUrl: '../../',
+	},
+	['game/levels'],
+	(levels) =>
+		# the good stuff
+```
+
+Like I mentioned above, communication between the web worker and the main thread is done via message passing. Messages are sent with the `postMessage` method and received with the `onmessage` method. Since we're intending to pass a layout to the worker, we need to set `onmessage` to receive one.
+
+Before we can construct a level for a layout, we need to load the `levels` module. Since we don't have any guarantee about *when* the layout will be received, we actually end up with two different message handling behaviours. Initially, before the `levels` module is loaded, we set `onmessage` to take note of a *pending* layout:
+
+```coffee
+pendingLayout = null
+self.onmessage = (event) ->
+	pendingLayout = event.data
+```
+
+Once the module has been loaded, we check if we have a pending layout. If we do, we construct it immediately; otherwise, we set `onmessage` to construct the next layout it receives:
+
+```coffee
+if pendingLayout?
+	construct pendingLayout
+else
+	self.onmessage = (event) =>
+		layout = event.data
+		construct layout
+```
+
+Given the layout, we can construct it, send the completed level to the main thread, then terminate the worker:
+
+```coffee
+construct = (layout) =>
+	postMessage(levels.construct layout)
+	self.close()
+```
+
+We just have to hook up the main thread to receive a completed level, then we can pass the worker a layout, throw up our building screen, and sit tight until the worker finishes:
+
+```coffee
+worker = new Worker 'js/game/levels/build-script.js'
+worker.onmessage = (event) =>
+	@levelBuilt(event.data)
+
+layout = levelLayouts.create()
+worker.postMessage layout
+
+@buildingScreen = new BuildingScreen
+@buildingScreen.show()
+```
+
+And that's all basically there is to it. We've now got multithreaded JavaScript. As the kids say, *swagga swag*.
+
+# web worst
+There's two big things that tripped me up.
+
+First, when you send a message to the web worker, you're basically stuck sending a JSON structure - importantly, that means you can't have any functions on that son-of-a-gun. For me, making this work meant rewriting OO-style code in a procedural fashion. Bang away on some JSON, call it day.
+
+The second caveat is that, as far as I can tell, any scripts included in the web worker need to be served from the same domain as the script. Since I'm using a CDN for most of my libraries, this ain't too good. Luckily, a little rewriting (plus some duplication of [underscore's](http://underscorejs.org/) functionality) got rid of those external dependencies. Whoo.
+
+So, I dunno, the second point is a bit more of a bummer because you end up sacrificing either convenience or simplicity and it's just, *yeugh*. Still, something like level generation isn't likely to require a ton of libraries anyway, so it's not the end of the world.
+
+# worth the work
+The big question is, is using a web worker justified? Well, it's more effort than writing plain old blocking code, but certainly less complex than the ad hoc [CSP](http://en.wikipedia.org/wiki/Continuation-passing_style) one might otherwise use. Moreover, long-running blocking code really isn't an option - bad for the browser, bad for the user.
+
+There are penalties - cloning of transmitted data; repeated evaluation of scripts; other, uh, thready stuff - so they're not the sort of thing you want to pull out willy-nilly, but then, for short-running tasks, you've got the clumsy-but-loveable blocking code you've always had.
+
+So, hey, if you've got something that lends itself well to stewing away in the background for a while, web workers seem like the way to go.
