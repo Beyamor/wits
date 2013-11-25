@@ -41,6 +41,15 @@
     :class "project-container"
     :scrolling "no"}])
 
+(defmethod html-representation :source-only
+  [{{:keys [screenshot]} :implementation :keys [source title]}]
+  [:a
+   {:href source
+    :title title
+    :target "_blank"}
+   [:img
+    {:src screenshot}]])
+
 (defmethod html-representation :this-site
   [_]) ; Nothing!
 
