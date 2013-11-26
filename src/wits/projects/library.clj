@@ -35,7 +35,8 @@
   "ruin"
   "message-in-a-bottle"
   "herrera"
-  "sapce")
+  "sapce"
+  "peaceful-octopus-legends")
 
 (def all @all-projects)
 
