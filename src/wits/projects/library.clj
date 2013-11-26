@@ -36,7 +36,9 @@
   "message-in-a-bottle"
   "herrera"
   "sapce"
-  "peaceful-octopus-legends")
+  "peaceful-octopus-legends"
+  "slippy-slidey-ice-puzzle"
+  "miss-the-missile")
 
 (def all @all-projects)
 
