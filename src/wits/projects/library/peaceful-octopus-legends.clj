@@ -1,6 +1,9 @@
 (defproject
   "Peaceful Octopus Legends"
 
+  :category
+  :game
+
   :description
   "An ASCII shooter about accretion made for UVic GameDev's Game Jam I.
   Move with `WASD`. Move with the arrow keys. Open the store with `E`.

@@ -1,6 +1,9 @@
 (defproject
   "Slippy Slidey Ice Puzzle"
 
+  :category
+  :pcg
+
   :description
   "Procedurally generated \"slippy slidey ice puzzles.\"
   While level generation works, there's no guarantee that the player won't get stuck and shortcuts might exist. Maybe I'll fix that someday."
