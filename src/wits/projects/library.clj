@@ -14,31 +14,31 @@
   (dorun (map #(load (str "library/" %)) projects)))
 
 (load-projects
+  "poplar"
+  "miss-the-missile"
+  "space-colonization-tree"
+  "slippy-slidey-ice-puzzle"
   "candy"
+  "neptune-ocean-explorer"
+  "herrera"
   "beef-and-harp"
   "vikes-invaders"
   "endless-mazes"
   "chomp"
   "fruit-flies-attack-surprise"
   "colton-and-toms-good-time-text-adventure"
-  "neptune-ocean-explorer"
   "midpoint-displacement-armor"
-  "space-colonization-tree"
   "game-of-life"
   "pattern-aisle"
-  "words-in-the-sky"
   "evolute"
-  "poplar"
   "face-rater"
   "dabber"
   "breedxel"
   "ruin"
   "message-in-a-bottle"
-  "herrera"
   "sapce"
   "peaceful-octopus-legends"
-  "slippy-slidey-ice-puzzle"
-  "miss-the-missile")
+  "words-in-the-sky")
 
 (def all @all-projects)
 
