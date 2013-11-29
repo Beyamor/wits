@@ -1,0 +1,88 @@
+title: roguelim retro
+date: 11-29-2013
+
+Over the last couple of days, I crunch-jammed out (the functional, but not complete) *[roguelim](https://github.com/Beyamor/roguelim)*. *roguelim* is a tiny roguelike played through [Twitter](https://twitter.com/RogueLim).
+
+Or, I mean, it would be if, uh, I hadn't decided to bail on the project.
+
+Hey, whoa, don't go lecturing me about dedication and perseverance just yet. This was exploratory work anyway. I wanted to get a feel for writing a Twitter bot as well as [Node.js](http://nodejs.org/). So, lemme blast out a thoughtdump.
+
+# know the node
+This was my first project in Node. Of course, I'm not going to touch JavaScript itself if I can help it, so it was our main slam [CoffeeScript](http://coffeescript.org/) all the way. 
+
+Browser-based JavaScript doesn't natively have modules, but Node's [got that covered](http://nodejs.org/api/modules.html). It's a bit weird though in that it's tied very closely to the actual directory structure. For example, if you don't want to use a bunch of relative paths (you don't), then you have to put stuff in a `node_modules` folder. Compared to require.js' more flexible configuration options, it's limiting.
+
+When you `require` a module, you get an object containing that module's exports. So, like:
+
+```coffee
+entities = require 'rl/entities'
+```
+
+Which is fine, whatever, but if you want something like Python's `from entities import Player`, you'd be stuck with something like this in JavaScript:
+
+```coffee
+entities = require 'rl/entities'
+Player = entities.Player
+```
+
+Redundent code is virtual vomit, no doubt. Fortunately, CoffeeScript has destructuring, so we can do something a little more succinct:
+
+```coffee
+{Player} = entities.require 'rl/entities'
+```
+
+Righteous. That said, each import module needs its own `require` statement. Lotta typing, man.
+
+# thinking about syncing
+
+Looking at a particular module, Node's [`fs`](http://nodejs.org/api/fs.html) offers all the file system operations you could hope for. What's cool is that it offers them in both synchronous (blocking) and *asynchronous* forms. The async ones are neat because they open things up to concurrency. Great for server stuff. That's kinda a big part of Node's pitch, right?
+
+That said, having to chain callbacks is just painful. God help you if you want to do more than a couple of async operations in a row. Even CoffeeScript's super lightweight function syntax isn't a panacea.
+
+This got me thinking about Clojure's `core.async` [again](/blog/entries/callbacks-a-drag). Hide away the ickyness of callbacks and you've got a very powerful platform. Luckily, it looks like [other people](https://github.com/michaelsbradleyjr/node-clojurescript) are thinking about Clojure targeting Node so maybe we'll see something there.
+
+Yes, "ickyness". Callbacks are icky.
+
+# the way to play
+Anyway, `roguelim`. In my mind, users could tweet commands at the bot to make things happen. So, for example, `@RogueLim start` would create a new dungeon and `@RogueLim show dungeon` would show it.
+
+Obviously, going through Twitter is a bit more of a hassle than, say, typing away at the terminal. I mean, it's an essential part of the actual game experience, but as far as getting things set up and tested, not the way you want to go. This meant whipping up a separate command-line interface to the game.
+
+Fortunately, this was pretty easy to do. Each interface - the terminal and the twitterbot - didn't need to do much more than load up the appropriate dungeon and pass off the command text to be processed. Really, I'm only mentioning it to brag about how nice it was to cleanly separate the game proper from the interface.
+
+That said, I think it's worth remembering: make sure you can swap out interfaces. Someone - and, sorry, I can't track down the quote - once talked about how problematic hooking up unix programs can be since most are hardcoded to a pretty-looking, but hard to parse human interface instead of offering a programmatic one.
+
+But hey, Twitter.
+
+# talk about a twit
+I used the [`twit`](https://github.com/ttezel/twit) module for all my tweetering needs. I really recommend it, honestly. It's super easy to set up a stream of tweets and attach a tweet handler:
+
+```coffee
+twitter         = new Twit config
+myTweets        = twitter.stream 'user', with: 'user'
+myTweets.on "tweet", (tweet) ->
+	console.log "Got a tweet about the user!"
+```
+
+Okay, so maybe that one callback isn't *too* icky.
+
+Making a tweet isn't too bad either:
+
+```coffee
+twitter.post 'statuses/update',
+	{status: "Posting a tweet!"},
+	(err) -> console.log err if err?
+```
+
+All of the REST actions have that `location, params, callback` format, so it's easy to jump from the Twitter dev docs back to the application code.
+
+# you already tweeted that
+So, all told, everything went smoothly except for one critical detail: Twitter gets super huffy if you post the same tweet twice. In a game where you almost certainly have to walk in the same direction multiple times, this is pretty much a show stopper. You can't walk `west` then `west` again because Twitter straight up won't let you. Blarg.
+
+Since I ignore everything after the command itself, users can append gibberish to their tweets to get them accepted (`west withsomegibberish`, `west withsomeothergibberish`), but that's awkward to the point of being unusable.
+
+Brainmagician and Hawaii Jive-O superstar [admung](https://twitter.com/admung) suggested letting users enter multiple commands at once (`west west`) which mitigates the problem pretty well. The bot itself can also run into the repetition problem, but it'd be easy enough to, say, attach an action ID or something to differentiate tweets.
+
+That said, I think I'm going to leave this project as-is. If I stick with making bots, are a couple of other more appropriate game formats I might try (sudokus, Battleships, etc.). Otherwise, I've got a few more traditional text-generators I might try.
+
+Regardless, this was a lot of fun and hey, I learned things, so that's a win. Good job, us.
