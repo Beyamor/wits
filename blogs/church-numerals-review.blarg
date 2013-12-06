@@ -1,0 +1,82 @@
+title: church numerals review
+date: 12-5-2013
+
+I'm reading through a bit of [SICP](http://mitpress.mit.edu/sicp/full-text/book/book-Z-H-4.html#%_toc_start) right now and came across an example problem which casually throws [Church Numerals](http://en.wikipedia.org/wiki/Church_numeral) in your face.
+
+Man, listen, I'm pretty dumb. I know that. You know that. People I pass on the street know that, deep in their hearts and with the certainty of *fact*.
+
+Anyway, Church Numerals. I stumble on 'em every time I come across 'em. Them and the rest of lambda calculus really, jeez, it just falls right out of my head. So, let me go ahead and capture my understanding in a blog before it escapes again.
+
+Church Numerals are just natural numbers, simple as that. The thing is, though, and this is neat, they're numbers *without* numbers - they're encoded with functions. It's, okay, check it.
+
+Instead of thinking of numbers as, well, numbers, we can think of them as things which can apply a function some number of times. Whoa, easy there, don't worry, we'll take it slow.
+
+Okay, so, let's start with zero. Our function `zero` will take a function `f` and return a function which will apply it *zero* times. Easy-peasy:
+
+```coffee
+zero =
+	# given f
+	(f) ->
+		# return a function of x
+		(x) ->
+			# which doesn't apply f to x
+			return x
+```
+
+Now, the increment function `inc` will take a number and return its successor - i.e., a function that applies `f` one additional time. Shouldn't be too bad:
+
+```coffee
+inc =
+	# given n-1
+	(prevN) ->
+		# return a function which takes f
+		(f) ->
+			# and returns a function of x
+			(x) ->
+				# which applies f to x n-1 times
+				result = prevN(f)(x)
+
+				# and applies f once more
+				return f(result)
+```
+
+Given `inc`, we can define a couple of other numbers for the hell of it:
+
+```coffee
+one	= inc zero
+two	= inc one
+```
+
+Now that we've our beautiful-looking numbers, how do we use 'em? Remember, given a number, we can pass it a function `f` and it'll return a function which applies `f` n times. So, let's say we were really interested in adding periods to things. We could write an `addPeriod` function:
+
+```coffee
+addPeriod = (s) ->
+	return s + "."
+```
+
+And we use this with a string, obvs:
+
+```coffee
+addPeriod("")
+# => "."
+```
+
+Using our numbers, we can apply this bad boy zero times:
+
+```coffee
+zero(addPeriod)("")
+# => ""
+```
+
+How dang exciting is that? Our zero produced zero periods by applying `addPeriod` zero times! Just like you'd expect!
+
+Okay, I can see it in your eyes. You want something with a little more razzle-dazzle. Well, prepare to get your mind blown. Let's check out the number two:
+
+```coffee
+two(addPeriod)("")
+# => ".."
+```
+
+Rad, right? `two` calls `one`, `one` calls `zero`, `zero` returns `""`, `one` adds a period, and finally, `two` adds another period. Couldn't be simpler.
+
+Boy, ain't this grand? I can't imagine why anybody would represent numbers the old, boring way ever again.
