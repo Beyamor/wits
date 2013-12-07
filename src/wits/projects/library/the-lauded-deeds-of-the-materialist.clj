@@ -6,7 +6,7 @@
 
   :implementation
   {:type :flash
-   :dimensions [600 :by 600]
+   :dimensions [640 :by 480]
    :swf "/projects/the-lauded-deeds-of-the-materialist/game.swf"}
 
   :short-description
