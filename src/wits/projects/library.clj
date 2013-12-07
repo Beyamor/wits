@@ -20,6 +20,7 @@
   "slippy-slidey-ice-puzzle"
   "candy"
   "neptune-ocean-explorer"
+  "the-lauded-deeds-of-the-materialist"
   "herrera"
   "beef-and-harp"
   "vikes-invaders"
