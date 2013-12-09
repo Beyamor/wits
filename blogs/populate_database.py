@@ -45,7 +45,13 @@ def populate():
 						if prop == "title":
 							title = val
 						elif prop == "date":
-							date = datetime.strptime(val, "%m-%d-%Y")
+							# try with hour first
+							try:
+								date = datetime.strptime(val, "%m-%d-%Y %I:%M%p")
+
+							# then without hour
+							except ValueError:
+								date = datetime.strptime(val, "%m-%d-%Y")
 				else:
 					content += line
 
@@ -54,7 +60,7 @@ def populate():
 		url = re.sub("[^\w\-]", "", url)
 		title = db.escape_string(title)
 		content = db.escape_string(content)
-		date = date.strftime("%Y-%m-%d")
+		date = date.strftime("%Y-%m-%d %H:%M:%S")
 
 		cur.execute("replace into blogs set url=\"%s\", title=\"%s\", date=\"%s\", content=\"%s\"" %
 				(url, title, date, content))
