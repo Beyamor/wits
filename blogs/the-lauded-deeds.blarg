@@ -1,0 +1,47 @@
+title: the lauded deeds
+date: 12-09-2013
+
+Over the last week or so, I made a game. Yay. Go me.
+
+You can play The Lauded Deeds of the Materialist [here](/projects/the-lauded-deeds-of-the-materialist).
+
+Let's talk about what I was trying to express and how I achieved it.
+
+# decisions decisions
+With TLDofM, I wanted to take a very familiar premise - get points for shooting stuff - and push the player to think about calculated risk/reward. It's not enough that the player always gets points for shooting stuff; there should be some kind of trade-off they have make trying to get those points.
+
+See, it's kind of a trope that the player automatically gets points for taking out a bad guy, right? But that, of course, leaves us somewhat bereft of interesting decisions. There's no downside to it; no reason to not try to get points.
+
+TLDofM presents an easy solution to this: instead of fatalistically increasing the score, enemies drop coins which the player must collect. The cool thing is that this introduces risk into the process; the player is pushed into further action. If they decide to go after their beloved points, they're deciding to try and take on all of the other baddies rather than retreating to safety.
+
+But, as you might've guessed, this introduces a problem in turn: if the coins stay where they are, the player can just wait until all of the enemies are gone, then scoop up the goods. We haven't quite solved the problem, we've just delayed the inevitable accumulation of points.
+
+Once again, it's not hard to find a solution. TLDofM tackles this by making coins disappear after a couple of seconds. Simple, but it forces the player to decide, and quickly, whether the points are worth the risk.
+
+Baby, we've cooked us up a trade-off.
+
+# spending spree
+Of course, just getting points isn't super interesting, is it? I mean, what's the point of a point? Not much, I can tell you that. The problem then is giving the player a reason for their collection.
+
+An idea I've toyed with before, and one which worked pretty well here, is using those points as currency. The player can spend points to improve their chance of survival - and, in doing so, their chance of getting more points. Being able to trade in points for perks does a wonderful job of making them desirable.
+
+(it didn't occur to me at the time, but Spelunky does exactly this)
+
+I wanted to keep TLDofM uncomplicated, so I eschewed character upgrades in favour of buying (increasingly expensive) lives. This poses a big question to the player: do they estimate the price of a life to be worth it? Can they recoup that cost?
+
+Buying lives actually feeds into the risk/reward of collecting coins really well. If they go after the coins, they could obtain enough to purchase another life; on the other hand, they risk losing one. The player has to evaluate the economics of mortality.
+
+Dang, "economics of mortality" would be bitchin' title.
+
+# a -> b
+Having established the higher-level design goals and the mechanics supporting them, the rest was just a matter of solving small design issues:
+
+- Enemy spawning is unpredictable? Have them fade into existence.
+- Shooting an enemy doesn't demand any thought? Introduce an enemy which becomes more problematic after you shoot it.
+- Stuck with programmer graphics? Tell yourself lies about how nobody will notice.
+
+I guess this is all game design is, really. Recognize a problem and propose a solution to it; repeat until all problems are solved or the money runs out. Still, being aware of its almost axiomatic nature made design feel as easy and logical as snapping together Lego.
+
+Anyway, while I think TLDofM exposes some interesting ideas, the important question is, is it fun? Well, you can be judge of that.
+
+(but no, probably not, c'mon, I suck)
