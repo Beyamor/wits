@@ -1,0 +1,230 @@
+title: more monads
+date: 12-09-2013 6:00pm
+
+Recently, I answered a question about [implementing the IO monad in Clojure](http://stackoverflow.com/questions/20431964/what-is-the-clojure-equivalent-for-haskells-operator/20438235#20438235). All well and good, except that it took me longer than I would have liked to get back into the swing of reasoning with monads. This is the sort of thing I want to be as natural as, if not breathing, at least working with classes, especially since it's a stepping stone to other concepts like comonads and arrows.
+
+To put myself on firmer ground, I took a day or so to write, from scratch, a couple of monads as well the supporting structure.
+
+We've talked about [monads before](/blog/entries/really-decent-parser), but implementing a more general monadic system is interesting. Let's take a look at how it can be done.
+
+# memories of a monad
+Remember the basics of monads? A monad is defined by a pair of key functions: `return`, which wraps a regular value in a monadic context, and `bind`, which unwraps a monadic value and passes the regular value inside to a function which produces a new monadic value. We can also define `zero` and `plus` for extra monadic bling. 
+
+So, okay, right. Let's get everybody's head in the game with an example. The sequence monad `Seq` is probably the easiest to wrap your head around. A monadic value is a list; a monadic function takes a value and produces a list. It's monad definition is as follows:
+
+```clojure
+(defn return
+  ; given x
+  [x]
+  ; wrap it in a list
+  (list x))
+
+(defn bind
+  ; given a list xs
+  ; and a function 
+  [xs f]
+  ; map f over each x in xs
+  ; and combine the result in a single list
+  (mapcat f xs))
+
+(def zero
+ ; the zero is an empty list
+ (list))
+
+(def plus
+  ; concat combines lists
+  concat)
+```
+
+Simple enough, right?
+
+# binging on binding
+Of course, we have a bunch of different types of monads. All of our good friends: `Maybe`, `Err`, `Writer`, and the rest. Each of these has its own definitions for `return`, `bind`, `zero`, and `plus`. To avoid clashes, we could differentiate the function names - `seq-return` and `maybe-return` - but there are some things we want to write for *any* monad using the generic `bind`, `return`, and so on without worry about *which* monad it will actually be used with.
+
+So, there's our problem. We want to write in terms of the abstract `return` *et al.* and define them later.
+
+In something like Haskell, this is would be a nonissue. We just set up a [typeclass](http://www.haskell.org/tutorial/classes.html) describing the monad definition and implement it for each monad. Since it's statically typed, the compiler can automatically determine *which* monad we're trying to use and swap in the correct `return`, `bind`, and so forth.
+
+Because Clojure is dynamically typed, we don't get that automatic inference. Instead, we'll have to explicitly supply the context. Once we've got a monad, we need to make `return` and the rest to use that monad's definitions.
+
+Fortunately, Clojure offers us a handy tool here - [`binding`](http://clojuredocs.org/clojure_core/clojure.core/binding). `binding` lets us redefine things within its scope. This means we can say, "Hey, I'm using Seq here" and, using `binding`, redefine `return` and the others to use `Seq`'s implementations.
+
+Let's write a macro `with` which will allow us to set up the monadic context; it'll bind the definitions so we can use them in its body. The monad we pass in will just be a map containing the pieces of its definition.
+
+```clojure
+(defmacro with
+  [monad & body]
+  `(let [monad# ~monad]
+    ; set up definitions
+    (binding [return (:return monad#)
+              bind   (:bind monad#)
+              zero   (:zero monad#)
+              plus   (:plus monad#)]
+      ; execute body in that context
+      ~@body)))
+```
+
+Okay. So, we can define `Seq` as a map of definitions:
+
+```clojure
+(def Seq
+  {:return seq-return
+   :bind   seq-bind
+   :zero   seq-zero
+   :plus   seq-plus})
+```
+
+Then, we can pass it to `with` and go about our monad business in the context of `Seq`:
+
+```clojure
+(with Seq
+  (return 1))
+; => [1]
+```
+
+# (def better)
+To clean up the definition of a monad a little, we can write a quick macro called `defmonad`. Completely unnecessary, but it alleviates some of the superfluous details.
+
+```clojure
+(defn keywordify-keys
+  [m]
+  (into {}
+    (for [[k v] m]
+      [(keyword k) v])))
+
+(defmacro defmonad
+  [name & {:as impl}]
+  `(def ~name ~(keywordify-keys impl)))
+```
+
+Let's define `Seq` with `defmonad`. This is identical to the implementation above:
+
+```clojure
+(defmonad Seq
+  return seq-return
+  bind   seq-bind
+  zero   seq-zero
+  plus   seq-plus)
+```
+
+# do it up
+In my mind, the best feature of Haskell's monads is the [do notation](http://en.wikibooks.org/wiki/Haskell/do_Notation). This takes a series of nested binding calls and cleans it up real nice. To make our monads useful, we want to appropriate this syntax. For example, instead of something ugly like this:
+
+```clojure
+(with Seq
+  (bind [1 2 3]
+    (fn [x]
+      (bind [:a :b :c]
+        (fn [y]
+          [x y])))))
+
+; => ([1 :a] [1 :b] [1 :c]
+;     [2 :a] [2 :b] [2 :c]
+;     [3 :a] [3 :b] [3 :c])
+```
+
+We want to be write something beautiful like this:
+
+```clojure
+(with Seq
+  (<- [x [1 2 3]
+       y [:a :b :c]]
+     (return [x y])))
+```
+
+This transformation is actually pretty easy: we just bind a function naming the variable on the left-hand-side of each expression to the right-hand-side.
+
+```clojure
+(defmacro <-
+  [bindings & body]
+  (let [bindings (->> bindings
+                   (partition 2)
+                   reverse)]
+      (reduce
+        (fn [body [lhs rhs]]
+          `(bind ~rhs
+             (fn [~lhs]
+               ~body)))
+        `(do ~@body)
+        bindings)))
+```
+
+Classy.
+
+# maybe some more
+At this point, we've got a pretty nice system in place. We've been giving `Seq` the spotlight, but let's consider another monad. `Maybe` captures possible failures. We either have a value or nothing. Trying to apply any function to nothing will get you more nothing.
+
+In Haskell, the two states of `Maybe` are encoded in a datatype: `data Maybe a = Nothing | Just a`. We could do something similar with, say, Clojure's record types, but that's not exactly idiomatic. Instead of wrapping stuff up in new types, we'll treat `nil` as our `Nothing` and everything else as, uh, not nothing:
+
+```clojure
+(defmonad Maybe
+  return identity
+  bind   (fn [x f]
+           (when-not (nil? x)
+             (f x))))
+
+(with Maybe
+  (<- [x 1
+       y (inc x)]
+    (return y)))
+; => 2
+
+(with Maybe
+  (<- [x nil
+       y (inc x)]
+    (return y)))
+; => nil
+```
+
+# write about it
+Another interesting monad is `Writer`. `Writer` values are of the form `[value, message]`. The monadic glue takes care of joining messages together:
+
+```clojure
+(defmonad Writer
+  return (fn [x]
+           [x, empty-log])
+
+  bind   (fn [[x, existing-log] f]
+           (let [[y, additional-log] (f x)]
+             [y (append existing-log
+                        additional-log)])))
+```
+
+Okay, cool, but what are `empty-log` and `append`? Mm. Well. Uh. Yeah.
+
+See, we actually want to be able to configure our `Writer`. We could, say, append messages to one long string or, we could add messages to the back of a list.
+
+In Haskell, this is type-system stuff once again. The `Writer` type is dependent upon some additional type for the log. What are we going to do in Clojure? Well, hey, a monad is just a map. Let's just pass the `Writer` its dependencies dynamically and close over them:
+
+```clojure
+(defn Writer
+  [{:keys [empty-log append]}]
+  {:return (fn [x]
+             [x, empty-log])
+
+   :bind (fn [[x, existing-log] f]
+           (let [[y, additional-log] (f x)]
+             [y (append existing-log
+                        additional-log)]))})
+
+(with (Writer {:empty-log ""
+               :append str})
+  (<- [x [1, "one!"]
+       y [2, "two!"]]
+    (return (+ x y))))
+
+; => [3 "one!two!"]
+
+(with (Writer {:empty-log []
+               :append concat})
+  (<- [x [1, ["one!"]]
+       y [2, ["two!"]]]
+    (return (+ x y))))
+
+; => [3 ["one!"
+;        "two!"]]
+```
+
+Neat, huh? So, that solves that. We can push our dependencies to runtime with plain ol' functions. That also means you can select those dependencies on the fly. Hell, if you wanted to, you could select the entire monad itself at runtime.
+
+So, that's that. Between functions, macros, and Clojure's core library, we can whip up a decent monad system. Not too shabby. You can check out the whole thing [here](https://github.com/Beyamor/momo).
