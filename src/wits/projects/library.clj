@@ -39,7 +39,8 @@
   "message-in-a-bottle"
   "sapce"
   "peaceful-octopus-legends"
-  "words-in-the-sky")
+  "words-in-the-sky"
+  "gal")
 
 (def all @all-projects)
 
