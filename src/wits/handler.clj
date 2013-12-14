@@ -20,7 +20,8 @@
            blog/all
            code/all
            projects/all
-           (route/resources "/")
+           (route/files "/"
+                        {:root (get (System/getenv) "WITS_FILES")})
            (route/not-found "Page not found"))
 
 (def app
