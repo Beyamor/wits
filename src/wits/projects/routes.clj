@@ -18,6 +18,7 @@
                 []
                 (->
                   projects/all
+                  (->> (remove :hidden))
                   (->> (map presentation/add-properties))
                   (view/collection pjax?)))
 
