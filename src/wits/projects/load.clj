@@ -5,7 +5,7 @@
 
 (defentity projects)
 
-(def project-list (-> (select* projects) (order :ordering :desc)))
+(def project-list (-> (select* projects) (order :ordering :asc)))
 
 (defn load-project
   [project]
