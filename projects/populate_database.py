@@ -24,10 +24,10 @@ cur.execute("delete from projects;")
 ordering = []
 with open("ordering", "r") as f:
 	for line in f:
-		ordering.append(line.strip())
+		ordering.append(line.strip().lower())
 
 def order(project):
-	title = project[TITLE]
+	title = project[TITLE].lower()
 	if title in ordering:
 		return ordering.index(title)
 	else:
