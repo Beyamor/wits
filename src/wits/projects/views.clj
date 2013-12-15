@@ -8,7 +8,6 @@
   (:require [wits.web.pages :as pages]
             [wits.web.html :as html]
             [wits.web.pjax :as pjax]
-            [wits.projects.library :as library]
             [clojure.data.json :as json]))
 
 (defn preview
