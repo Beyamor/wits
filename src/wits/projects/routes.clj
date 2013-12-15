@@ -3,7 +3,6 @@
         [hiccup.page :only [html5 include-js]]
         [wits.web.pjax :only [PJAX]])
   (:require [wits.projects.views :as view]
-            [wits.projects.library :as projects]
             [wits.projects.load :as load]
             [wits.projects.presentation :as presentation]
             [wits.web.apps :as apps]
