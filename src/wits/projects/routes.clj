@@ -4,6 +4,7 @@
         [wits.web.pjax :only [PJAX]])
   (:require [wits.projects.views :as view]
             [wits.projects.library :as projects]
+            [wits.projects.load :as load]
             [wits.projects.presentation :as presentation]
             [wits.web.apps :as apps]
             [wits.web.pages :as pages]
@@ -17,7 +18,7 @@
            (PJAX "/projects"
                 []
                 (->
-                  projects/all
+                  (load/all)
                   (->> (remove :hidden))
                   (->> (map presentation/add-properties))
                   (view/collection pjax?)))
@@ -26,7 +27,7 @@
                  [url]
                  (->
                    url
-                   projects/by-url
+                   load/by-url
                    presentation/add-properties
                    presentation/full-project
                    (view/full-project pjax?)))
@@ -35,7 +36,7 @@
                 [url]
                 (->
                   url
-                  projects/by-url
+                  load/by-url
                   presentation/add-properties
                   presentation/for-canvas
                   pages/content-wrapper))
