@@ -2,7 +2,6 @@
   (:use hiccup.element
         [hiccup.page :only [html5]]
         [hiccup.util :only [escape-html]]
-        [markdown.core :only [md-to-html-string]]
         [wits.util :only [-#> -#>>]]
         [wits.web.html :only [sections]])
   (:require [wits.web.pages :as pages]
@@ -37,7 +36,7 @@
    [:div.info
     [:div.title title]
     [:div.summary
-     [:p short-description]]
+     short-description]
     [:div.check-it-out (link-to {:class "project-link"} url "check it out")]]])
 
 (defn collection
@@ -102,4 +101,4 @@
         html-representation
         (when source (link-to {:class "source" :target "_blank"} source "source"))]
        [:div.description
-        (-> description (.replace "\n", "\n\n") md-to-html-string)])}))
+        description])}))

@@ -35,6 +35,6 @@ whenPageLoads '/projects', ->
 				$('.showcase > .screenshot img').attr 'src', data['showcase']
 				$('.showcase .project-link').attr 'href', data['url']
 				$('.showcase > .info > .title').text data['title']
-				$('.showcase > .info > .summary > p').text data['short-description']
+				$('.showcase > .info > .summary').html data['short-description']
 
 				scrollToTop()

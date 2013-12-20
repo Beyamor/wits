@@ -2,6 +2,7 @@
   (:use [hiccup.page :only [include-js]]
         [hiccup.element :only [link-to image]]
         [hiccup.util :only [escape-html]]
+        [markdown.core :only [md-to-html-string]]
         [wits.util :only [flatten-lists assoc-if-missing]])
   (:require [wits.web.html :as html]
             [wits.web.apps :as apps]))
@@ -77,3 +78,16 @@
     (assoc :url (str "/projects/" (html/urlify title)))
     (assoc-if-missing :description "")
     (#(assoc-if-missing % :short-description (-> % :description clojure.string/split-lines first)))))
+
+(defn markdownify
+  [project]
+  (-> project
+    (update-in [:description] #(.replace % "\n" "\n\n"))
+    (update-in [:description] md-to-html-string)
+    (update-in [:short-description] md-to-html-string)))
+
+(defn prepare
+  [project]
+  (-> project
+    add-properties
+    markdownify))

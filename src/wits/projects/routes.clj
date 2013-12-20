@@ -19,7 +19,7 @@
                 (->
                   (load/all)
                   (->> (remove :hidden))
-                  (->> (map presentation/add-properties))
+                  (->> (map presentation/prepare))
                   (view/collection pjax?)))
 
            (PJAX "/projects/:url"
@@ -27,7 +27,7 @@
                  (->
                    url
                    load/by-url
-                   presentation/add-properties
+                   presentation/prepare
                    presentation/full-project
                    (view/full-project pjax?)))
 
@@ -36,7 +36,7 @@
                 (->
                   url
                   load/by-url
-                  presentation/add-properties
+                  presentation/prepare
                   presentation/for-canvas
                   pages/content-wrapper))
 
