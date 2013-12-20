@@ -64,13 +64,14 @@
        [:div
         [:div.collection
          [:div.categories
-          (for [[category id] [["all" "all"]
-                               ["games" "games"]
-                               ["procedural generation" "pcg"]]]
+          (for [[label category] [["all" "all"]
+                                  ["games" "game"]
+                                  ["procedural generation" "pcg"]]]
             [:div
-             {:id (str "collection-category-" id)
-              :class (str "category" (when (= "all" id) " selected"))}
-             category])]
+             {:class (str "category"
+                          (when (= "all" category) " selected"))
+              :data-category category}
+             label])]
 
          [:div.previews
           (for [i (range (count projects))

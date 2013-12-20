@@ -6,10 +6,6 @@ whenPageLoads '/projects', ->
 		$el.addClass 'selected'
 		# scrollTo $('.collection')
 
-	$('#collection-category-all').click ->
-		$previews.show()
-		selectCategory $(this)
-
 	showCategory = (category) ->
 		$previews.each (_, el) ->
 			$el = $(el)
@@ -19,13 +15,14 @@ whenPageLoads '/projects', ->
 			else
 				$el.hide()
 
-	$('#collection-category-games').click ->
-		showCategory 'game'
-		selectCategory $(this)
-
-	$('#collection-category-pcg').click ->
-		showCategory 'pcg'
-		selectCategory $(this)
+	$('.collection > .categories > .category').click ->
+		$this = $(this)
+		category = $this.data 'category'
+		if category is 'all'
+			$previews.show()
+		else
+			showCategory category
+		selectCategory $this
 
 	$previews.each (_, preview) ->
 		$preview = $(preview)
