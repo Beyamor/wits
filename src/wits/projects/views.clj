@@ -1,6 +1,6 @@
 (ns wits.projects.views
   (:use hiccup.element
-        [hiccup.page :only [html5]]
+        [hiccup.page :only [html5 include-css]]
         [hiccup.util :only [escape-html]]
         [wits.util :only [-#> -#>>]]
         [wits.web.html :only [sections]])
@@ -9,21 +9,27 @@
             [wits.web.pjax :as pjax]
             [clojure.data.json :as json]))
 
+(def categories
+  [["all" "all"]
+   ["games" "game"]
+   ["procedural generation" "pcg"]
+   ["art" "art"]])
+
 (defn preview
   "A Hiccup data structure for the preview of some project."
   [{:keys [url title thumbnail short-description description]}]
   [:div
    (link-to (str "/projects/" url)
-                   [:div.project-preview
-                    (sections
-                      :thumbnail (image thumbnail)
-                      :info (sections
-                              :title title
-                              :description (or short-description description)))])])
+            [:div.project-preview
+             (sections
+               :thumbnail (image thumbnail)
+               :info (sections
+                       :title title
+                       :description (or short-description description)))])])
 
 (defn filter-by-category
   "Creates a filter function which
-   returns only the projects in the given category"
+  returns only the projects in the given category"
   [category projects]
   (filter #(= category (:category %)) projects))
 
@@ -32,7 +38,7 @@
   [:div.showcase
    [:div.screenshot
     (link-to {:class "project-link"} url
-      (image showcase-image))]
+             (image showcase-image))]
    [:div.info
     [:div.title title]
     [:div.summary
@@ -63,9 +69,7 @@
        [:div
         [:div.collection
          [:div.categories
-          (for [[label category] [["all" "all"]
-                                  ["games" "game"]
-                                  ["procedural generation" "pcg"]]]
+          (for [[label category] categories]
             [:div
              {:class (str "category"
                           (when (= "all" category) " selected"))
@@ -109,8 +113,8 @@
   since we don't want it fitting within another page's content."
   [project]
   (html5
+    [:head
+     (include-css "/css/full-page.css")]
     [:body
-     {:style "margin: 0px; padding: 0px; height: 100%;"} ; hardcode that css
      [:iframe
-      {:style "position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; border: 0px;" ; yeah do it hardcore
-       :src (-> project :implementation :url)}]]))
+       {:src (-> project :implementation :url)}]]))
