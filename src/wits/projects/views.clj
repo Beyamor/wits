@@ -1,6 +1,6 @@
 (ns wits.projects.views
   (:use hiccup.element
-        [hiccup.page :only [html5 include-css]]
+        [hiccup.page :only [html5 include-css include-js]]
         [hiccup.util :only [escape-html]]
         [wits.util :only [-#> -#>>]]
         [wits.web.html :only [sections]])
@@ -114,7 +114,9 @@
   [project]
   (html5
     [:head
-     (include-css "/css/full-page.css")]
+     (include-css "/css/full-page.css")
+     (include-js "/js/lib/jquery-1.9.1.min.js")
+     (include-js "/js/full-page-project.js")]
     [:body
      [:iframe
        {:src (-> project :implementation :url)}]]))
