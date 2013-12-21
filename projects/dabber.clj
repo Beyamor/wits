@@ -1,11 +1,14 @@
 {:title
-  "Dabber"
+ "Dabber"
 
-  :implementation
-  {:type :html-page
-   :dimensions [800 :by 600]
-   :url "/projects/dabber/index.html"}
+ :category
+ :art
 
-  :description
-  "Paint a painting with a few dabs.
-  (heads up: bigger pictures might tank on CPU or memory.)"}
+ :implementation
+ {:type :html-page
+  :dimensions [800 :by 600]
+  :url "/projects/dabber/index.html"}
+
+ :description
+ "Upload a picture to paint a painting.
+ (heads up: bigger pictures might tank on CPU or memory.)"}
