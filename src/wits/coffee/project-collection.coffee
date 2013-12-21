@@ -30,10 +30,12 @@ whenPageLoads '/projects', ->
 		$('a', $preview).click (e) ->
 			unless e.ctrlKey
 				e.preventDefault()
-				data = projectCollection[$preview.data('id')]
+
+				data		= projectCollection[$preview.data('id')]
+				isFullPage	= data['full-page?']
 
 				$('.showcase > .screenshot img').attr 'src', data['showcase']
-				$('.showcase .project-link').attr 'href', data['url']
+				$('.showcase .project-link').attr('href', data['url']).toggleClass('pjax', !isFullPage)
 				$('.showcase > .info > .title').text data['title']
 				$('.showcase > .info > .summary').html data['short-description']
 

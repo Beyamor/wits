@@ -102,3 +102,15 @@
         (when source (link-to {:class "source" :target "_blank"} source "source"))]
        [:div.description
         description])}))
+
+(defn full-page
+  "A full-page full-project view.
+  Note that this shouldn't be used with PJAX
+  since we don't want it fitting within another page's content."
+  [project]
+  (html5
+    [:body
+     {:style "margin: 0px; padding: 0px; height: 100%;"} ; hardcode that css
+     [:iframe
+      {:style "position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; border: 0px;" ; yeah do it hardcore
+       :src (-> project :implementation :url)}]]))

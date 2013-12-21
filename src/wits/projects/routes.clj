@@ -7,13 +7,14 @@
             [wits.projects.presentation :as presentation]
             [wits.web.apps :as apps]
             [wits.web.pages :as pages]
-            wits.projects.backends.message-in-a-bottle))
+            wits.projects.backends.message-in-a-bottle
+            [lonocloud.synthread :as ->]
+            [ring.util.response :as resp]))
 
 (defroutes project-backends
            wits.projects.backends.message-in-a-bottle/all-routes)
 
 (defroutes all
-
            (PJAX "/projects"
                 []
                 (->
@@ -28,8 +29,12 @@
                    url
                    load/by-url
                    presentation/prepare
-                   presentation/full-project
-                   (view/full-project pjax?)))
+                   (->/as project
+                          (->/if (:full-page? project)
+                                 view/full-page
+                                 (->
+                                   presentation/full-project
+                                   (view/full-project pjax?))))))
 
            (GET "/projects/:url/canvas"
                 [url]

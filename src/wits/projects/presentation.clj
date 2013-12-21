@@ -5,7 +5,8 @@
         [markdown.core :only [md-to-html-string]]
         [wits.util :only [flatten-lists assoc-if-missing]])
   (:require [wits.web.html :as html]
-            [wits.web.apps :as apps]))
+            [wits.web.apps :as apps]
+            [lonocloud.synthread :as ->]))
 
 (defmulti html-representation
   "Based on the type of the implementation,
@@ -77,7 +78,9 @@
     (assoc :showcase (str "/images/projects/" (html/urlify title) "-showcase.png"))
     (assoc :url (str "/projects/" (html/urlify title)))
     (assoc-if-missing :description "")
-    (#(assoc-if-missing % :short-description (-> % :description clojure.string/split-lines first)))))
+    (#(assoc-if-missing % :short-description (-> % :description clojure.string/split-lines first)))
+    (->/when (= (-> project :implementation :type) :full-html-page)
+             (assoc :full-page? true))))
 
 (defn markdownify
   [project]

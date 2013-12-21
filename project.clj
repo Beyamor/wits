@@ -15,7 +15,8 @@
                            [log4j "1.2.15" :exclusions [javax.mail/mail
                                                         javax.jms/jms
                                                         com.sun.jdmk/jmxtools
-                                                        com.sun.jmx/jmxri]]]
+                                                        com.sun.jmx/jmxri]]
+                           [lonocloud/synthread "1.0.4"]]
             :plugins [[lein-ring "0.8.3"]]
             :ring {:handler wits.handler/app}
             :profiles {:prod {:ring {:port 13994}}})
