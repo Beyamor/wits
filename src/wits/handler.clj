@@ -5,7 +5,6 @@
   (:require [compojure.handler :as handler]
             [compojure.route :as route]
             [wits.blog.routes :as blog]
-            [wits.code.routes :as code]
             [wits.projects.routes :as projects]
             [wits.web.pages :as wits-pages]
             [wits.web.pjax :as pjax]
@@ -18,7 +17,6 @@
                         {:css
                          ["/css/home.css"]}))
            blog/all
-           code/all
            projects/all
            (route/files "/"
                         {:root (get (System/getenv) "WITS_FILES")})
