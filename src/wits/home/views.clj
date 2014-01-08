@@ -32,4 +32,6 @@
 
      :content
      [:div.page
-      (md-to-html-string content)]}))
+      (-> content
+        md-to-html-string
+        html->hiccup)]}))
