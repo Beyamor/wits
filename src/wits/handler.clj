@@ -4,6 +4,7 @@
         [hiccup.middleware :only (wrap-base-url)])
   (:require [compojure.handler :as handler]
             [compojure.route :as route]
+            [wits.home.routes :as home]
             [wits.blog.routes :as blog]
             [wits.projects.routes :as projects]
             [wits.web.pages :as wits-pages]
@@ -11,11 +12,7 @@
             [ring.util.response :as ring-resp]))
 
 (defroutes all-routes
-           (pjax/PJAX "/" []
-                      (pjax/page
-                        wits-pages/main pjax?
-                        {:css
-                         ["/css/home.css"]}))
+           home/all
            blog/all
            projects/all
            (route/files "/"
