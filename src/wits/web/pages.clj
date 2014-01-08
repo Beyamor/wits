@@ -41,7 +41,7 @@
   (add-pjax-links
     [:div#header
       [:div.title
-       "words in the sky"]
+       (link-to "/" "words in the sky")]
       [:div.navigation
        (link-to "/blog" "blog")
        (link-to "/projects" "projects")]]))
