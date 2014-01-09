@@ -1,0 +1,49 @@
+title: break on through
+date: 01-08-2014
+
+I've been graduated for, good lord, a little over four months now. Some people might take a fortune of time like that and spend it doing something exciting and horizon-expanding like travelling. Me? Well, I'm more of a hide-in-my-room kind of guy.
+
+What've I been doing with this time then? Some might claim long stints in front of my computer were symptomatic of a bone-deep laziness. Faced with this accusation, I throw up my hands and protest (in a squeaky voice) that this was my long-desired *PROJECT TIME*.
+
+As my accuser turns away, I quickly drop my hands. Holding them up there is a lot of effort for these lazy bones.
+
+Anyway, much as I've enjoyed taking this break and getting a chance to poke at some ideas which had been kicking around in my head, it's time for me to ~~mess up some interviews~~ find a job. However, I thought it'd be nice to have a summary of my work.
+
+This isn't exactly an exhaustive list - there's a bunch stuff that never ended up online, whether because it was too uninteresting or too underdeveloped or whatever - but it is, indisputably, a list, and, well, there's something to be said for that.
+
+# Games
+- [Poplar](/projects/poplar), a haXe-based match-three platformer.
+- [Herrera](/projects/herrera), an experiment with HTML5 and procedural generation.
+- [The Lauded Deeds of the Materialist](/projects/the-lauded-deeds-of-the-materialist), a fun little action game.
+- [Ruin](/projects/ruin), a ClojureScript-based roguelike built on top of [rot.js](http://ondras.github.io/rot.js/hp/).
+- [roguelim](https://github.com/Beyamor/roguelim), a roguelike played through Twitter.
+- [A Sky Full of Gumption](https://github.com/Beyamor/a-sky-full-of-gumption), the start of a Spelunky-inspired platformer.
+- [Hyderabad](https://github.com/Beyamor/hyderabad), a real-time game in ClojureScript (which ended up being way too slow).
+
+# Proceduralism
+- [Armor generation](/projects/midpoint-displacement-armor) with midpoint displacement.
+- Block leaf [trees](http://localhost:3000/projects/block-leaves).
+- Perlin noise-generated [planets](http://imgur.com/P7rFmNv).
+- Experiments in [texture generation](http://i.imgur.com/1K5tk12.png).
+
+# Tools
+- [Updated tools](https://github.com/Beyamor/recaps) for the [Destructoid CBlog Recaps](http://www.destructoid.com/blogs/CblogRecaps) team.
+- [Emily](https://github.com/Beyamor/emily), the start of a Clojure-based paint program.
+- [Jinn](https://github.com/Beyamor/jinn), a continuation of the CoffeeScript engine started in Herrera.
+
+# Websites
+- A ton of work for [this site](https://github.com/Beyamor/wits).
+- A website for [Colton Phillips](https://github.com/Beyamor/web-coach).
+
+# Languages
+- [Go Forth](https://github.com/Beyamor/go-forth), a partial implementation of Forth in Go.
+- [Cricket](https://github.com/Beyamor/cricket), a Lisp(ish) interpreter in CoffeeScript.
+
+# Miscellanea
+- [Momo](https://github.com/Beyamor/momo), a Clojure-based implementation of monads.
+- [Dabber](/projects/dabber), which applies a painterly effect to pictures.
+- [Evolute](/projects/evolute), a song breeder.
+- [Breedxel](/projects/breedxel), an image breeder.
+- [Face Rater](/projects/face-rater), which rates faces.
+- [Message in a Bottle](/projects/message-in-a-bottle), an experiment in communication.
+- [An entry](https://github.com/Beyamor/nanogenmo-2013) for [NaNoGenMo](https://github.com/dariusk/NaNoGenMo) which scraped  and blended Wikipedia articles.
