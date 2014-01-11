@@ -80,7 +80,10 @@
 
 (def blog-js
   ["/js/lib/syntax-highlighter/brushes/shBrushClojure.js"
-   "/js/lib/syntax-highlighter/brushes/shBrushCoffeeScript.js"])
+   "/js/lib/syntax-highlighter/brushes/shBrushCoffeeScript.js"
+   "/js/lib/syntax-highlighter/brushes/shBrushXml.js"
+   "/js/lib/syntax-highlighter/brushes/shBrushJScript.js"
+   "/js/lib/syntax-highlighter/brushes/shBrushPython.js"])
 
 (def base-blog-page
   {:css

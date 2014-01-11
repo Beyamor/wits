@@ -1,0 +1,167 @@
+title: resumess
+date: 01-11-2014
+
+A big part of getting a job is having a resume, right? I mean, only very rarely does the job fairy poke her head out of her enchanted cubicle to magically bestow a career; usually, you've gotta get your name and selected marketable skills out there.
+
+So, how does one put a resume together? Not the actual content; that, obviously, comes from a lifetime of experiences and liberal use of a thesaurus. No, instead we must ask by what means one assembles this sacred text.
+
+Microsoft Word is great; a lot of very smart people have spent a great deal of time and energy making a semi-prescient typewriter. Microsoft Word is also not on my computer. Microsoft Word also costs the sort of money one needs a job to spend.
+
+Google's Docs are a jaw-dropping vision of the future. An entire in-browser text editor? *With tables?* It might as well be a flying car. However, as staggeringly tech-mazing Docs are, they fall a bit short when it comes to styling. You can't put rims on a flying car.
+
+Open Office is, well, *ugh*. Which is not entirely fair because, like, it's a tremendously ambitious undertaking and, as an open source project, what's there is pretty god damn impressive. At the same time, Open Office's tables are an inescapable hell full of scowling imps who take turns pulling out your fingernails. *Ugh*.
+
+# cascading style sermons
+Having now worked on, all modesty aside, like, a bunch of websites, I've got a pretty good handle on HTML and CSS. Okay, it's not that I understand CSS exactly, but I have a pretty decent feeling for how much I don't know and exactly how much misery working with it is going to cause me.
+
+Besides, I kinda grok the box model, so that's something.
+
+So, there's a couple reasons for me to use HTML and CSS for my resume:
+- Prior experience.
+- The precision of a declarative language.
+- An expressive vocabulary for styling things.
+- There's an internet full of solutions to common problems.
+
+Now, I could use LaTeX - I've use it before and found it pretty handy - however, it doesn't offer the stylistic control I want for something as personal as a resume.
+
+Similarly, I could use Markdown. Hell, I'm a huge fan of it - it's what I use for this blog you're reading right here. However, adding classes to elements means dropping down into raw HTML and since I'd end up doing that pretty often, I might as well go full HTML.
+
+Okay. So. Whatever. HTML and CSS. How do we get a PDF out of that?
+
+#wkhtmltopdf
+There are a few utilities that suck up HTML and CSS and spit out a PDF, but after trying out a couple, [wkhtmltopdf](https://code.google.com/p/wkhtmltopdf/) seemed like the best. Importantly, it faithfully adhered to *all* the CSS rules rather than some random subset.
+
+It's super easy to use, too:
+
+```
+wkhtmltopdf tom-gibson-resume.html tom-gibson-resume.pdf
+```
+
+Groovy. So, easy enough to go from A to B. Write up the resume and we're good to go.
+
+And that's just what I was doing, writing up the resume, when I started to get frustrated. See, a resume has a lot of similarly-structured pieces, right? For example, every job in your work experience will have the same format. Working with raw HTML, this meant a lot of copying and pasting.
+
+Obviously, that's no good. It's a hassle, for one, but what's worse, if you want to change that structure - e.g., add a class - you've got to go through and edit every single instance. Blarg. If only we had a means of separating HTML structure from content.
+
+Oh, wait. There's about eight million HTMl templating libraries that solve exactly this problem.
+
+#jsontemplate
+Even in Python alone, there are [a ton](https://wiki.python.org/moin/Templating) of templating options. I narrowed this down with two criteria:
+- It could be drop-dead simple. No filters, no in-template logic.
+- I wanted to use JSON for my data because, well, I'm familiar with it.
+
+This lead to [JSON Template](http://json-template.googlecode.com/svn/trunk/doc/Introducing-JSON-Template.html). This is actually a really lovely solution because it's very, very simple and focused on the structure of JSON. There are basically a couple of rules:
+- A property specified with `{property}` gets replaced by that property's value.
+- `{.section property}` and `{.repeated section property}` are used instead of `if` and looping.
+- `{.or}` handles an absent property.
+
+There's a bit more, but that's the short of it. And with that, we're on our way. We can now put something like this in `template.html`:
+
+```xml
+<div class="jobs">
+	{.repeated section jobs}
+		<div class="job">
+			<div class="info">
+				<div class="main-info">
+					<div class="position">{position}</div>
+					<div class="company">{company}</div>
+				</div>
+				<div class="duration">{duration}</div>
+			</div>
+			<ul class="description">
+				{.repeated section description}
+					<li>{@}</li>
+				{.end}
+			</ul>
+		</div>
+	{.end}
+</div>
+```
+
+Then, in `data.json`, we get the corresponding data:
+
+```jscript
+{
+	"jobs": [{
+		"position":	"Software Developer",
+		"company":	"Seeker Solutions",
+		"city":		"Victoria, BC",
+		"duration":	"September - December 2012",
+		"description": [
+			"Built tools to aggregate comments from social media sites like Twitter and Facebook.",
+			"Designed a system which used natural language processing to analyze brand reputations based on trends in this user data.",
+			"Created an interface to explore the results of the analysis using Google Web Toolkit.",
+			"Coordinated Scrum-based development with JIRA and Jenkins."
+		]
+	}]
+}
+```
+
+A little bit of python ties them together:
+
+```python
+with open("template.html", "r") as f:
+	template = f.read()
+
+with open("data.json", "r") as f:
+	data = json.loads(f.read())
+
+result = jsontemplate.expand(template, data)
+
+with open("tom-gibson-resume.html", "w") as f:
+	f.write(result)
+
+os.system("wkhtmltopdf tom-gibson-resume.html tom-gibson-resume.pdf")
+```
+
+Boom. Electing for HTML and CSS gets us templating basically for free. How great is that? Now we can separate content from structure and style. If that doesn't put a smile on your face, you might need to see a shrink.
+
+At this point we're ready to start writing the actual resume, right? I mean, what else?
+
+Well, okay, it's kind of a bummer that we have to manually run that compilation script every time. Hmm. I bet we can do something about that.
+
+#watchdog
+Turns out there's a handy library called [Watchdog](http://pythonhosted.org/watchdog/) that lets us watch for and react to file modifcations. Hardly a surprise, I guess. It's Python; there's always a library.
+
+Anyway, tweaking one of Watchdog's examples gets us something that does the job. Moving the compilation stuff into a `run` function, we can write a handler that recompiles when one of the important files changes:
+
+```python
+class RecompileHandler(FileSystemEventHandler):
+	def on_modified(self, event):
+		index	= event.src_path.rfind("/") + 1
+		name	= event.src_path[index:]
+		
+		if name in ["data.json", "template.html", "style.css"]:
+			run()
+```
+
+We'll use [`argparse`](http://docs.python.org/dev/library/argparse.html) to check for a `--watch` option. If we find it, we'll go ahead and watch for modifications.
+
+```python
+parser = argparse.ArgumentParser()
+parser.add_argument("--watch", "-w", action="store_true")
+args = parser.parse_args()
+```
+
+So, if we're watching, get a `RecompileHandler` going:
+
+```python
+run()
+if args.watch:
+	event_handler = RecompileHandler()
+
+	observer = Observer()
+	observer.schedule(event_handler, ".")
+	observer.start()
+
+	try:
+		while True:
+			time.sleep(0.1)
+	except KeyboardInterrupt:
+		observer.stop()
+	observer.join()
+```
+
+Awesome. Now we can go edit our resume files and this script will take care of compiling everything in the background. Even cooler, Ubuntu's document viewer reloads when the PDF changes, so we can watch as the document updates in real time while we edit!
+
+So, with a little bit of effort, we, uh, we created a dinky little Microsoft Word knockoff. Mm. Well, at least we get to use CSS? *Yay*.
