@@ -162,6 +162,6 @@ if args.watch:
 	observer.join()
 ```
 
-Awesome. Now we can go edit our resume files and this script will take care of compiling everything in the background. Even cooler, Ubuntu's document viewer reloads when the PDF changes, so we can watch as the document updates in real time while we edit!
+Awesome. Now we can go edit our resume files and [this script](https://gist.github.com/Beyamor/8378285) will take care of compiling everything in the background. Even cooler, Ubuntu's document viewer reloads when the PDF changes, so we can watch as the document updates in real time while we edit!
 
 So, with a little bit of effort, we, uh, we created a dinky little Microsoft Word knockoff. Mm. Well, at least we get to use CSS? *Yay*.
