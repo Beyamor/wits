@@ -1,0 +1,112 @@
+title: delegetter
+date: 01-20-2014
+
+It's pretty common in the OO world for one object to delegate stuff down to another object. For example, in [Jinn](https://github.com/Beyamor/jinn?source=cc), I'm [decorating](http://en.wikipedia.org/wiki/Decorator_pattern) cameras. Though each camera decorator has its own behaviour - say, staying within some bounds - it'll delegate to the camera it decorates for things like the position and the viewing dimensions.
+
+In a [less powerful](https://www.java.com/en/) language, setting up delegation often means a lot of boilerplate:
+
+```coffee
+class Delegate
+	delegatedProperty: "delegate property"
+
+class Delegater
+	myDelegate: new Delegate
+
+	Object.defineProperty @prototype,
+		"delegatedProperty",
+		get: ->
+			@myDelegate.delegatedProperty
+
+		set: (value) ->
+			@myDelegate.delegatedProperty = value
+
+delegater = new Delegater
+console.log delegater.delegatedProperty
+# => "delegate property"
+```
+
+How awful would it be if every time you want to delegate a property, you had to write that same chunk of code? Thankfully, JavaScript lets us do some really ~~horrific~~ cool things and CoffeeScript gives us a nice way of writing them.
+
+# on the right syntracks
+For something like this, I think the right way to go is to pin down the syntax and then, y'know, make it happen. Don't sweat the implementation, just focus on what it is you're trying to say.
+
+What we want to be able to do is declare the delegates and the properties we're delegating to them. Should look something like this:
+
+```coffee
+class Delegater
+	myDelegate: new Delegate
+
+	@delegate
+		myDelegate: ["delegatedProperty"]
+```
+
+If we wanted to set up more delegations, we'd get something like this:
+
+```coffee
+class Foo
+	myBar:	new Bar
+	myBaz:	new Baz
+
+	@delegate
+		myBar:	["bar"]
+		myBaz:	["baz", "moreBaz"]
+```
+
+Simple enough, right? Let's make it happen.
+
+# delegreatness
+CoffeeScript's class definition is actually hella nice. We can execute arbitrary expressions and `this` refers to the constructor function. That opens the language up to simple, but powerful metaprogramming.
+
+What we're gunna do is add a function to the `Function` prototype called `delegate`. This'll take the delegation specs and set them up. Because it's attached to the `Function` prototype, we can call call `delegate` from the class definition with `@delegate`, just like we wanted.
+
+```coffee
+Function::delegate = (specs) ->
+	# make it happen
+```
+
+To call this, we pass it the specs. This is just a JavaScript object, but CoffeeScript's syntax makes this incredibly clean. With parens, it'd look more like this:
+
+```coffee
+class Foo
+	myBar:	new Bar
+	myBaz:	new Baz
+
+	@delegate({
+		myBar:	["bar"],
+		myBaz:	["baz", "moreBaz"]
+	})
+
+```
+
+Now we can move the boilerplate stuff into the `delegate` function, iterating over the specs to define our property delegations. Since JavaScript let us do string-based property access with the `[]` notation, this is just as straightforward as you could hope:
+
+```coffee
+Function::delegate = (specs) ->
+	for delegate, properties of specs
+		for property in properties
+			do (delegate, property) =>
+				Object.defineProperty @prototype,
+					property,
+					get: ->
+						this[delegate][property]
+					set: (val) ->
+						this[delegate][property] = val
+```
+
+And everything *just works*:
+
+```coffee
+class Delegater
+	myDelegate: new Delegate
+
+	@delegate
+		myDelegate:	["delegatedProperty"]
+
+delegater = new Delegater
+console.log delegater.delegatedProperty
+# => "delegate property"
+```
+
+Pretty rad, right? And you could take this even further. For example, set up [a dot syntax](http://stackoverflow.com/questions/6491463/accessing-nested-javascript-objects-with-string-key) for delegation to nested objects or use a syntax like `{from: "property", to: "delegatedProperty"}` to map between properties with different names.
+
+The world's your syntactic oyster, baby. Figure out a syntax and make it happen or, better yet, delegate the work to someone else.
