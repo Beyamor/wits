@@ -51,9 +51,9 @@ $ ->
 
 	$(document).on('pjax:success', pjaxReload)
 
-	$('#art').height($(window).height() - $('#header').height())
-	# ugh, so hack. header height + 120 pixels of padding
-	$('#page').css('min-height', ($(window).height() - $('#header').height() - 120))
+	#$('#art').height($(window).height() - $('#header').height())
+	## ugh, so hack. header height + 120 pixels of padding
+	#$('#page').css('min-height', ($(window).height() - $('#header').height() - 120))
 	drawArt('art') if drawArt?
 
 	$(document).on('pjax:end', callOnloadCallbacks)
