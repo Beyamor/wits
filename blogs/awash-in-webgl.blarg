@@ -1,0 +1,52 @@
+title: awash in webgl
+date: 01-29-2014
+
+Recently, I took it into my head to poke around with [WebGL](http://en.wikipedia.org/wiki/WebGL), the HTML5 API for in-browser 3D rendering. Okay, I actually used [three.js](http://threejs.org/), a handy library on top of it, but hey, you say tomato, I say ketchup. For real though, you have to be some kind of nutjob to get down and dirty with anything that looks like OpenGL.
+
+Anyway, 3D stuff. And in the browser, no less. What's that, doctor? You say I've come down with a case of *excitement*? Dear me, I hope it's contagious.
+
+So, with a bit of fiddling, I took [Jinn](https://github.com/Beyamor/jinn) and hooked it up with three.js to get [Awash in Iron](/projects/awash-in-iron), the start of a 3D, tactical strategy game. Okay, there's not much of a game there, but I got enough going to be able to rattle off a braindump.
+
+# three for free
+If you're looking to give your rendering a little more depth, three.js is the way to go. The documentation could definitely use some fleshing out, but their guide to [creating a scene](http://threejs.org/docs/index.html#Manual/Introduction/Creating_a_scene) got me up and running faster than Usain Bolt after his sixth cup of coffee.
+
+I've only seen a sliver of the [fairly hefty library](http://threejs.org/docs/), but everything I played with was pretty intuitive. Slap a material on some geometry, stick it in a scene, and call it a day.
+
+One really standout feature is the choice of renderer - [WebGL](http://threejs.org/docs/#Reference/Renderers/WebGLRenderer)-based or [2D context](http://threejs.org/docs/#Reference/Renderers/CanvasRenderer)-based. I mean, you really, *really* shouldn't use the latter. It takes a scenes that looks like this in WebGL:
+
+![webgl](http://i.imgur.com/QEtEdd9.png)
+
+and renders it like this:
+
+![canvas](http://i.imgur.com/hWOab5i.png?2)
+
+Yuck. And that number in the top-left? That's the FPS. 12, listen, 12 ain't great. Still, having a fallback available for clients that don't support WebGL is a relief. Now, how about those models?
+
+# the all-important import
+What good's a scene if there's nothing in it? Fortunately, creating and loading a model turned out to be a breeze.
+
+The [JSONLoader](http://threejs.org/docs/#Reference/Loaders/JSONLoader) slurps up a model's JSON data and spits out the geometry and materials. It [looks like](http://stackoverflow.com/questions/9783458/blender-export-to-three-js) you could use a format like Collada if you wanted, but there's a [three.js plugin](https://github.com/mrdoob/three.js/tree/master/utils/exporters/blender) for [Blender](http://www.blender.org/), so there's really no reason not to go for three.js' JSON format. 
+
+The JSONLoader is pretty excited to do the loading, but since I'm using [Preload.js](http://www.createjs.com/#!/PreloadJS) to handle my assets, I wanted to skip right to the parsing. Thankfully, though it's not particularly well documented, you can call the `parse` method directly, so no big:
+
+```coffee
+{geometry} = loader.parse app.assets.get modelName
+```
+
+I have run into one hiccup: the models are loaded rotated by ninety degrees. Super weird, but easy enough to correct. Just, like, I dunno.
+
+(Actually, as I'm typing this, it's occurring to me the models are probably treating the y-axis as "up" whereas I'm using the z-axis. Well, whatever)
+
+# pick of the litter
+Uh, let's see. What else? Well, I was mega pleased by how easy [mouse picking](http://away3d.com/tutorials/Introduction_to_Mouse_Picking) was to set up. three.js gives you everything you need to get in done in a [scant handful of lines](https://gist.github.com/Ricket/2044441).
+
+In *Awash in Iron*, picking is used to figure out which tile the player is clicking on. The picking itself gives you the model(s) which are clicked on. Getting from the model to the tile is potentially tricky. In a more rigid language, we might have to, say, maintain a table mapping models to the tiles they belong to. However, this being JavaScript, we can just add a property specifying the owner:
+
+```coffee
+@model.mesh.tile = this
+```
+
+I bring this up because it shows how flexible data lets us easily integrate someone else's code. I mean, heck, that's a whole topic by itself, but I thought it was neat.
+
+# wrap it up
+Okay, there we go. A bunch of words. What'd we get? Well, three.js is a convenient and powerful library and in-browser 3D rendering via WebGL is incredibly exciting. So, hey, go make something cool.
