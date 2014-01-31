@@ -1,0 +1,341 @@
+title: cljurtle
+date: 01-30-2014
+
+Boy, if I could be paid to be unemployed, I'd be a billionaire. Real talk, I think I'm the best in the field. I'm thinking of founding an awards show for bums so I can start raking in the trophies.
+
+Anyway, all this time spent not working has given me a lot of time to, well, work on things.
+
+[Turtle graphics](http://en.wikipedia.org/wiki/Turtle_graphics) has always struck as a thing overflowing with charm. Like, how cute is the idea an altruistic turtle artist? Plus, word is it's a great way to introduce minds to this whole computer business, so that's neat. A [recent video](http://www.infoq.com/presentations/turtle-groovy-dsl?utm_campaign=infoq_content&utm_source=infoq&utm_medium=feed&utm_term=global) featuring our beloved chelonian inspired me to try my hand at implementation, so let's talk about it.
+
+# turtle power
+So, okay, what're we going for here? A turtle is a bag of data - a position, a bearing, and a pen with information like whether the pen is down and what color its ink is. The turtle can be directed with commands like `move-forward` and it'll, well, move forward with respect to its current bearing. If the pen is down, it'll draw a line as it moves.
+
+Intuitively, a turtle's current state will look something like this:
+
+```clojure
+{:position	{:x 0, :y 0}
+ :bearing	0
+ :pen-down?	true
+ :pen-color	"black"}
+```
+
+Now, we want a strong separation between the model and the actual rendering. That'll make it easier both to reason about the former and to switch out the latter. Ideally, our model is just some data we can hand off to be rendered, right?
+
+One option might be to give the turtle a history of its commands. With this, when we say `move-foward`, rather than moving, the turtle simply stores the fact that it received a command to move. Then, when rendering, we can just replay all of the commands.
+
+This has some interesting implications, but it ends up moving basically all of the logic into the rendering, so ultimately, it's got too much of a smell to it. Let's find something else.
+
+We could, alternatively, give the turtle a history of all of its previous states. When we transition to a new state, we just append the old state to the history. Then, when we go to render a turtle, we just walk through its history and draw the line from one state's position to the next when the pen is down.
+
+Our full turtle model thus looks something like this:
+
+```clojure
+{:state    {:position	{:x 0, :y 0}
+           :bearing	0
+           :pen-down?	true
+           :pen-color	"black"}
+ :history  []}
+```
+
+If we, say, move the turtle forward twenty units, we'll end up with something like this:
+
+```clojure
+{:state    {:position	{:x 20, :y 0}
+           :bearing	0
+           :pen-down?	true
+           :pen-color	"black"}
+ :history  [{:position	{:x 0, :y 0}
+             :bearing	0
+             :pen-down?	true
+             :pen-color	"black"}]}
+```
+
+So, we'll create a `new-turtle` function that'll take the initial position and give us a new turtle:
+
+```clojure
+(defn new-turtle
+  ([]
+   (new-turtle 0 0))
+  ([x y]
+   {:state   {:position  {:x x :y y}
+              :bearing   (/ Math/PI 2)
+              :pen-down? true
+              :pen-color "black"}
+    :history []}))
+```
+
+Now that we have our data figured out, we need the operations that act on it.
+
+# cowabunga
+Obviously, we want to be able to set and update properties of the turtle's state. Each time we do that though, we need to make sure we append the current state to the turtle's history:
+
+```clojure
+(defn- push-history
+  [{:keys [state] :as turtle}]
+  (update-in turtle [:history] conj state))
+```
+
+With this, we can write our property setter and updater:
+
+```clojure
+(defn set-property
+  [turtle property value]
+  (-> turtle
+    push-history
+    (assoc-in [:state property] value)))
+
+(defn update-property
+  [turtle property f & args]
+  (-> turtle
+    push-history
+    (update-in [:state property] #(apply f % args))))
+```
+
+With these low-level operations, we can start to build more interesting commands:
+
+```clojure
+(defn move-forward
+  [{{:keys [bearing]} :state :as turtle} distance]
+  (update-property turtle :position
+                   #(-> %
+                      (->/in [:x]
+                        (+ (* distance
+                              (Math/cos bearing))))
+                      (->/in [:y]
+                        (+ (* distance
+                              (Math/sin bearing)))))))
+
+(defn move-backward
+  [turtle distance]
+  (move-forward turtle (* -1 distance)))
+
+(defn turn-left 
+  [turtle degrees]
+  (update-property turtle :bearing
+                          + (degrees->rad degrees)))
+
+(defn turn-right
+  [turtle degrees]
+  (update-property turtle :bearing
+                          - (degrees->rad degrees)))
+
+(defn lower-pen
+  [turtle]
+  (set-property turtle :pen-down? true))
+
+(defn raise-pen
+  [turtle]
+  (set-property turtle :pen-down? false))
+
+(defn set-color
+  [turtle color]
+  (set-property turtle :pen-color color))
+```
+
+Righteous. With these commands, we can order our turtle around:
+
+```clojure
+(-> (new-turtle)
+  (move-forward 20)
+  raise-pen
+  (move-forward 30)
+  (turn-left 20)
+  (set-color "blue")
+  lower-pen
+  (move-forward 20))
+
+; => {:state   {:position   {:x -6.840402866513371,
+;                            :y 68.79385241571816}
+;               :bearing    1.9198621771937625
+;               :pen-down?  true
+;               :pen-color  "blue"}
+;     :history [...]}
+```
+
+Now, what's cool is that, since these are just functions operating on plain ol' data, we can throw in arbitrary code:
+
+```clojure
+(defn draw-colors
+  [turtle colors]
+  (reduce
+    (fn [turtle color]
+      (-> turtle
+        (set-color color)
+        (move-forward 20)))
+    turtle colors))
+
+(-> (new-turtle)
+  (draw-colors ["red" "blue" "yellow"])
+  (turn-right 90)
+  (draw-colors ["green" "purple" "orange"]))
+```
+
+So, after issuing all these commands, we've got a turtle with a fairly interesting story. We can get the sequence of all the turtle's states by appending the current state to the history:
+
+```clojure
+(defn state-sequence
+  [{:keys [state history]}]
+  (conj history state))
+```
+
+It's this sequence of states that we'll hand off for rendering. And how, dear reader, do we do that rendering?
+
+# totally tubular, dude
+Like we discussed above, the renderer really just has to know how to draw a line from one state to the next when the pen is down. Not much more to it than walking through the state sequence. 
+
+```clojure
+(defn turtle-sequence!
+  [graphics width height states]
+  (doseq [[current-state next-state] (partition 2 1
+                                              states)]
+    (when (and (:pen-down? current-state)
+               (not= (:position current-state)
+                     (:position next-state)))
+      (set-color! graphics (:pen-color current-state))
+      (draw-line! graphics width height
+                  (:position current-state)
+                  (:position next-state)))))
+```
+
+I actually ended up switching from ClojureScript to Clojure midway though this project and as you might guess, from the rendering side, it didn't take much more than re-implementing the `set-color!` and `draw-line!` functions.
+
+At this point, we've figured out our data model and our rendering, but we need a way to put them together.
+
+# let's turtalise 'em
+Obviously, the fun of turtle graphics comes from bossing the poor turtle around, so we're going to need some way of issuing instructions. We want to be able to write a turtle script and run it interactively.
+
+What we're going to do is take the script in text form, evaluate it, and render the results. A script should describe turtles, but it should also let us define functions like the `draw-colors` function above.
+
+Having the power of the full language at our disposal is pretty well a must, so we're going to be using the built-in `eval`, but we want to do it safely. Well, kind of. Importantly, we don't really want to muck up the existing namespace with new definitions.
+
+What're we gunna do? Well, what we're gunna do, see, is evaluate the script in its own dynamically-created namespace. So, create a new namespace, set it up with useful vars, then read and evaluate the script. Afterward, we'll tear down the namespace and return the turtles defined by the script. This means our `eval-script` function will look like this:
+
+```clojure
+(defn eval-script
+  [script]
+  (let [script-ns-name  (gensym)
+        script-ns       (create-ns script-ns-name)
+        turtles         (atom [])]
+    (set-up-script-ns script-ns turtles)
+    (binding [*ns*  script-ns]
+      (-> (str "(do\n" script "\n)")
+        read-string
+        eval))
+    (remove-ns script-ns-name)
+    @turtles))
+```
+
+What does `set-up-script-ns` do then? Well, the namespace should include all of the core library, as well as the turtle-specific functions and `def-turtle`, which we'll use to define turtles. `def-turtle` will work by adding new turtles to the vector in the `turtles` atom. Working within the dynamically-created namespace requires a bit of weirdness (ugh, that `eval`), but it's easy enough:
+
+```clojure
+(defn set-up-script-ns
+  [script-ns turtles]
+  ; interning pre-existing stuff with require/refer
+  (binding [*ns* script-ns]
+    (eval '(do
+             (clojure.core/refer-clojure)
+             (require '[lonocloud.synthread :as ->])
+             (require '[cljurtle.core :as core
+                        :refer [move-forward ...]]))))
+
+  ; hand-interning our new def-turtle function
+  (intern script-ns 'def-turtle
+          (fn [turtle]
+            (swap! turtles conj turtle))))
+```
+
+Righteous. Now we can `eval-script` something like this:
+
+```clojure
+"(defn draw-colors
+  [turtle colors]
+  (reduce
+    (fn [turtle color]
+      (-> turtle
+        (set-color color)
+        (move-forward 20)))
+    turtle colors))
+
+(def-turtle
+  (-> (new-turtle)
+    (draw-colors [\"red\" \"blue\" \"yellow\"])
+    (turn-right 90)
+    (draw-colors [\"green\" \"purple\" \"orange\"]))"
+```
+
+# raise some shell
+So, that's all of the pieces. Sticking them together is pretty easy, too. Our application will need a canvas, a text area, and a run button. The text area is, well, just a text area:
+
+```clojure
+(defn create-script-box
+  []
+  (->
+    (s/text
+      :multi-line?  true
+      :rows         15)
+    (doto
+      (.setFont (Font. "SansSerif" Font/PLAIN 12)))))
+```
+
+When we click the run button, we grab the script in the text box, evaluate it, and swap the `turtles` atom to hold the new set of turtle definitions:
+
+```clojure
+(defn run
+  [turtles script]
+  (reset! turtles
+          (eval-script script)))
+
+(defn create-run-button
+  [turtles script-box]
+  (s/button
+    :text   "run"
+    :listen [:action
+             (fn [_]
+               (run turtles (s/value script-box)))]))
+```
+
+Finally, we'll bind the canvas to paint the turtles when the atom changes:
+
+```clojure
+(defn create-canvas
+  [turtles]
+  (let [width   600
+        height  400
+        el      (s/canvas
+                  :size [width :by height]
+                  :paint  (fn [c g]
+                            (doseq [turtle @turtles]
+                              (draw/turtle-sequence!
+                                 g width height
+                                 (core/state-sequence turtle)))))]
+    (sb/bind turtles
+             (sb/b-do [_]
+                    (s/repaint! el)))
+    el))
+```
+
+Putting it together:
+
+```clojure
+(defn -main [& args]
+  (let [turtles     (atom [])
+        canvas      (create-canvas
+                      turtles)
+        script-box  (create-script-box)
+        run-button  (create-run-button
+                      turtles script-box)]
+    (s/invoke-later
+      (-> (s/frame :title     "Cljurtle"
+                   :content   (s/vertical-panel
+                                :items  [canvas
+                                         (s/scrollable
+                                           script-box)
+                                         run-button])
+                   :on-close  :exit)
+        s/pack!
+        s/show!))))
+```
+
+And there we go. Now we can spend all day making turtles. Anything to drown out those unemployment blues.
+
+Check out the code [here](https://github.com/Beyamor/cool-stuff/tree/master/cljurtle).
