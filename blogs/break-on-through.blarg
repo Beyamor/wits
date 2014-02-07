@@ -22,7 +22,7 @@ This isn't exactly an exhaustive list - there's a bunch stuff that never ended u
 
 # Proceduralism
 - [Armor generation](/projects/midpoint-displacement-armor) with midpoint displacement.
-- Block leaf [trees](http://localhost:3000/projects/block-leaves).
+- Block leaf [trees](/projects/block-leaves).
 - Perlin noise-generated [planets](http://imgur.com/P7rFmNv).
 - Experiments in [texture generation](http://i.imgur.com/1K5tk12.png).
 
