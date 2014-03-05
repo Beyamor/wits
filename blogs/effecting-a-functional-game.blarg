@@ -1,0 +1,180 @@
+title: effecting a functional game
+date: 02-26-2014
+
+The intersection between game development and functional programming is a wild place. See, while we're pretty good at making games in OOP world, in FP, it's all still a bit of a mystery. Sure, people are tossing around stuff like functional reactive programming, but on the whole, it's a relatively unexplored area and one that's sparking a lot of creative thought.
+
+Anyway, recently I gave programming a game in a functional language [another go](https://github.com/Beyamor/lapwing) because, if nothing else, I'm a masochist.
+
+After reading [James Hague's stuff](http://prog21.dadgum.com/23.html) about a million times, I ended up with an architectural pattern that seemed to work pretty well. Let's talk about it.
+
+# specifically, spe
+Game development with a functional programming language can be pretty awkward. Since your data is immutable, you can't make local changes with side effects. This can tempt you to thread the entire game state through a function to update some of the entities in it.
+
+Obviously, this is bad. It effectively makes your state entirely mutable. That updater function could, if it wanted to, do something nasty like changing the screen dimensions stored in the game state. This potentially makes it pretty hard to reason about your program, so we want to have tighter control of our data than that.
+
+Because we're smart people (well, hopefully you are, at least), we realize the key is, at it is so often, separating the *what* from the *how*. A bit of verbiage:
+- *Statements* describe things that should happen.
+- *Producers* produce statements.
+- *Effectors* make statements happen.
+
+Note the tidy little separation between producers and effectors? Neither one depends directly on the other. That's good. Software folks like things to be decoupled. That's the reason we go on so few dates.
+
+That's what I tell myself, anyway.
+
+Okay, let's give this stuff a closer look.
+
+# stately statements
+A statement is super simple. It's just a vector whose first element is the type of statement and whose other elements are extra statement-specific data. For example, a statement about accelerating an entity looks like this:
+
+```clojure
+[:accelerate e {:x 10}]
+```
+
+If we wanted to state a bunch of things, well, we'd just whip up a collection of statements:
+
+```clojure
+[[:accelerate e1 {:x 10}]
+ [:accelerate e2 {:y -5}]
+ [:accelerate e3 {:x 100 :y 2}]]
+```
+
+Boy howdy, those are some good-lookin' statements. I bet you're thinking, "Where can I get myself some statements like those?"
+
+# producing some producers
+What's a producer look like? It's going to take the game statement and produce statements about it.
+
+Let's consider gravity. What we want to do is say that each entity with velocity and gravity should accelerate. So, for each entity in the subset, we say hey, accelerate this guy. How's that look in code?
+
+```clojure
+(defn apply-gravity
+  [{:keys [entities]}]
+  (-> entities
+    (es/those-with [:gravity :vel]
+      (fn [e]
+        [:accelerate e {:y 1}]))))
+```
+
+This, of course, gives us a sequence of statements, one for each entity with gravity and velocity components.
+
+At this point, we've built up a description of what should happen. It's nice and simple and very, very declarative. And that's great, but where do things actually happen?
+
+# effecting effectively
+What we want to do is take each statement and pass it off to an effector who makes the good stuff happen. For example, the effector that handles acceleration takes the game state, the entity to accelerate, and the acceleration and updates the game state to, y'know, get the job done:
+
+```clojure
+(defn accelerate
+  [game-state e {ax :x, ay :y}]
+  (-> game-state
+    (->/in [:entities]
+     (es/update-only 
+       e
+       #(-> %
+          (->/when ax
+            (update-in [:vel :x] + ax))
+          (->/when ay
+            (update-in [:vel :y] + ay)))))))
+```
+
+We can then create a map which connects statement types to effectors:
+
+```clojure
+(def effectors
+  {:accelerate
+   (fn [game-state e {ax :x, ay :y}]
+     ; work it harder
+     )
+
+   :velocity
+   (fn [game-state e {vx :x, vy :y}]
+     ; make it better
+     )
+   })
+```
+
+And now, we can take the game state, the map of statement types to effectors, and the statements and, for each statement, apply the appropriate effector to it:
+
+```clojure
+(defn effect-statements
+  [game-state effectors statements]
+  (reduce
+    (fn [game-state [statement-type & data]]
+      (if-let [effector (get effectors
+                          statement-type)]
+        (apply effector game-state data)
+        (throw (Exception. (str "No effector for "
+                                statement-type)))))
+    game-state
+    statements))
+```
+
+So then, something like:
+
+```clojure
+(effect-statements
+  game-state effectors
+  [[:accelerate e1 {:x 10}]
+   [:accelerate e2 {:y -5}]
+   [:accelerate e3 {:x 100 :y 2}]])
+```
+
+will produce a new game state in which all of the entities in those statements have been accelerated. Hey, that was easy.
+
+Since it's just a map, the set of effectors can easily be configured for different contexts. You might have a set of universal effectors (e.g., `create-entity`) as well as context-specific ones (e.g., `increase-score`). By merging maps, you can build context-specific sets:
+
+```clojure
+(def universal-effectors
+  {:create-entity create-entity})
+
+(def training-level-effectors
+  (merge universal-effectors
+         {:show-training-tip show-training-tip}))
+
+(def actual-level-effectors
+  (merge universal-effectors
+         {:increase-score increase-score}))
+```
+
+It's important to note that, though we're passing the entire game state to the effectors, the set of effectors is closed. This means that we have very tight control over exactly how the game state can be changed. For example, it's impossible to change the game's screen dimensions unless an effector is defined to do exactly that.
+
+# final statements
+A cool thing about this scheme is how well statements compose. They're just collections, right? That means it's easy to, say, combine statements from two different sources - you just concatenate the two sequences:
+
+```clojure
+(defn do-this-and-that
+  [game-state]
+  (concat
+    (do-this game-state)
+    (do-that game-state)))
+```
+
+Another big win is how imperative can statements feel. Back in imperative land, we can make changes willy-nilly:
+
+```coffee
+e.accelerate x: (speed * dx)
+if dx != 0 and e.hasComponent "direction"
+    e.direction = dx
+```
+
+With functional programming we normally have to thread updates and explicitly handle every logic branch, so we write code like this:
+
+```clojure
+(let [e (accelerate e {:x (* speed dx)})
+      e (if (and (not (zero? dx))
+                 (has-component? e :direction))
+          (set e :direction dx)
+          e)]
+  e)
+```
+
+However, by filtering out `nil` statements, we can get something that looks like our old side-effectful code:
+
+```clojure
+[[:accelerate e {:x (* speed dx)}]
+ (when (and (not (zero? dx))
+            (has-component? e :direction))
+   [:set e [:direction] dx])]
+```
+
+That's pretty legit. We can write out our brutish imperative stuff, but everything still has the simplicity of pure functions.
+
+And that's about all I've got. I don't know that the statement-producer-effector triumvirate is the one-stop solution for programming functional games, but it served me pretty well.
