@@ -1,0 +1,146 @@
+title: doing doto
+date: 04-24-2014
+
+Hey yo hey. So, over in the world of mutable objects, it's pretty common to bash away on some poor, abused piece of data by calling a bunch of (non-referentially transparent) methods on it. I mean, it's kind of the only way anything gets done, right? That being the case, you'd think there'd be better way to do it.
+
+See, there's tends to be a lot of verbosity. Like, say you had your `Foo` class with a couple of methods `doBar` and `doBaz`:
+
+```java
+class Foo {
+	void doBar() {
+		System.out.println(
+			"doing bar");
+	}
+
+	void doBaz(final String anArgument) {
+		System.out.println(
+			"doing baz with " + anArgument);
+	}
+}
+```
+
+Assuming you've gotta call `doBar` and `doBaz` to get things moving, you'll end up with something like this:
+
+```java
+Foo foo = new Foo()
+foo.doBar();
+foo.doBaz("an argument");
+```
+
+A lot of `foo` up in that bitch, eh? Like, c'mon dude, we get it. There's a `foo`. We're doing things to it. Cut to the chase already.
+
+A well-designed API might allow you to [chain methods](http://en.wikipedia.org/wiki/Method_chaining) by returning the target in each method. Something like this:
+
+```java
+class Foo {
+	Foo doBar() {
+		System.out.println(
+			"doing bar");
+		return this;
+	}
+
+	Foo doBaz(final String anArgument) {
+		System.out.println(
+			"doing baz with " + anArgument);
+		return this;
+	}
+}
+
+Foo foo = new Foo()
+		.doBar()
+		.doBaz();
+```
+
+But then, there are still a couple of API flies in the ointment:
+1. You run into issues with inheritance because child classes get upcast to their parents when chaining *and*
+2. Some [poorly designed libraries](http://docs.oracle.com/javase/7/docs/api/javax/swing/package-summary.html) don't have this sort of chaining baked in.
+
+So, what do we do? Well, over in Clojure (where they do Java better than Java does Java), they have the [`doto`](http://clojuredocs.org/clojure_core/clojure.core/doto) macro. This guy lets you invoke all the methods you want on some target. Looks something like this:
+
+```clojure
+(doto (Foo.)
+  (.doBar)
+  (.doBaz "an argument"))
+```
+
+Cool, right? How do we get that in Java? Well, I can tell you it's not going to be quite as succinct, but dollars to doughnuts, I bet we can get something like this:
+
+```java
+Foo foo = doto(new Foo())
+		.invoke("bar")
+		.invoke("baz", "an argument")
+		.andReturn();
+```
+
+Now, how do we get there? Well, Java actually has some pretty slick reflection utilities. For example, you can grab a method pretty easily:
+
+```java
+final Method doBaz = foo.getClass()
+				.getMethod("doBaz", String.class);
+```
+
+Then, you can invoke that fella:
+
+```java
+doBaz.invoke(foo, "an argument");
+```
+
+Pretty easy to see where we go from here. Let's create an `Invoker` class. This guy'll take some target and, with chained methods, let you invoke away to your heart's content. It'll all have an `andReturn` method which simply returns the target when you're done. Check it:
+
+```java
+static class Invoker<T> {
+	final T target;
+	public Invoker(final T target) {
+		this.target = target;
+	}
+
+	public Invoker<T> invoke(final String methodName, final Object... args) {
+		try {
+			// Grab the classes of the arguments
+			final Class[] argClasses = new Class[args.length];
+			for (int i = 0; i < args.length; ++i) {
+				argClasses[i] = args[i].getClass();
+			}
+
+			// Find the method
+			final Method method = target.getClass().getMethod(methodName, argClasses);
+
+			// Invoke it
+			method.invoke(target, args);
+
+			// And return this guy for chaining
+			return this;
+		}
+
+		catch (final Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public T andReturn() {
+		return target;
+	}
+}
+```
+
+Because this class is genericized, it'll correctly carry the target's type all the way through. Swag.
+
+Now, we create a nice constructor method to sweeten up the syntax a little:
+
+```java
+	public static <T> Invoker<T> doto(final T target) {
+		return new Invoker<T>(target);
+	}
+
+```
+
+And we're all set:
+
+```java
+Foo foo = doto(new Foo())
+		.invoke("bar")
+		.invoke("baz", "an argument")
+		.andReturn();
+```
+
+It's still a little wordy, but when you thinking about invoking a bunch of stuff on your, I dunno, `bigButNotUnreasonablyBigContentPanel`, you're going to be saving a small novel worth of characters. 
