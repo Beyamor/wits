@@ -27,7 +27,7 @@ foo.doBar();
 foo.doBaz("an argument");
 ```
 
-A lot of `foo` up in that bitch, eh? Like, c'mon dude, we get it. There's a `foo`. We're doing things to it. Cut to the chase already.
+A lot of `foo` up in that dude, eh? Like, c'mon man, we get it. There's a `foo`. We're doing things to it. Cut to the chase already.
 
 A well-designed API might allow you to [chain methods](http://en.wikipedia.org/wiki/Method_chaining) by returning the target in each method. Something like this:
 
@@ -63,7 +63,9 @@ So, what do we do? Well, over in Clojure (where they do Java better than Java do
   (.doBaz "an argument"))
 ```
 
-Cool, right? How do we get that in Java? Well, I can tell you it's not going to be quite as succinct, but dollars to doughnuts, I bet we can get something like this:
+Cool, right? 
+
+Now, without macros, Java's defs not gunna be as succinct. That said, I bet we can still do, well, *something*. Something like this, maybe:
 
 ```java
 Foo foo = doto(new Foo())
@@ -85,11 +87,12 @@ Then, you can invoke that fella:
 doBaz.invoke(foo, "an argument");
 ```
 
-Pretty easy to see where we go from here. Let's create an `Invoker` class. This guy'll take some target and, with chained methods, let you invoke away to your heart's content. It'll all have an `andReturn` method which simply returns the target when you're done. Check it:
+Pretty easy to see where we go from here. Let's create an `Invoker` class. This guy'll take some target and, with chained methods, let you invoke away to your heart's content. It'll also have an `andReturn` method which simply returns the target when you're done. Check it:
 
 ```java
 static class Invoker<T> {
 	final T target;
+
 	public Invoker(final T target) {
 		this.target = target;
 	}
@@ -125,7 +128,7 @@ static class Invoker<T> {
 
 Because this class is genericized, it'll correctly carry the target's type all the way through. Swag.
 
-Now, we create a nice constructor method to sweeten up the syntax a little:
+Now, we create a nice static constructor method to sweeten up the syntax a little:
 
 ```java
 	public static <T> Invoker<T> doto(final T target) {
@@ -143,4 +146,4 @@ Foo foo = doto(new Foo())
 		.andReturn();
 ```
 
-It's still a little wordy, but when you thinking about invoking a bunch of stuff on your, I dunno, `bigButNotUnreasonablyBigContentPanel`, you're going to be saving a small novel worth of characters. 
+At the end of the day, what did we get? Well, we got method chaining, so hey, that's good. I mean, it's still noisier than the Clojure version, but, uh, at least we get the super unsafe string-based method invocation, so that's - yeesh. Okay, maybe you don't want to be using this any time soon. Still, it's neat that we can get there, at least.
