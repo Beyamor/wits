@@ -6,7 +6,6 @@
 
   :implementation
   {:type :html-page
-   :dimensions [800 :by 400]
    :url "/projects/space-colonization-tree/index.html"}
 
   :short-description
