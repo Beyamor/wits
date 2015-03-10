@@ -1,11 +1,12 @@
 @import "common";
 
 body {
-	background-color: white;
+	background-color: #fafafa;
 	color: $main-text-color;
 	margin: 0px;
 	font-family: "Helvetica";
 	text-align: justify;
+	font-size: large;
 
 	a {
 		text-decoration: none;

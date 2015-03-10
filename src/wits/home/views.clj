@@ -10,7 +10,7 @@
             [wits.web.pjax :as pjax]))
 
 (def content
-  "![me](http://i.imgur.com/MR1ZxOo.jpg)
+  "![me](http://i.imgur.com/hOyQCFS.png)
 
   Hey there. I'm Tom Gibson.
   
