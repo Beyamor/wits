@@ -14,7 +14,7 @@
 
   Hey there. I'm Tom Gibson.
   
-  I'm a software engineer from UVic who gets excited about programming languages, procedural generation, and cardigans.
+  I'm a software engineer who gets excited about programming languages, procedural generation, and cardigans.
 
   While you're here, feel free to read my latest rambling over in [the blog](/blog) or check out some of my [projects](/projects). For more of me, hit up my [GitHub](https://github.com/Beyamor) and [Stack Overflow](http://stackoverflow.com/users/1308287/beyamor) accounts.
 
