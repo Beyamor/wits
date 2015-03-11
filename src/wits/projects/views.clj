@@ -99,7 +99,7 @@
 
      :content
      (list
-       [:h1 (escape-html title)]
+       [:div.title (escape-html title)]
        ; haha this is so dumb
        [:div#app.project-container-container
         html-representation
