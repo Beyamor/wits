@@ -1,6 +1,9 @@
 {:title
  "Roguelim"
 
+ :category
+ :game
+
   :implementation
   {:type :source-only
    :screenshot "/images/projects/roguelim.png"}
