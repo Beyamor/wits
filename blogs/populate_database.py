@@ -21,6 +21,7 @@ cur = db.cursor()
 
 opt_parser = OptionParser()
 opt_parser.add_option("-w", "--watch", action="store_true", dest="watch")
+opt_parser.add_option("-d", "--delete", action="store_true", dest="delete_existing")
 (options, blog_file_names) = opt_parser.parse_args()
 
 if len(blog_file_names) is 0:
@@ -66,6 +67,13 @@ def populate():
 				(url, title, date, content))
 
 	db.commit()
+
+def depopulate():
+            cur.execute("delete from blogs")
+            db.commit()
+
+if options.delete_existing:
+    depopulate()
 
 if options.watch:
 	quit = False
