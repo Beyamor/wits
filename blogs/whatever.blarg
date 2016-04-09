@@ -1,0 +1,41 @@
+title: awash in webgl
+date: 11-28-2015
+
+I mean, let's make the compiler work for us, yo.
+
+So, elevator pitch, we're gunna use type parameters as flags for what state has been set. Cool, check it.
+
+Let's say we had, I don't know, a `ThingBuilder`. It builds a `Thing`. You probably figured that out. You've got a good and pretty head on those shoulders of yours. It looks like this (the `ThingBuilder`, not your head):
+
+```java
+class ThingBuilder {
+	int foo;
+	boolean bar;
+	String baz;
+
+	ThingBuilder setFoo(final foo foo) {
+		this.foo = foo;
+		return this;
+	}
+
+	ThingBuilder setBar(final boolean bar) {
+		this.bar = bar;
+		return this;
+	}
+
+	ThingBuilder setBaz(final String baz) {
+		this.baz = baz;
+		return this;
+	}
+
+	Thing build() {
+		return new Thing(foo, bar, baz);
+	}
+} 
+```
+
+Pretty straightforward, I hope. Set up a bunch of state, then act on it.
+
+But, like, I'm a forgetful guy. What if I forget to set some state? Like, say I never call `setBar`? Dang yo, what a tragedy. If only there was some way to save us from such a terrible calamity.
+
+In statically-typed languages that don't [live in a self-indulgent land of make believe](https://golang.org/), you have something like Java's generics - some kind of 
