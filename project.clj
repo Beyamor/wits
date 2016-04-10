@@ -3,7 +3,7 @@
             :url "http://www.wordsinthesky.com"
             :license {:name "Eclipse Public License"
                       :url "http://www.eclipse.org/legal/epl-v10.html"}
-            :dependencies [[org.clojure/clojure "1.4.0"]
+            :dependencies [[org.clojure/clojure "1.8.0"]
                            [compojure "1.1.5"]
                            [hiccup "1.0.0"]
                            [enlive "1.1.1"]

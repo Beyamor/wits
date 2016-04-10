@@ -9,7 +9,7 @@
 
 (defn load-project
   [project]
-  (-> project
+  (some-> project
     :data
     read-string
     eval))
@@ -25,7 +25,7 @@
 (defn by-url
   "Returns the project whose url matches the one provided."
   [url]
-  (->>
+  (some->>
     (select project-list
             (where {:url url}))
     (with-db data/wits-db)

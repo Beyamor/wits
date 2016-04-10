@@ -17,7 +17,7 @@
 (defroutes all
            (PJAX "/projects"
                 []
-                (->
+                (some->
                   (load/all)
                   (->> (remove :hidden))
                   (->> (map presentation/prepare))
@@ -25,7 +25,7 @@
 
            (PJAX "/projects/:url"
                  [url]
-                 (->
+                 (some->
                    url
                    load/by-url
                    presentation/prepare
@@ -38,7 +38,7 @@
 
            (GET "/projects/:url/canvas"
                 [url]
-                (->
+                (some->
                   url
                   load/by-url
                   presentation/prepare

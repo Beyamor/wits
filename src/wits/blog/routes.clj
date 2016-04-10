@@ -8,21 +8,21 @@
 (defroutes all
            (PJAX "/blog"
                 []
-                (->
+                (some->
                   (load/page 1)
                   (view/blog-page pjax?)))
            (PJAX "/blog/all"
                  []
-                 (->
+                 (some->
                    (load/all)
                    (view/all-blogs pjax?)))
            (PJAX ["/blog/page/:page", :page #"[0-9]+"]
                  [page]
-                 (->
+                 (some->
                    (load/page (Integer. page))
                    (view/blog-page pjax?)))
            (PJAX "/blog/entries/:blog-url"
                 [blog-url]
-                (->
+                (some->
                   (load/by-url blog-url)
                   (view/blog-entry pjax?))))
