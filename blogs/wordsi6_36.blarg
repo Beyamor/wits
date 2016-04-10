@@ -1,11 +1,11 @@
 title: the n-complete problem
 date: 11-7-2011
 
-Long, long ago, sometime around the point in my life where I was still playing with Beyblades - the later years of highschool, if memory serves - I first learned of *[Gadsby*](http://en.wikipedia.org/wiki/Gadsby_(novel)), the novel written by Ernest Vincent Wright *entirely* without the letter "e." I don't know if you've picked up on this over the course of your life, dear reader, but "e" is a tremendously valuable letter. You'll find it rearing its head in everything from "cheese" and "spleen" all the way through "elephantine," which, I'm sure you'll concede, are essential elements of any vocabulary. Anyway, at the time, I was floored by this feat and I immediately vowed to forfeit the use of "e" for an entire day.
+Long, long ago, sometime around the point in my life where I was still playing with Beyblades - the later years of highschool, if memory serves - I first learned of *<a href="http://en.wikipedia.org/wiki/Gadsby_(novel)">Gadsby</a>*, the novel written by Ernest Vincent Wright *entirely* without the letter "e." I don't know if you've picked up on this over the course of your life, dear reader, but "e" is a tremendously valuable letter. You'll find it rearing its head in everything from "cheese" and "spleen" all the way through "elephantine," which, I'm sure you'll concede, are essential elements of any vocabulary. Anyway, at the time, I was floored by this feat and I immediately vowed to forfeit the use of "e" for an entire day.
 
 I almost made it to lunch.
 
-Anyway, a recent assignment tasked us with writing a C or Java program which would read input, count the number of lowercase "n's" and determine whether that number is a [twin prime](http://en.wikipedia.org/wiki/Twin_prime) - that is, the number is a prime that differs from another by two. To test it, we were to feed the program its own source code as the input. As proof of correctness, we were also supposed to print out the code and highlight the "n's." Now, (with small numbers) this is an almost insultingly trivial undertaking. However, taking umbrage with the need to take pen to paper for a programming assignment, a friend suggested we write the program without using "n."
+Anyway, a recent assignment tasked us with writing a C or Java program which would read input, count the number of lowercase "n's" and determine whether that number is a [twin prime](http://en.wikipedia.org/wiki/Twin_prime) - that is, the number is a prime that differs from another by two. To test it, we were to feed the program its own source code as the input. As proof of correctness, we were also supposed to print out the code and highlight the "n's". Now, (with small numbers) this is an almost insultingly trivial undertaking. However, taking umbrage with the need to take pen to paper for a programming assignment, a friend suggested we write the program without using "n".
 
 Which, obviously, is a stupid thing to do.
 
@@ -68,7 +68,7 @@ void pritf( char *s ) {
 }
 ```
 
-You'll notice the escape characters !! and !* which respectively denote places where we want to insert "n" and "N" into the string. Of course, since explicitly writing those characters is off-limits, we've got *subject = 0x6e* and *subjectPrime = 0x4e* to hold the actual ASCII values.
+You'll notice the escape characters !! and ! which respectively denote places where we want to insert "n" and "N" into the string. Of course, since explicitly writing those characters is off-limits, we've got *subject = 0x6e* and *subjectPrime = 0x4e* to hold the actual ASCII values.
 
 There's a few other wrinkles, but the last big leap was getting values back from functions. See, normally you can make a function spit out a value by specifying it's *return* value. However, once again we run into our old frienemy "n," so that's no good. Instead, the function is supplied with an additional parameter - the address of the variable where we want to store the result. After the function finishes, this variable should hold the value calculate by the function.
 
@@ -103,4 +103,4 @@ Boom. Look at that. Functions without returns. Output without *printf*s. Main fu
 
 No, no I probably should not.
 
-You can find the full source [here](/blog/entries/mai.c).
+You can find the full source [here](http://www.wordsinthesky.com/projects/n-complete-problem/mai.c).
