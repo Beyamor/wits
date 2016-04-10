@@ -6,7 +6,8 @@
 
   :implementation
   {:type :html-page
-   :url "/projects/space-colonization-tree/index.html"}
+   :url "/projects/space-colonization-tree/index.html"
+   :dimensions [800 :by 400]}
 
   :short-description
   "An implementation of tree generation by space colonization."
