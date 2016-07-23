@@ -75,15 +75,20 @@ def depopulate():
 if options.delete_existing:
     depopulate()
 
+def run():
+    if options.delete_existing:
+        depopulate()
+    populate()
+
 if options.watch:
 	quit = False
 	while not quit:
 		try:
-			populate()
-			time.sleep(1)
+                    run()
+                    time.sleep(1)
 		except KeyboardInterrupt:
-			quit = True
+                    quit = True
 		except:
-			pass
+                    pass
 else:
-	populate()
+    run()
