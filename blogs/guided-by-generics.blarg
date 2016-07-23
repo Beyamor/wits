@@ -1,0 +1,120 @@
+title: guided by generics
+date: 07-23-2016
+
+Let's make the compiler work for us, yo.
+
+So, elevator pitch, we're gunna get the Java compiler to enforce the state of our program.
+
+Say we had, I don't know, a `ThingBuilder`. It builds a `Thing`. You probably figured that out. You've got a good and pretty head on those shoulders of yours. It looks like this (the `ThingBuilder`, not your head):
+
+```java
+class ThingBuilder {
+	int foo;
+	boolean bar;
+	String baz;
+
+	ThingBuilder setFoo(int foo) {
+		this.foo = foo;
+		return this;
+	}
+
+	ThingBuilder setBar(boolean bar) {
+		this.bar = bar;
+		return this;
+	}
+
+	ThingBuilder setBaz(String baz) {
+		this.baz = baz;
+		return this;
+	}
+
+	Thing build() {
+		return new Thing(foo, bar, baz);
+	}
+} 
+```
+
+Pretty straightforward, I hope. Set up a bunch of state, then act on it.
+
+But, like, I'm a forgetful guy. What if I forget to set some state? Like, say I never call `setBar`? Dang yo, absolute tragedy. If only there was some way to save us from such a terrible calamity.
+
+In statically-typed languages that don't [live in a self-indulgent land of make believe](https://golang.org/), you have something like Java's generics - some kind of type-level parameterization. This is programming at the compiler level, rather than runtime.
+
+Can we use that? Get our bro the compiler to give us a hand here? Well, yeah, duh, of course we can, otherwise I wouldn't be writing this blog.
+
+# type tutelage
+
+Okay, super quick refresher on Java's generics. A `List<E>` is a generic `List` type parameterized by `E`. We could have, for example, a `List<String>` or a `List<Bucket>` or whatever.
+
+There's a special type parameter, `?`. It's a complete unknown. A `List<?>`, for example, is a `List` of some unknowable type.
+
+Another thing! Unlike, say, C++, in Java, generics are erased. That means a `List<SweetPotato>` is the same type at run time as a `List<Yam>`, namely, a plain ol'  `List`. The compiler will prevent you from accidentally mixing different parameterized types up, but they're actually the same thing and you could, for example, forcibly cast between one to another.
+
+# got my bracket
+
+Anyway, the idea's pretty simple, I think. We use type parameters as flags to describe the state of our builder. A field is either set or not; the type parameter signals which. We can only build with the builder when it's in a valid state.
+
+We have a type parameter for each field in our builder, so our `ThingBuilder` from before is going to look something like this:
+
+```java
+class ThingBuilder<Foo,Bar,Baz> {
+	int foo;
+	boolean bar;
+	String baz;
+
+	// ...
+} 
+```
+
+At first, none of the fields have been set. We'll indicate unset fields by using `?` for the type parameter. So, our initial `ThingBuilder` will look like this:
+
+```java
+ThingBuilder<?,?,?> builder = ThingBuilder.create();
+```
+
+Now, whenever a field is set, we'll indicate that by settings its type parameter to some other type, say, `Object`. The `setFoo` method, for example, becomes this:
+
+```java
+ThingBuilder<Object,Bar,Baz> setFoo(int foo) {
+	this.foo = foo;
+	return (ThingBuilder<Object,Bar,Baz>) this;
+}
+```
+
+Notice that we force `Foo` to `Object`, leaving `Bar` and `Baz` unchanged. When we call it, the type parameter gets set:
+
+```java
+ThingBuilder<Object,?,?> updatedBuilder = builder
+						.setFoo(1);
+```
+
+Cool, right? Updating a type parameter at a time, we can tell at the compiler-level what fields have been set. But how do we use that?
+
+We're going to have to move things around just a little but, I think. At least, I haven't thought of a way around it. We pull the `build` method out into a static method that'll take the builder as a parameter. Not just any builder though; by constraining the type parameters, it'll only take a fully set, legit builder. Get your eyes on this:
+
+```java
+static Thing build(ThingBuilder<Object,Object,Object> builder) {
+	// ...
+}
+```
+
+Check it, right. The type parameters specify `Object`. `?` ain't gunna cut it. We don't want no scrub. This, for example, won't compile:
+
+```java
+ThingBuilder<?,?,?> builder = ThingBuilder.create();
+ThingBuilder.build(builder);
+```
+
+After we set the fields, though? No problemo:
+
+```java
+ThingBuilder<Object,Object,Object> builder = ThingBuilder.created()
+	.setFoo(1)
+	.setBar(true)
+	.setBaz("hey!");
+ThingBuilder.build(builder);
+```
+
+Boom! Speaking in the language of generics, we convince the compiler to check our code for us. (This, by the way, is the penniless man's [dependent types](https://en.wikipedia.org/wiki/Dependent_type))
+
+Is it worth it? Probably not, it's a lot of extra code! Is it cool? Not really, most of your coworkers would just be confused and angry if you actually did this! But did I write a blog about it? You betcha!
