@@ -1,0 +1,179 @@
+title: wherefore combinator
+date: 11-03-2016
+
+Like them [devout numbers](/blog/entries/church-numerals-review), the Y combinator is a right of passage for any would-be functional programmer.
+
+No, we're not talking about [orange-flavoured racism](http://qz.com/810778/y-combinator-has-no-problem-with-partner-peter-thiel-funding-donald-trump-sam-altman-says/), we've got some functional fun up our sleeves. I've never really understood the damn thing and I'm excited to try to rectify that.
+
+So, how do it do?
+
+Well, aight, here's the sitch. Say we had a recursive function, like, math's most excited function, the factorial:
+
+```javascript
+var factorial = function(n) {
+	if (n == 0) {
+		return 1;
+	}
+	else {
+		return n * factorial(n-1);
+	}
+};
+```
+
+Now, here's the game: what if a function couldn't refer to itself in its definition? How could we make recursion work? 
+
+Easy! Like any good functional programmer, we make the thing a higher-order function. Simple enough, if a little mind-bending, we can pass the function to itself:
+
+```javascript
+var factorialStep = function(self) {
+	return function(n) {
+		if (n == 0) {
+			return 1;
+		}
+		else {
+			var recur = self(self);
+			return n * recur(n-1);
+		}
+	}
+};
+
+var factorial = function(n) {
+	return factorialStep(factorialStep)(n);
+};
+```
+
+Neat! `recur` is a little tricky here, but it's the next `factorialStep`, created by threading `self` through to, well, itself, which returns a function ready to be called with the next `n`.
+
+Let's clean stuff up a bit though. Ideally, we'd just pass `factorialStep` the `recur` function and eschew all the grody details of the implementation. And we can do that by shuffling things around a little: 
+
+```javascript
+var factorialStep = function(recur) {
+	return function(n) {
+		if (n == 0) {
+			return 1;
+		}
+		else {
+			return n * recur(n-1);
+		}
+	}
+};
+
+var factorial = function(n) {
+	var recursionHelper = function(self) {
+		var recur = function(n) {
+			return self(self)(n);
+		};
+
+		return factorialStep(recur);
+	};
+
+	return recursionHelper(recursionHelper)(n);
+};
+```
+
+Is this better? Kinda! We'll circle back to that. Check that `recursionHelper` function though. When called, it returns a `factorialStep`, passing it a `recur` method.
+
+`recur` is tricky again! Remember, `self` is `recursionHelper` and when we call it, it returns the next `factorialStep`. So, when `recur` is called, it creates another `factorialStep` and calls it with the next `n`. Oof, getcher brain around that.
+
+Why's this better? Well, if you peer through the thick fog of FP fugure, you can see that the bulk of `factorial` can be pulled out and applied to any recursive function. Let's do that! You remember ol' Fibonacci?
+
+```javascript
+var makeRecursive = function(f) {
+	var recursionHelper = (function(self) {
+		var recur = function(n) {
+			return self(self)(n);
+		};
+
+		return f(recur);
+	});
+
+	return recursionHelper(recursionHelper);
+};
+
+var factorial = makeRecursive(function(recur) {
+	return function(n) {
+		if (n == 0) {
+			return 1;
+		}
+		else {
+			return n * recur(n-1);
+		}
+	}
+});
+
+var fibonacci = makeRecursive(function(recur) {
+	return function(n) {
+		if (n <= 1) {
+			return 1;
+		}
+		else {
+			return recur(n-1) + recur(n-2);
+		}
+	}
+});
+```
+
+We can poke `makeRecursive` a bit more to bring it in line with society's standards. Let's *Pretty Function* that down-and-out boy.
+
+Remember, another way to name a value is to bind it as a function parameter. So, for example:
+
+```javascript
+var y = 1;
+console.log(y);
+```
+
+becomes:
+
+```javascript
+(function(y) {
+	console.log(y);
+})(1);
+```
+
+Applying the same to `makeRecursive`, this:
+
+```javascript
+var makeRecursive = function(f) {
+	var recursionHelper = function(self) {
+		var recur = function(n) {
+			return self(self)(n);
+		};
+
+		return f(recur);
+	};
+
+	return recursionHelper(recursionHelper);
+}
+```
+becomes:
+
+```javascript:
+var makeRecursive = function(f) {
+	return (function(recursionHelper) {
+		return recursionHelper(recursionHelper);
+	})(function(self) {
+		var recur = function(n) {
+			return self(self)(n);
+		};
+		return f(recur);
+	});
+};
+```
+
+But huh, those variable names don't make a lotta sense anymore. Let's fix that up and heck, inline `recur`. We can also generalize things by forwarding all of the arguments, not just `n`, with `apply`: 
+
+```javascript
+var makeRecursive = function(f) {
+	return (function(x) {
+		return x(x);
+	})(function(x) {
+		return f(function() {
+			return x(x).apply(null, arguments);
+		});
+	});
+};
+```
+
+And that beautiful monstrosity is the Y combinator! Now we can make all sortsa recursive functions! How cool is that!
+
+Yeah, it's pretty opaque just to look at. I dunno, I'm not sure I'd even recognize the damn thing if I passed it on the street, but y'know, the rote, mechanical steps that get us there are each pretty straightforward, if, like, you spend a few hours staring at 'em.
