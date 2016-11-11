@@ -76,7 +76,7 @@
 
 (def blog-css
   ["/css/blog.css"
-   "/css/lib/syntax-highlighter/themes/witsTheme.css"])
+   "/css/syntaxHighlighter.css"])
 
 (def blog-js
   ["/js/lib/syntax-highlighter/brushes/shBrushClojure.js"
