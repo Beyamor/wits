@@ -18,7 +18,11 @@
 	}
 
 	.code-block {
-		margin-top: 20px;
+		margin: {
+			top: 20px;
+			left: 20px;
+			right: 20px;
+		}
 	}
 
 	.read-more {

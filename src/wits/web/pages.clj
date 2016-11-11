@@ -13,8 +13,8 @@
   ["/js/lib/jquery-1.9.1.min.js"
    "/js/lib/jquery.pjax.js"
    "/js/art/cityscape.js"
-   "/js/core.js"
-   "/js/lib/syntax-highlighter/shCore.js"])
+   "/js/lib/syntax-highlighter/shCore.js"
+   "/js/core.js"])
 
 (def page-initialization-js
   ["/js/project-collection.js"])

@@ -11,6 +11,9 @@ callOnloadCallbacks = ->
 		f() for f in onloadCallbacks[page]
 
 $ ->
+	if SyntaxHighlighter?
+		SyntaxHighlighter.defaults["gutter"] = false
+
 	# Used to fix the header to the top of the screen when scrolling down
 	# Dunno. Looks kinda cheesy, but I'll keep the code around for now.
 	###
