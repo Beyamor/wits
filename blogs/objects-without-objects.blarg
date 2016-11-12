@@ -1,0 +1,461 @@
+title: objects without objects
+date: 11-11-2016
+
+Caution, dear reader: there's no point to this particular entry, I'm just rambling.
+
+Then again, aren't I always?
+
+I've been idly doodling a programming language and it led me to thinking about the nature of objects. Crazy how they do. Poking around in that thoughtspace, I was wondering how far you could get with just plain ol' functions, which is the ill-defined road we're going to wander down today.
+
+This isn't so hard actually! Here's the deal: we'll call an "object" a function that takes a method name and some arguments. So, for example:
+
+```coffee
+greeter = (method, name) ->
+	if method == "greet"
+		console.log("Hello, " + name)
+	else
+		throw new Error("Unknown method")
+
+greeter("greet", "lovely reader")
+```
+
+This is OO in action: we send a dude a message and it does *something*. This scheme is all we need; it handily gives us polymorphism:
+
+```coffee
+excitedGreeter = (method, name) ->
+	if method == "greet"
+		console.log("Hello, " + name + "!")
+	else
+		throw new Error("Unknown method")
+
+greeters = [greeter, excitedGreeter]
+for someGreeter in greeters
+	someGreeter("greet", "lovely reader")
+```
+
+We can even do mutable state, right:
+
+```coffee
+createCounter = ->
+	count = 0
+	return (method) ->
+		switch method
+			when "count"
+				count += 1
+			when "get"
+				count
+			else
+				throw new Error("Unknown method")
+
+counter = createCounter()
+counter("count")
+counter("count")
+console.log(counter("get"))
+# => 2
+```
+
+Cool! But we're already starting to see a lot of boilerplate. I bet we can cut that down some.
+
+# attributed to attributes
+
+Let's take the JavaScript view of objects. What is an object? A miserable little pile of attributes. We can do that, no prob. But first we'll need the duct tape of programming: dictionaries. If we could use objects, well, we'd use 'em here, but that's off the table, so we'll define our own:
+
+```coffee
+emptyDictionary = null
+
+get = (dictionary, key) ->
+	if dictionary?
+		return dictionary(key)
+	else
+		return null
+
+set = (dictionary, key, value) ->
+	(someKey) ->
+		if someKey == key
+			return value
+		else
+			get(dictionary, someKey)
+
+aDictionary = set(emptyDictionary, "key", "value")
+console.log(get(aDictionary, "key"))
+# => value
+```
+
+Perfect!
+
+*(Try not to think about how badly this thing will blow up on deep searches for keys)*
+
+Okay, let's get to it. An object will basically just close over a dictionary of attributes. It'll handle messages by looking up the corresponding function and calling it on itself with the arguments:
+
+```coffee
+newObject = ->
+	attributes = emptyDictionary
+
+	setAttribute = (self, name, value) ->
+		attributes = set(attributes, name, value)
+	attributes = set attributes, "setAttribute", setAttribute
+
+	self = (methodName, args...) ->
+		method = get(attributes, methodName)
+		if method?
+			method(self, args...)
+		else
+			throw new Error("Unknown method")
+
+greeter = newObject()
+greeter "setAttribute", "greet", (self, name) ->
+	console.log("Hello, " + name)
+
+greeter("greet", "lovely reader")
+```
+
+Straightforward enough, right? An object'll come with one baked-in method, `setAttribute`, and it can build everything from that. Sure, we're skipping over some error handling, but shwatevs. That'll be a common theme.
+
+What next? Hm. How about prototypical inheritance? We'll take JavaScript as our model again. When an object looks up an attribute and it doesn't find it on itself, it should look it up in its parent. But how do we do that?
+
+# inheriting inheritance
+
+Well, first, let's get a little more flexibility in our objects. Right now, getting attributes is hardcoded as a direct dictionary lookup, but what if it was just another method?
+
+```coffee
+newObject = ->
+	attributes = emptyDictionary
+
+	getAttribute = (self, name) ->
+		get(attributes, name)
+	attributes = set attributes, "getAttribute", getAttribute
+
+	setAttribute = (self, name, value) ->
+		attributes = set(attributes, name, value)
+	attributes = set attributes, "setAttribute", setAttribute
+
+	self = (methodName, args...) ->
+		getAttribute = get(attributes, "getAttribute")
+		method = getAttribute(self, methodName)
+		if method?
+			method(self, args...)
+		else
+			throw new Error("Unknown method")
+```
+
+Okay, there's still a bootstrapping lookup in the attributes to get `getAttribute` itself, but from there, the object can do what it wants.
+
+How does this help us? Well, now we can redefine `getAttributes` for inheritance:
+
+```coffee
+object = newObject()
+object "setAttribute", "extend", (parent) ->
+	child = newObject()
+
+	getOwnAttribute = child("getAttribute", "getAttribute")
+
+	child "setAttribute", "getAttribute", (self, name) ->
+		getOwnAttribute(self, name) or parent("getAttribute", name)
+
+	child "setAttribute", "getOwnAttribute", getOwnAttribute
+
+	return child
+
+
+parent = object "extend"
+parent "setAttribute", "parentMethod", (self) ->
+	"parentValue"
+
+child = parent "extend"
+console.log(child("parentMethod"))
+# => parentValue
+
+grandChild = child "extend"
+console.log(grandChild("parentMethod"))
+# => parentValue
+```
+
+Let's revisit our counters now:
+
+```coffee
+baseCounter = object "extend"
+
+baseCounter "setAttribute", "init", (self) ->
+	self("setAttribute", "_count", 0)
+
+baseCounter "setAttribute", "count", (self) ->
+	self("setAttribute", "_count", self("getAttribute", "_count") + 1)
+
+baseCounter "setAttribute", "get", (self) ->
+	self("getAttribute", "_count")
+
+counter = baseCounter "extend"
+counter "init"
+counter "count"
+console.log(counter("get"))
+# => 1
+```
+
+Ack, whose keyboard had indigestion? Let's clean that up some.
+
+# refining defining
+
+Mm, first off, defining new methods is super repetitive. We reduce it a bit by adding a callback to define new methods when extending:
+
+```coffee
+object "setAttribute", "extend", (parent, onDefinition) ->
+	child = newObject()
+
+	# ...
+
+	if onDefinition?
+		defineAttribute = (name, value) ->
+			child("setAttribute", name, value)
+
+		onDefinition(defineAttribute)
+
+	return child
+
+
+nicelyDefinedThing = object "extend", (def) ->
+	def "someMethod", (self) ->
+		console.log("nice!")
+
+nicelyDefinedThing("someMethod")
+# => nice!
+```
+
+Second, the explicit `init` calls to set up the initial state. Let's make that happen automatically with a call to `new`:
+
+```coffee
+object "setAttribute", "new", (parent, args...) ->
+	child = parent "extend"
+	child "init", args...
+	return child
+
+
+newableThing = object "extend", (def) ->
+	def "init", (self) ->
+		self("setAttribute", "inited", true)
+
+newThing = newableThing "new"
+console.log(newThing("getAttribute", "inited"))
+# => true
+```
+
+Finally, state. All these `getAttribute` and `setAttribute` calls just to set state. Let's add some smarts to our objects. `@var` will get a value for an instance variable `var` and `@var=` will set it.
+
+We'll do this by intercepting the method lookup and returning a getter or setter based on its name if it starts with `@`:
+
+```coffee
+oldGet = object "getAttribute", "getAttribute"
+object "setAttribute", "getAttribute", (self, name) ->
+	if name[0] == "@"
+		if name[name.length-1] == "="
+			name = name.substring(0, name.length - 1)
+			return (self, value) ->
+				vars = self("getOwnAttribute", "instanceVariables")
+				vars = set(vars, name, value)
+				self("setAttribute", "instanceVariables", vars)
+		else
+			return (self) ->
+				vars = self("getOwnAttribute", "instanceVariables")
+				return get(vars, name)
+	else
+		oldGet(self, name)
+
+
+myStatefulThing = object "extend"
+myStatefulThing("@state=", "some state")
+console.log(myStatefulThing("@state"))
+# => some state
+```
+
+Now our definition looks like this: 
+
+```coffee
+baseCounter = object "extend", (def) ->
+	def "init", (self) ->
+		self("@count=", 0)
+
+	def "count", (self) ->
+		self("@count=", self("@count") + 1)
+
+	def "get", (self) ->
+		self("@count")
+
+counter1 = baseCounter "new"
+counter1 "count"
+console.log(counter1("get"))
+# => 1
+
+counter2 = baseCounter "new"
+counter2 "count"
+counter2 "count"
+console.log(counter2("get"))
+# => 2
+```
+
+That's not so bad, is it?
+
+Okay, let's do one last thing: dispatching to the parent.
+
+# proud parents
+
+Remember the `excitedGreeter`? It's, uh, the `greeter` but more different:
+
+```coffee
+greeter = object "extend", (def) ->
+	def "greet", (self, name) ->
+		console.log("Hello, " + name)
+
+excitedGreeter = object "extend", (def) ->
+	def "greet", (self, name) ->
+		console.log("Hello, " + name + "!")
+``` 
+
+We should be able to leverage the `greeter` implementation somehow, right? Right now we can write:
+
+```coffee
+greeter = object "extend", (def) ->
+	def "greet", (self, name) ->
+		console.log("Hello, " + name)
+
+excitedGreeter = object "extend", (def) ->
+	def "greet", (self, name) ->
+		greeter("getAttribute", "greet")(self, name + "!")
+```
+
+But that's a little cumbersome.
+
+Well, what if we defined `parent` to call the parent object's implementation?
+
+```coffee
+object "setAttribute", "extend", (parent, onDefinition) ->
+	child = newObject()
+
+	child "setAttribute", "parent", (self) ->
+		(methodName, args...) ->
+			parent("getAttribute", methodName)(self, args...)
+	
+	# ...
+
+	return child
+
+
+greeter = object "extend", (def) ->
+	def "greet", (self, name) ->
+		console.log("Hello, " + name)
+
+excitedGreeter = greeter "extend", (def) ->
+	def "greet", (self, name) ->
+		self("parent")("greet", name + "!")
+
+excitedGreeter("greet", "lovelier reader")
+# => Hello, lovelier reader!
+```
+
+That seems to work, but what if we inherit again?
+
+```coffee
+evenMoreExcitedGreeter = excitederGreeter "extend", (def) ->
+	def "greet", (self, name) ->
+		self("parent")("greet", name + "!!")
+
+evenMoreExcitedGreeter("greet", "lovely reader")
+# => RangeError: Maximum call stack size exceeded
+```
+
+Ah jeez, what even?
+
+The problem is that the `parent` lookup is *too* dynamic. `evenMoreExcitedGreeter` calls `excitedGreeter`'s `greet`, which calls `evenMoreExcitedGreeter`'s `parent`'s `greet`, which is just `excitedGreeter`'s `greet` again! Bwaugh!
+
+What we want to do is call to the parent of the exact object for which those methods are defined. Let's extend our `extend` mini-language with a way of doing that: 
+
+```coffee
+object "setAttribute", "extend", (parent, onDefinition) ->
+	child = newObject()
+
+	child "setAttribute", "parent", (self, name) ->
+		parent("getAttribute", name)
+
+	getFromParent = (name) ->
+		child("parent", name)
+
+	getOwnAttribute = child("getAttribute", "getAttribute")
+	child "setAttribute", "getOwnAttribute", getOwnAttribute
+	child "setAttribute", "getAttribute", (self, name) ->
+		getOwnAttribute(self, name) or getFromParent(name)
+
+	if onDefinition?
+		defineAttribute = (name, value) ->
+			child("setAttribute", name, value)
+
+		onDefinition(defineAttribute, getFromParent)
+
+	return child
+```
+
+Note the new `getFromParent` function that looks up an attribute through the `child`'s `parent`. We're passing it to `onDefinition` and we modified the inheritance stuff to use it too. Now we can call to the right parent: 
+
+```coffee
+
+greeter = object "extend", (def) ->
+	def "greet", (self, name) ->
+		console.log("Hello, " + name)
+
+excitedGreeter = greeter "extend", (def, parent) ->
+	def "greet", (self, name) ->
+		parent("greet")(self, name + "!")
+
+excitedGreeter("greet", "lovelier reader")
+# => Hello, lovelier reader!
+
+evenMoreExcitedGreeter = excitedGreeter "extend", (def, parent) ->
+	def "greet", (self, name) ->
+		parent("greet")(self, name + "!!")
+
+evenMoreExcitedGreeter("greet", "loveliest reader")
+# => Hello, loveliest reader!!!
+```
+
+Groovy! One last little thing here though: `parent` is just another method. That means we've got a hook into how we look up parent values. That makes it easy to, say, write mixins:
+
+```coffee
+object "setAttribute", "mixin", (self, objects...) ->
+	getFromParent = self("getAttribute", "parent")
+	for object in objects
+		do (object) ->
+			oldGetFromParent = getFromParent
+			getFromParent = (self, name) ->
+				oldGetFromParent(self, name) or object("getAttribute", name)
+	self("setAttribute", "parent", getFromParent)
+	return self
+
+
+animal = object "extend", (def) ->
+	def "describe", (self) ->
+		console.log("I " + self("move") + " and " + self("talk"))
+
+walkMixin = object "extend", (def) ->
+	def "move", (self) -> "walk"
+
+swimMixin = object "extend", (def) ->
+	def "move", (self) -> "swim"
+
+neighMixin = object "extend", (def) ->
+	def "talk", (self) -> "neigh"
+
+horse = animal("extend")("mixin", walkMixin, neighMixin)
+horse("describe")
+# => I walk and neigh
+
+seahorse = animal("extend")("mixin", swimMixin, neighMixin)
+seahorse("describe")
+# => I swim and neigh
+```
+
+Phew! Okay! I think let's call it quits maybe!
+
+So hey, what'd we do today? We discovered that you can build a pretty righteous object system using plain ol' functions. Starting with message dispatch, we built up state, prototypical inheritance, and mixins. That's pretty cool!
+
+# the dang lang
+
+How does the programming language I mentioned *waaay* back at the start tie into this? Partly smoothing over some of the roughness of stuff like the `extend` mini-language with built-in syntax and partly expanding on the method dispatch.
+
+Remember when we added special handling for names starting with `@`? That's a taste of doing more interesting dispatch than a straight dictionary lookup of the method name. Another path to explore would be dispatching on the arguments too. But oh, I've said too much. That's a subject for another blog.
