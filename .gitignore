@@ -15,3 +15,7 @@ pom.xml.asc
 /resources/
 db.conf
 *.bak
+/.idea
+*.iml
+/.gradle
+.nrepl-port
