@@ -18,23 +18,14 @@
 
   While you're here, feel free to read my latest rambling over in [the blog](/blog) or check out some of my [projects](/projects). For more of me, hit up my [GitHub](https://github.com/Beyamor) and [Stack Overflow](http://stackoverflow.com/users/1308287/beyamor) accounts.
 
-  Got questions or just want to shoot the breeze? <a class=\"email\">Let's talk.</a>")
+  Got questions or just want to shoot the breeze? Find me on <a href=\"https://www.linkedin.com/in/tom-gibson-60a6b9156\">LinkedIn</a>.")
 
-(defn home-page
-  [pjax?]
-  (pjax/page
-    pages/main pjax?
-    {:title
-     "Words in the Sky"
+(def home-page
+  {:title
+   "Words in the Sky"
 
-     :js
-     ["/js/home.js"]
-
-     :css
-     ["/css/home.css"]
-
-     :content
-     [:div.page
-      (-> content
+   :content
+   [:div.page
+    (-> content
         md-to-html-string
-        html->hiccup)]}))
+        html->hiccup)]})
