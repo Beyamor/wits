@@ -36,3 +36,17 @@
   (if (contains? m k)
     m
     (assoc m k v)))
+
+(defn is-child-file?
+  [maybe-parent child]
+  (cond
+    (or (not (.exists maybe-parent))
+        (not (.isDirectory maybe-parent)))
+    false
+
+    (= (.getCanonicalFile maybe-parent)
+       (.getCanonicalFile child))
+    true
+
+    :else
+    (is-child-file? maybe-parent (.getParentFile child))))
