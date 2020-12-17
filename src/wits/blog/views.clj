@@ -8,7 +8,8 @@
   (:require [markdown.core :as md]
             [wits.web.pages :as pages]
             [wits.web.html :as html]
-            [wits.web.pjax :as pjax])
+            [wits.web.pjax :as pjax]
+            [clojure.string :as string])
   (:import java.text.SimpleDateFormat))
 
 (defn add-code-tags
@@ -55,6 +56,12 @@
     blog-content
     (filter (-#> html/tag (= :p)))
     (take number-of-paragraphs)))
+
+(defn generate-url-slug
+  [{:keys [title]}]
+  (-> title
+      (string/replace #" " "-")
+      (string/replace #"[^\w-]" "")))
 
 (defn blog-link
   ([link-contents blog]

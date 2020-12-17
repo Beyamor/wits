@@ -1,9 +1,11 @@
 (ns wits.blog
   (require [clojure.java.io :as io]
-           [clojure.string :as string]))
+           [clojure.string :as string])
+  (:import (java.text SimpleDateFormat)))
 
-; Assumes we're running from the root of the project
-(def blog-directory (io/file "blogs"))
+(defn parse-date
+  [s]
+  (.parse (SimpleDateFormat. "dd-MM-yyyy") s))
 
 (defn is-blog-file?
   [f]
@@ -14,6 +16,15 @@
   [s]
   (clojure.string/split s #"\r?\n" 2))
 
+(defn parse-property
+  [prop val]
+   (let [prop (keyword (string/trim prop))
+         val (string/trim val)
+         val (case prop
+               :date (parse-date val)
+               val)]
+     [prop val]))
+
 (defn parse-blog-props
   ([text]
    (parse-blog-props text {}))
@@ -21,20 +32,12 @@
    (let [[line text] (read-first-line text)]
      (if (empty? (string/trim line))
        [props text]
-       (let [[prop val] (string/split line #":" 2)
-             prop (string/trim prop)
-             val (string/trim val)
-             props (assoc props (keyword prop) val)]
-         (recur text props))))))
+       (let [[prop val] (apply parse-property (string/split line #":" 2))]
+         (recur text
+                (assoc props prop val)))))))
 
 (defn parse-blog-file
   [f]
   (let [text (slurp f)
         [props content] (parse-blog-props text)]
     (merge props {:content content})))
-
-(doseq [f (->> blog-directory
-               file-seq
-               (filter is-blog-file?)
-               (take 1))]
-  (println (parse-blog-file f)))
