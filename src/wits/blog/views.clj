@@ -150,5 +150,8 @@
 (defn generate-views
   [blogs]
   (for [blog blogs]
-    {:path ["blogs" (str (generate-url-slug blog) ".html")]
-     :page {:content (full-blog blog)}}))
+    {:path
+     ["blogs" (str (generate-url-slug blog) ".html")]
+
+     :content
+     (full-blog blog)}))
