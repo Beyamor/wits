@@ -146,3 +146,9 @@
        "$(function() {
        SyntaxHighlighter.highlight();
        });"})))
+
+(defn generate-views
+  [blogs]
+  (for [blog blogs]
+    {:path ["blogs" (str (generate-url-slug blog) ".html")]
+     :page {:content (full-blog blog)}}))

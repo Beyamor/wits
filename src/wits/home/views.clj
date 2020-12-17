@@ -20,12 +20,14 @@
 
   Got questions or just want to shoot the breeze? Find me on <a href=\"https://www.linkedin.com/in/tom-gibson-60a6b9156\">LinkedIn</a>.")
 
-(def home-page
-  {:title
-   "Words in the Sky"
+(def home-page-view
+  {:path ["index.html"]
+   :page
+         {:title
+          "Words in the Sky"
 
-   :content
-   [:div.page
-    (-> content
-        md-to-html-string
-        html->hiccup)]})
+          :content
+          [:div.page
+           (-> content
+               md-to-html-string
+               html->hiccup)]}})
