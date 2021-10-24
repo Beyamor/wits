@@ -8,14 +8,23 @@
             [hickory.core :as hik]
             [markdown.core :as md])
   (:import [java.text SimpleDateFormat]
-           (org.apache.commons.text WordUtils)))
+           (org.apache.commons.text WordUtils)
+           (java.time.format DateTimeFormatter)
+           (java.time LocalDate)
+           (java.util Locale)))
 
 (def blog-source-dir (clojure.java.io/file "blogs"))
 (def blog-output-dir (clojure.java.io/file wits.core/output-root "blog"))
 
-(defn parse-date
-  [s]
-  (.parse (SimpleDateFormat. "dd-MM-yyyy") s))
+(let [formatter (DateTimeFormatter/ofPattern "dd-MM-yyyy")]
+  (defn parse-date
+    [s]
+    (LocalDate/parse s formatter)))
+
+(let [formatter (DateTimeFormatter/ofPattern "MMM dd, yyyy" Locale/ENGLISH)]
+  (defn format-date
+    [d]
+    (.format d formatter)))
 
 (defn is-blog-file?
   [f]
@@ -78,24 +87,29 @@
          [:code {:class class} (clojure.string/trim text)]]))))
 
 (defn blog->html
-  [{:keys [title content]}]
+  [{:keys [title content] :as blog}]
   (let [content (-> content
                     md/md-to-html-string
                     hik/parse
                     hik/as-hiccup
                     capitalize-headings
-                    syntaxhighlight->highlight)]
+                    syntaxhighlight->highlight)
+        title (WordUtils/capitalizeFully title)]
     (hic/html
       [:html
        [:head
         [:meta {:charset "utf-8"}]
-        [:title (WordUtils/capitalize title)]
+        [:title title]
         wits.core/resources-html]
        [:body
-        [:div#content
-         content]
-        [:script {:type "text/javascript"}
-         "hljs.highlightAll();"]]])))
+        [:div#blog
+         [:h1.title title]
+         (when (:date blog)
+           [:h2.date (format-date (:date blog))])
+         [:div#content
+          content]
+         [:script {:type "text/javascript"}
+          "hljs.highlightAll();"]]]])))
 
 (defn generate-blogs!
   []

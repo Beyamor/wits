@@ -1,7 +1,9 @@
 (ns wits.core)
 
 (def output-root (clojure.java.io/file "target/site"))
-(def css-files ["shades-of-purple.min.css"])
+(def css-files ["shades-of-purple.min.css"
+                "common.css"
+                "blog.css"])
 (def js-files ["highlight.min.js"])
 
 (def resources-html

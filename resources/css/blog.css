@@ -1,0 +1,22 @@
+#blog {
+    width: 650px;
+    margin: auto;
+}
+
+.title {
+    margin-bottom: 0px;
+}
+
+.date {
+    color: #bbb;
+    font-size: small;
+}
+
+#content h1 {
+    font-size: 18pt;
+    margin-top: 50px;
+}
+
+pre {
+    font-size: 12pt;
+}
