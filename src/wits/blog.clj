@@ -1,7 +1,7 @@
 (ns wits.blog
-  (require [clojure.java.io :as io]
-           [clojure.string :as string])
-  (:import (java.text SimpleDateFormat)))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as string])
+  (:import [java.text SimpleDateFormat]))
 
 (defn parse-date
   [s]
@@ -18,12 +18,12 @@
 
 (defn parse-property
   [prop val]
-   (let [prop (keyword (string/trim prop))
-         val (string/trim val)
-         val (case prop
-               :date (parse-date val)
-               val)]
-     [prop val]))
+  (let [prop (keyword (string/trim prop))
+        val (string/trim val)
+        val (case prop
+              :date (parse-date val)
+              val)]
+    [prop val]))
 
 (defn parse-blog-props
   ([text]
