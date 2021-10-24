@@ -12,7 +12,6 @@ pom.xml.asc
 .lein-repl-history
 *.sw[op]
 /.sass-cache/
-/resources/
 db.conf
 *.bak
 /.idea
