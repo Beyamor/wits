@@ -1,5 +1,5 @@
 title: really terrifying type info
-date: 6-23-2012
+date: 06-23-2012
 
 Let's spend some time staring into the black abyss of metaprogramming in C++. Today, we're gunna cover variadic templates.
 

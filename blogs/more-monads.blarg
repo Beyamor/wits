@@ -1,5 +1,5 @@
 title: more monads
-date: 12-09-2013 6:00pm
+date: 12-09-2013
 
 Recently, I answered a question about [implementing the IO monad in Clojure](http://stackoverflow.com/questions/20431964/what-is-the-clojure-equivalent-for-haskells-operator/20438235#20438235). All well and good, except that it took me longer than I would have liked to get back into the swing of reasoning with monads. This is the sort of thing I want to be as natural as, if not breathing, at least working with classes, especially since it's a stepping stone to other concepts like comonads and arrows.
 

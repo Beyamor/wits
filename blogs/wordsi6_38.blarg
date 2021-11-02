@@ -1,5 +1,5 @@
 title: a special kind of generic
-date: 1-21-2012
+date: 01-21-2012
 
 Boopity-boop, *templates.*
 
@@ -107,7 +107,7 @@ class Vector {
 	float dot( Vector<CARDINALITY> other );
 };
 
-// 2-dimensional specialization
+// 02-dimensional specialization
 template <>
 class Vector<2> {
 

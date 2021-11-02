@@ -13,8 +13,10 @@
 
 (defn generate!
   []
-  (clojure.java.io/make-parents wits.core/output-root)
-  (copy-resources!)
-  (wits.blog/generate-blogs!))
-
-(generate!)
+  (try
+    (clojure.java.io/make-parents wits.core/output-root)
+    (copy-resources!)
+    (wits.blog/generate-blogs!)
+    (catch Throwable t
+      (println (.getMessage t))
+      (.printStackTrace t))))

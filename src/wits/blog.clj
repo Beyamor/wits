@@ -7,8 +7,7 @@
             [hiccup.core :as hic]
             [hickory.core :as hik]
             [markdown.core :as md])
-  (:import [java.text SimpleDateFormat]
-           (org.apache.commons.text WordUtils)
+  (:import (org.apache.commons.text WordUtils)
            (java.time.format DateTimeFormatter)
            (java.time LocalDate)
            (java.util Locale)))
@@ -16,10 +15,14 @@
 (def blog-source-dir (clojure.java.io/file "blogs"))
 (def blog-output-dir (clojure.java.io/file wits.core/output-root "blog"))
 
-(let [formatter (DateTimeFormatter/ofPattern "dd-MM-yyyy")]
+(let [formatter1 (DateTimeFormatter/ofPattern "dd-MM-yyyy")
+      formatter2 (DateTimeFormatter/ofPattern "MM-dd-yyyy")]
   (defn parse-date
     [s]
-    (LocalDate/parse s formatter)))
+    (try
+      (LocalDate/parse s formatter1)
+      (catch Exception e
+        (LocalDate/parse s formatter2)))))
 
 (let [formatter (DateTimeFormatter/ofPattern "MMM dd, yyyy" Locale/ENGLISH)]
   (defn format-date
@@ -57,9 +60,12 @@
 
 (defn parse-blog-file
   [f]
-  (let [text (slurp f)
-        [props content] (parse-blog-props text)]
-    (merge props {:content content})))
+  (try
+    (let [text (slurp f)
+          [props content] (parse-blog-props text)]
+      (merge props {:content content}))
+    (catch Exception e
+      (throw (RuntimeException. (str "Error in " f) e)))))
 
 (defn title->file-name
   [title]
@@ -81,10 +87,12 @@
   (wits.html/transform-tag
     content :pre
     (fn [attr [text]]
-      (let [class (-> attr :class
-                      (clojure.string/replace "brush: " "language-"))]
+      (let [class (some-> attr :class
+                          (clojure.string/replace "brush: " "language-"))]
         [:pre
-         [:code {:class class} (clojure.string/trim text)]]))))
+         [:code {:class class} (if (string? text)
+                                 (clojure.string/trim text)
+                                 text)]]))))
 
 (defn blog->html
   [{:keys [title content] :as blog}]
@@ -116,7 +124,8 @@
   (doseq [blog-file (->> blog-source-dir
                          file-seq
                          (filter is-blog-file?)
-                         (filter #(clojure.string/includes? (.getName %) "objects-with")))
+                         ;(filter #(clojure.string/includes? (.getName %) "objects-with")))
+                         )
           :let [blog (parse-blog-file blog-file)
                 file-name (title->file-name (:title blog))
                 file-contents (blog->html blog)
