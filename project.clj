@@ -15,5 +15,5 @@
   :aliases {"build-site" ["exec" "-ep" "(require 'wits.generate) (wits.generate/generate!)"]}
   :auto {"build-site" {:paths ["src"
                                "blogs"
-                               "sources"]
+                               "resources"]
                        :file-pattern #"\.(clj|cljs|cljx|cljc|js|css|blarg)$"}})

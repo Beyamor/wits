@@ -16,7 +16,7 @@
   (try
     (clojure.java.io/make-parents wits.core/output-root)
     (copy-resources!)
-    (wits.blog/generate-blogs!)
+    (wits.blog/generate!)
     (catch Throwable t
       (println (.getMessage t))
       (.printStackTrace t))))

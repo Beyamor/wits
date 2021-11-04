@@ -1,4 +1,4 @@
-#blog {
+#content {
     width: 650px;
     margin: auto;
 }
@@ -19,4 +19,12 @@
 
 pre {
     font-size: 12pt;
+}
+
+.blog-list-entry {
+    display: block;
+}
+
+.blog-list-entry .date {
+    margin-left: 10px;
 }

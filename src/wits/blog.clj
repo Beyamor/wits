@@ -67,9 +67,10 @@
     (catch Exception e
       (throw (RuntimeException. (str "Error in " f) e)))))
 
-(defn title->file-name
-  [title]
-  (-> title
+(defn blog->file-name
+  [blog]
+  (-> blog
+      :title
       clojure.string/lower-case
       (clojure.string/replace " " "-")
       (clojure.string/replace #"[^a-z0-9_\-]" "")
@@ -94,6 +95,18 @@
                                  (clojure.string/trim text)
                                  text)]]))))
 
+(defn ->page
+  [{:keys [title body]}]
+  (hic/html
+    [:html
+     [:head
+      [:meta {:charset "utf-8"}]
+      [:title title]
+      wits.core/resources-html]
+     [:body
+      [:div#content
+       body]]]))
+
 (defn blog->html
   [{:keys [title content] :as blog}]
   (let [content (-> content
@@ -103,33 +116,43 @@
                     capitalize-headings
                     syntaxhighlight->highlight)
         title (WordUtils/capitalizeFully title)]
-    (hic/html
-      [:html
-       [:head
-        [:meta {:charset "utf-8"}]
-        [:title title]
-        wits.core/resources-html]
-       [:body
-        [:div#blog
-         [:h1.title title]
-         (when (:date blog)
-           [:h2.date (format-date (:date blog))])
-         [:div#content
-          content]
-         [:script {:type "text/javascript"}
-          "hljs.highlightAll();"]]]])))
+    (->page
+      {:title title
+       :body [:div#blog
+              [:h1.title title]
+              (when (:date blog)
+                [:h2.date (format-date (:date blog))])
+              [:div#content
+               content]
+              [:script {:type "text/javascript"}
+               "hljs.highlightAll();"]]})))
 
 (defn generate-blogs!
-  []
-  (doseq [blog-file (->> blog-source-dir
-                         file-seq
-                         (filter is-blog-file?)
-                         ;(filter #(clojure.string/includes? (.getName %) "objects-with")))
-                         )
-          :let [blog (parse-blog-file blog-file)
-                file-name (title->file-name (:title blog))
+  [blogs]
+  (doseq [blog blogs
+          :let [file-name (blog->file-name blog)
                 file-contents (blog->html blog)
                 output-file (clojure.java.io/file blog-output-dir file-name)]]
     (println file-name)
     (clojure.java.io/make-parents output-file)
     (spit output-file file-contents)))
+
+(defn generate-list!
+  [blogs]
+  (spit (clojure.java.io/file blog-output-dir "index.html")
+        (->page
+          {:title "Blogs"
+           :body (for [blog (reverse (sort-by :date blogs))]
+                   [:div.blog-list-entry
+                    [:a {:href (str "/blog/" (blog->file-name blog))}
+                     (WordUtils/capitalizeFully (:title blog))]
+                    [:span.date (format-date (:date blog))]])})))
+
+(defn generate!
+  []
+  (let [blogs (->> blog-source-dir
+                   file-seq
+                   (filter is-blog-file?)
+                   (map parse-blog-file))]
+    (generate-blogs! blogs)
+    (generate-list! blogs)))
