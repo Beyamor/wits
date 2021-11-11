@@ -1,7 +1,3 @@
-#content {
-    width: 650px;
-    margin: auto;
-}
 
 .title {
     margin-bottom: 0px;
@@ -14,6 +10,9 @@
 
 #content h1 {
     font-size: 18pt;
+}
+
+#content h1:not(:first-child) {
     margin-top: 50px;
 }
 

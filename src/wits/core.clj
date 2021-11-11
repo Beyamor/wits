@@ -14,6 +14,12 @@
     (for [js js-files]
       [:script {:type "text/javascript" :src (str "/js/" js)}])))
 
+(def header
+  [:div#header
+   [:h1 [:a {:href "/"} "Words in the Sky"]]
+   (for [[text link] [["Blog" "/blog"]]]
+     [:a {:href link} text])])
+
 (defn ->page
   [{:keys [title body]}]
   (hic/html
@@ -24,6 +30,7 @@
         [:title title])
       wits.core/resources-html]
      [:body
+      header
       [:div#content
        body]]]))
 
