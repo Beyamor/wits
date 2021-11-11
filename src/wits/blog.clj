@@ -10,7 +10,6 @@
            (java.util Locale)))
 
 (def blog-source-dir (clojure.java.io/file "blogs"))
-(def blog-output-dir (clojure.java.io/file wits.core/output-root "blog"))
 
 (let [formatter1 (DateTimeFormatter/ofPattern "dd-MM-yyyy")
       formatter2 (DateTimeFormatter/ofPattern "MM-dd-yyyy")]
@@ -64,14 +63,21 @@
     (catch Exception e
       (throw (RuntimeException. (str "Error in " f) e)))))
 
-(defn blog->file-name
+(defn blog->base-file-name
   [blog]
   (-> blog
       :title
       clojure.string/lower-case
       (clojure.string/replace " " "-")
-      (clojure.string/replace #"[^a-z0-9_\-]" "")
-      (str ".html")))
+      (clojure.string/replace #"[^a-z0-9_\-]" "")))
+
+(defn blog->file-name
+  [blog]
+  [(blog->base-file-name blog) "index.html"])
+
+(defn blog->link
+  [blog]
+  (str "/blog/entries/" (blog->base-file-name blog)))
 
 (defn capitalize-headings
   [content]
@@ -115,7 +121,7 @@
   [blogs]
   (doseq [blog blogs]
     (wits.core/generate-page!
-      (merge {:file ["blog" (blog->file-name blog)]}
+      (merge {:file ["blog" "entries" (blog->file-name blog)]}
              (blog->page blog)))))
 
 (defn generate-list!
@@ -125,7 +131,7 @@
      :file ["blog" "index.html"]
      :body (for [blog (reverse (sort-by :date blogs))]
              [:div.blog-list-entry
-              [:a {:href (str "/blog/" (blog->file-name blog))}
+              [:a {:href (blog->link blog)}
                (WordUtils/capitalizeFully (:title blog))]
               [:span.date (format-date (:date blog))]])}))
 

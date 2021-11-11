@@ -39,7 +39,7 @@
   (let [html (->page {:title title
                       :body body})
         output-file (if (coll? file)
-                      (reduce clojure.java.io/file output-root file)
+                      (reduce clojure.java.io/file output-root (flatten file))
                       (clojure.java.io/file output-root file))]
     (println "Generating " file)
     (clojure.java.io/make-parents output-file)
