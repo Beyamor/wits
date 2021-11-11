@@ -1,4 +1,5 @@
-(ns wits.core)
+(ns wits.core
+  (:require [hiccup.core :as hic]))
 
 (def output-root (clojure.java.io/file "target/site"))
 (def css-files ["shades-of-purple.min.css"
@@ -12,3 +13,27 @@
       [:link {:rel "stylesheet" :href (str "/css/" css)}])
     (for [js js-files]
       [:script {:type "text/javascript" :src (str "/js/" js)}])))
+
+(defn ->page
+  [{:keys [title body]}]
+  (hic/html
+    [:html
+     [:head
+      [:meta {:charset "utf-8"}]
+      (when title
+        [:title title])
+      wits.core/resources-html]
+     [:body
+      [:div#content
+       body]]]))
+
+(defn generate-page!
+  [{:keys [title body file]}]
+  (let [html (->page {:title title
+                      :body body})
+        output-file (if (coll? file)
+                      (reduce clojure.java.io/file output-root file)
+                      (clojure.java.io/file output-root file))]
+    (println "Generating " file)
+    (clojure.java.io/make-parents output-file)
+    (spit output-file html)))

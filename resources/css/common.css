@@ -3,3 +3,7 @@ body {
     font-size: 14pt;
 }
 
+a {
+    color: #2eabd1;
+    text-decoration: none;
+}

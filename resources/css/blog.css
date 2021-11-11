@@ -23,6 +23,7 @@ pre {
 
 .blog-list-entry {
     display: block;
+    margin-bottom: 8px;
 }
 
 .blog-list-entry .date {

@@ -1,10 +1,7 @@
 (ns wits.blog
   (:require wits.core
             wits.html
-            [clojure.java.io :as io]
             [clojure.string :as string]
-            [clojure.walk :as walk]
-            [hiccup.core :as hic]
             [hickory.core :as hik]
             [markdown.core :as md])
   (:import (org.apache.commons.text WordUtils)
@@ -95,19 +92,7 @@
                                  (clojure.string/trim text)
                                  text)]]))))
 
-(defn ->page
-  [{:keys [title body]}]
-  (hic/html
-    [:html
-     [:head
-      [:meta {:charset "utf-8"}]
-      [:title title]
-      wits.core/resources-html]
-     [:body
-      [:div#content
-       body]]]))
-
-(defn blog->html
+(defn blog->page
   [{:keys [title content] :as blog}]
   (let [content (-> content
                     md/md-to-html-string
@@ -116,37 +101,33 @@
                     capitalize-headings
                     syntaxhighlight->highlight)
         title (WordUtils/capitalizeFully title)]
-    (->page
-      {:title title
-       :body [:div#blog
-              [:h1.title title]
-              (when (:date blog)
-                [:h2.date (format-date (:date blog))])
-              [:div#content
-               content]
-              [:script {:type "text/javascript"}
-               "hljs.highlightAll();"]]})))
+    {:title title
+     :body [:div#blog
+            [:h1.title title]
+            (when (:date blog)
+              [:h2.date (format-date (:date blog))])
+            [:div#content
+             content]
+            [:script {:type "text/javascript"}
+             "hljs.highlightAll();"]]}))
 
 (defn generate-blogs!
   [blogs]
-  (doseq [blog blogs
-          :let [file-name (blog->file-name blog)
-                file-contents (blog->html blog)
-                output-file (clojure.java.io/file blog-output-dir file-name)]]
-    (println file-name)
-    (clojure.java.io/make-parents output-file)
-    (spit output-file file-contents)))
+  (doseq [blog blogs]
+    (wits.core/generate-page!
+      (merge {:file ["blog" (blog->file-name blog)]}
+             (blog->page blog)))))
 
 (defn generate-list!
   [blogs]
-  (spit (clojure.java.io/file blog-output-dir "index.html")
-        (->page
-          {:title "Blogs"
-           :body (for [blog (reverse (sort-by :date blogs))]
-                   [:div.blog-list-entry
-                    [:a {:href (str "/blog/" (blog->file-name blog))}
-                     (WordUtils/capitalizeFully (:title blog))]
-                    [:span.date (format-date (:date blog))]])})))
+  (wits.core/generate-page!
+    {:title "Blogs"
+     :file ["blog" "index.html"]
+     :body (for [blog (reverse (sort-by :date blogs))]
+             [:div.blog-list-entry
+              [:a {:href (str "/blog/" (blog->file-name blog))}
+               (WordUtils/capitalizeFully (:title blog))]
+              [:span.date (format-date (:date blog))]])}))
 
 (defn generate!
   []

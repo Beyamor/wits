@@ -1,6 +1,7 @@
 (ns wits.generate
   (:require wits.core
-            wits.blog))
+            wits.blog
+            wits.home))
 
 (defn copy-resources!
   []
@@ -17,6 +18,7 @@
     (clojure.java.io/make-parents wits.core/output-root)
     (copy-resources!)
     (wits.blog/generate!)
+    (wits.home/generate!)
     (catch Throwable t
       (println (.getMessage t))
       (.printStackTrace t))))
