@@ -46,6 +46,13 @@ That just barfs the entire static site out. I'm running a local server to view t
 
 You can see how we could improve this - only regengerating files when their inputs change (e.g. if I edit this blog, we don't need to recreate the rest) or replacing that copy-paste step with a command to automatically publish - but hey, it's good enough to get off the ground.
 
+# Toasting the Hosting
+Like I alluded to there, I'm taking a pretty lightweight approach to actually serving up the site.
+
+I'm pushing everything up to [GitHub Pages](https://pages.github.com/) right now.  It's a lowkey relief not to have to even _think_ about a server, just chuck up some junk and let that cute little cat-octopus-thing figure it out.
+
+I do really appreciate the accessibility of any shlub like me being able to publish in such an unintrusive way. I dunno, there's a lot to disparage in the parasitic monopolization of the internet, but I can still credit this for lowering the barrier to getting a site going.
+
 # Pitching Projects
 I'm not the only one who's gotten more boring in the intervening years. [Flash is no longer in the pan](https://isflashdeadyet.com/).
 
