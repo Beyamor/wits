@@ -111,7 +111,7 @@
      :body [:div#blog
             [:h1.title title]
             (when (:date blog)
-              [:h2.date (format-date (:date blog))])
+              [:span.date (format-date (:date blog))])
             [:div#content
              content]
             [:script {:type "text/javascript"}
