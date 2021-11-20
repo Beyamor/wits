@@ -1,0 +1,63 @@
+title: Regenerating the Site
+date: 11-11-2021
+
+Hello, dear reader! It's been, not a word of a lie, half a decade since my last blog. I do hope you haven't been holding your breath.
+
+It is no small act to unbury the terrible writing war machine, shake the rust from its dread gears, and loose upon the world, y'know, the occasional blog, but hey, I'm trying.
+
+# Starting Static
+Impossibly, I've grown even more boring in the intervening years, the boundless imagination of youth giving way to the workhorse mindset of the 9-to-5er.
+
+I am a man undergoing mental fossilization in realtime and as my brain calcifies into a single featureless sphere, it's come to value similarly unremarkable software. That is to say, boring is good.
+
+You can see, it's a terrible dearth of verve I've been infected with here; I've grown to the point where I can even admit Java has _some_ merit, which really highlights the depths of my mundane madness.
+
+There's nothing more boring than a static HTML page. Loads quick, no bugs or memory issues, just words on a page.  With that in mind, I've torn out the bones of the site with [only a little buzzing](https://en.wikipedia.org/wiki/Operation_(game) and changed over to statically generating the pages, rather than having dynamic code on the server.
+
+So, yeah, a mostly from-scratch rewrite over to statically generating the pages. Still home-rolled because the passion isn't totally gone, still in Clojure because Java is still pretty bad.
+
+# Warming up to Writing
+In my waking world, despite still very much being a software developer, I actually do less and less software development these days.
+
+I've picked up the clunky title of "technical team lead", which roughly translates in everyday English to "scapegoat". With that though, comes less time on interesting technical projects.
+
+As more of my days has been given over to meetings and managing and some absurdly dreary toil trying to modernize our services, I've lost out on plain writing code, so it's refreshing to be able to just jam something out.
+
+The code for this website is, charitably, inelegant, but I'm not too worried about it. One benefit Clojure continues to bring is that a little code goes a long way, so at least this blemish on the world is comparatively small.
+
+# Processing the Build
+Anyway, all the code generator does is slurp up some markdown and spit out some html. The current build process regenerates the entire thing on every change, to give you an idea how crude it is.
+
+`lein` makes that pretty easy, actually. `exec` lets you call into Clojure code and `auto` can run a command when source files change, so generating the site boils down to:
+
+```clojure
+:aliases {"build-site" ["exec" "-ep" "(require 'wits.generate) (wits.generate/generate!)"]}
+  :auto {"build-site" {:paths ["src"
+                               "blogs"
+                               "resources"]
+                       :file-pattern #"\.(clj|cljs|cljx|cljc|js|css|blarg)$"}}
+
+; lein auto build-site
+```
+
+So, we call `wits.generate/generate!` whenever one of the files changes. Easy peasy.
+
+That just barfs the entire static site out. I'm running a local server to view the site locally and I can copy-paste it to the actual host to publish. Pretty ugly, but we're not looking to win any prizes here.
+
+You can see how we could improve this - only regengerating files when their inputs change (e.g. if I edit this blog, we don't need to recreate the rest) or replacing that copy-paste step with a command to automatically publish - but hey, it's good enough to get off the ground.
+
+# Pitching Projects
+I'm not the only one who's gotten more boring in the intervening years. [Flash is no longer in the pan](https://isflashdeadyet.com/).
+
+There's a lot of virtual ink to be spilled about what that meant for the internet as a whole, but one consequence for this site  is that a lot of the random projects that littered it no longer function. Most were written in [Haxe](https://haxe.org/), so I figure I can probably rebuild, but grooming my motley collection of code-gremlins is a project in and of itself for another day, so for now, it's just the blog.
+
+At least that's simpler for you, dear reader, less cruft to ignore.
+
+Still, I'd like to get back into the habit of tinkering, so I'll have to get something together.
+
+# Every Beginning Has An End
+On the whole, not much to say here today, but I suppose I've never had much to say any other day.
+
+Still, I'm hoping to get back to more frequent ramblings. Even if they don't go anywhere, I do think it helps keep the mind sharp to write and my ever-dull mind could definitely do with some sharpening.
+
+Anyway, thanks for sticking it out with me, dear reader.
