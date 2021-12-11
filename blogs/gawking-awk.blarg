@@ -1,0 +1,356 @@
+title: Grokking Awk
+date: 04-12-2021
+
+Lately I've been absolutely obsessed with [awk](https://en.wikipedia.org/wiki/AWK).
+
+My command of the command line has always been limited at best, so for a long time, I've relied solely on increasingly gnarled greps to process files, dropping into python when things got too scary, but I've been trying to improve there.
+
+Actually digging into awk to a level beyond copy-pasting Stack Overflow snippets was illuminating. Like, dang, it's so empowering. It feels like learning about regexes the first time, where this whole world of text opens its doors to you.
+
+This is old news if you've been around for the last forty years or so, and likely woefully incorrect, but it helps my brain to talk about awk.
+
+# Presenting a Problem
+So, awk. It's a language for processing columnar data. If you've ever wanted to munge something like a file with regular rows of data, awk may be the tool for you.
+
+As an example, say we had a `request.log` file full of request logs. Something like:
+
+```
+01:52:30 /blog 200 2
+02:24:41 /projects 200 5
+03:05:51 /blog 500 4
+04:21:16 /projects 200 1
+05:49:27 /blog 200 2
+```
+
+We've got 4 columns: the timestamp, the path, the response code, and the response time. We want to answer some questions about our server by inspecting these logs.
+
+It'd be tedious to do this by hand and cumbersome to create a bespoke program for it. Thankfully, awk gives us a better way.
+
+# Model of a Model
+awk really likes rows and columns, so it makes it easy to execute a command for each row in the data and pick out values in the columns.
+
+To print each line in the file, we can run:
+
+```
+awk '{ print }' request.log
+
+# 01:52:30 /blog 200 2
+# 02:24:41 /projects 200 5
+# 03:05:51 /blog 500 4
+# 04:21:16 /projects 200 1
+# 05:49:27 /blog 200 2
+```
+
+Simple, right? `print` is a command that prints the current line, which awk calls a record, and awk will execute the statement in the `{}` for every record in the file. We can also select a particular column to print. Say we want all the paths that have been hit:
+
+```
+awk '{ print $2 }' request.log
+
+# /blog
+# /projects
+# /blog
+# /projects
+# /blog
+```
+
+`$2` refers to the second column, which awk calls a field, and we print specifically that. Again, this happens for each record, so awk is making it dead simple to process this structure of rows and columns.
+
+awk will set up some stuff to help us out too. `$NF` refers to the number of fields in the record. We can use this to select the last field and print the response times:
+
+```
+awk '{ print $NF }' requests.log
+
+# 2
+# 5
+# 4
+# 1
+# 2
+```
+
+This is useful if there's a variable number of fields in the record.
+
+Making sense? We've got files structure in rows and columns and awk is eager to chew them up.
+
+# Following the Script
+We can put the awk script in a file so we don't have to cobble it out in the command line. Let's save `script.awk` and make it executable:
+
+```
+#!/bin/awk -f
+{
+    print
+}
+```
+
+Now we can run it on a file:
+
+```
+./script.awk request.log
+
+# 2021-12-04T01:52:30 /blog 200 2
+# 2021-12-04T02:24:41 /projects 200 5
+# 2021-12-04T03:05:51 /blog 500 4
+# 2021-12-04T04:21:16 /projects 200 1
+# 2021-12-04T05:49:27 /blog 200 2
+```
+
+For the rest of this post, we'll skip the boilerplate and focus on the meat of the scripts. 
+
+# Conspiring to Calculate
+If all it could do was print out fields, awk would just be a neat party trick, but it can do more intelligent processing too.
+
+Let's say we want to figure out the _total_ time spent processing requests. How do we do it?
+
+A couple of things to know. awk can do arithmetic, so we can do something like:
+
+```
+{
+    print (2 * $NF)
+}
+
+# 4
+# 10
+# 8
+# 2
+# 4
+```
+
+to print _double_ the response time. awk also lets us declare our own variables, so we can rewrite the above as:
+
+```
+{
+    double = (2 * $NF)
+    print double
+}
+
+# 4
+# 10
+# 8
+# 2
+# 4
+```
+
+These user-declared variables actually carry over between executions, so we can print a running sum like:
+
+```
+{
+    sum += $NF
+    print sum
+}
+
+# 2
+# 7
+# 11
+# 12
+# 14
+```
+
+So, awk automatically initializes `sum` and remembers its value as the program runs. For every record in the file, we add the response time and print the total. 
+
+# Questioning the Question Mark
+One thing to examine here is the `$`. Why do we have it in front of `NF`, but not `sum`? Well, `$` actually grabs the field at that position. See, `NF` is a variable by itself, assigned the number of fields, and `$NF` looks up the field at that position.
+
+By contrast, this adds up the total number of fields:
+
+```
+{
+    sum += NF
+     print sum
+}
+
+# 4
+# 8
+# 12
+# 16
+# 20
+```
+
+You can even dynamically look up the field:
+
+```
+{
+    sum += $(2 + 2)
+    print sum
+}
+
+# 2
+# 7
+# 11
+# 12
+# 14
+```
+
+Cool! But back to the problem at hand, we probably only want the _final_ total, right?
+
+# Begining to Enderstand
+awk lets us use two special keywords `BEGIN` and `END` before a statement to indicate it should execute only at the start or end of processing the file, instead of on each record. We can use them like so:
+
+```
+BEGIN {
+    print "Start"
+}
+{
+    print
+}
+END {
+    print "End"
+}
+
+# Start
+# 01:52:30 /blog 200 2
+# 02:24:41 /projects 200 5
+# 03:05:51 /blog 500 4
+# 04:21:16 /projects 200 1
+# 05:49:27 /blog 200 2
+# End
+```
+
+We can use `END` to print the total response time _after_ we've added everything up:
+
+```
+{
+    sum += $NF
+}
+END {
+    print sum
+}
+
+# 14
+```
+
+Neat! awk gives us another magic variable for the number of records called `NR`, so we can spit out the average response time:
+
+```
+{
+    sum += $NF
+}
+END {
+    print sum / NR
+}
+
+# 2.8
+```
+
+# Iffy Ifs
+What if we only want the average response time for the `/blog` endpoint?
+
+Like most languages, `awk` has conditional logic, so we can increase sum only if the path field is `/blog`:
+
+```
+{
+    if ($2 == "/blog") {
+        sum += $NF
+        count += 1
+    }
+}
+END {
+    print sum / count
+}
+
+# 2.66667
+```
+
+That's pretty handy! You can see how we're dealing with an actual programming language here, so the type processing you can do is sophisticated.
+
+# Meeting our Matches
+Matching a field is a pretty common use case, unsurprisingly, and awk actually makes it easier.
+
+We've seen a command like `{print}` and how we can precede it with `BEGIN` or `END` to control when it executes. If we put an expression in front of the command, it will execute only when it's true. So, we can rewrite the previous example as:
+
+```
+$2 == "/blog" {
+    sum += $NF
+    count += 1
+}
+END {
+    print sum / count
+}
+
+# 2.66667
+```
+
+The expression can be as complex as you want.
+
+This is the essence of awk: matching and executing, `condition { action} condition { action }`.
+
+# More Matching
+One handy thing to know is awk has an `~` operator for regex matching, so we can do:
+
+```
+$2 ~ "^/blo" {
+    sum += $NF
+    count += 1
+}
+END {
+    print sum / count
+}
+
+# 2.66667
+```
+
+That's super useful if we're looking for a pattern, rather than a fixed field value.
+
+awk also has a shortcut for matching a regex against the entire record with `/pattern/`, so we can even do:
+
+```
+/\/blo/ {
+    sum += $NF
+    count += 1
+}
+END {
+    print sum / count
+}
+
+# 2.66667
+```
+
+# Counting on Cartography
+What if we wanted the average request time for __each__ endpoint? awk also gives us maps we can use for that!
+
+We can access entries in the map with `[]` and iterate over the keys with `for`. That gives us:
+
+```
+{
+        path = $2
+        sum[path] += $NF
+        count[path] += 1
+}
+END {
+        for (path in sum) {
+                print path, (sum[path] / count[path])
+        }
+}
+
+# /blog 2.66667
+# /projects 3
+```
+
+# Finding a Function
+Another handy tool awk gives us is functions. We can define one for the averages:
+
+```
+function average(sum, count) {
+    return sum / count
+}
+{
+        path = $2
+        sum[path] += $NF
+        count[path] += 1
+}
+END {
+        for (path in sum) {
+                print path, average(sum[path], count[path])
+        }
+}
+
+# /blog 2.66667
+# /projects 3
+```
+
+Quite the little language we've got here. It gives you the tools you need to be pretty sophisticated, but it puts the things you want to do front and center.
+
+# Rocking Awk
+Circling back to the programming model of awk, I think I'm so enamored because of its simplicity. "Find thing, do thing" is an incredibly straightforward model, but it makes it tremendously easy to do the thing you want to do.
+
+If I had to look for a broader lesson, it'd be the power of a good model. By designing around its very specific domain, awk blows the doors off world of columnar text processing.
+
+Okay, maybe that doesn't sound too exciting, but I think it's inspirational nevertheless. Can you build out a more fluent API or a DSL to really hone in on what you want to achieve? Can you cut away the friction to really focus on what your user wants to do? Can you rock the zen of awk?
