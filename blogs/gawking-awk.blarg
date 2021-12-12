@@ -188,9 +188,11 @@ awk lets us use two special keywords `BEGIN` and `END` before a statement to ind
 BEGIN {
     print "Start"
 }
+
 {
     print
 }
+
 END {
     print "End"
 }
@@ -210,6 +212,7 @@ We can use `END` to print the total response time _after_ we've added everything
 {
     sum += $NF
 }
+
 END {
     print sum
 }
@@ -223,6 +226,7 @@ Neat! awk gives us another magic variable for the number of records called `NR`,
 {
     sum += $NF
 }
+
 END {
     print sum / NR
 }
@@ -242,6 +246,7 @@ Like most languages, `awk` has conditional logic, so we can increase sum only if
         count += 1
     }
 }
+
 END {
     print sum / count
 }
@@ -261,6 +266,7 @@ $2 == "/blog" {
     sum += $NF
     count += 1
 }
+
 END {
     print sum / count
 }
@@ -280,6 +286,7 @@ $2 ~ "^/blo" {
     sum += $NF
     count += 1
 }
+
 END {
     print sum / count
 }
@@ -296,6 +303,7 @@ awk also has a shortcut for matching a regex against the entire record with `/pa
     sum += $NF
     count += 1
 }
+
 END {
     print sum / count
 }
@@ -314,6 +322,7 @@ We can access entries in the map with `[]` and iterate over the keys with `for`.
         sum[path] += $NF
         count[path] += 1
 }
+
 END {
         for (path in sum) {
                 print path, (sum[path] / count[path])
@@ -331,11 +340,13 @@ Another handy tool awk gives us is functions. We can define one for the averages
 function average(sum, count) {
     return sum / count
 }
+
 {
         path = $2
         sum[path] += $NF
         count[path] += 1
 }
+
 END {
         for (path in sum) {
                 print path, average(sum[path], count[path])
