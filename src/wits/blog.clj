@@ -83,8 +83,24 @@
   [content]
   (wits.html/transform-tag
     content :h1
-    (fn [_ [text]]
-      [:h1 (WordUtils/capitalizeFully text)])))
+    (fn [attr [text]]
+      [:h1 attr (WordUtils/capitalizeFully text)])))
+
+(defn heading->id
+  [text]
+  (-> text
+      clojure.string/lower-case
+      clojure.string/trim
+      (clojure.string/replace #"\s+" "-")
+      (clojure.string/replace #"[^\w-]" "")))
+
+(defn identify-headings
+  [content]
+  (wits.html/transform-tag
+    content :h1
+    (fn [attr [text]]
+      [:h1 (assoc attr :id (heading->id text))
+       text])))
 
 (defn syntaxhighlight->highlight
   [content]
@@ -105,6 +121,7 @@
                     hik/parse
                     hik/as-hiccup
                     capitalize-headings
+                    identify-headings
                     syntaxhighlight->highlight)
         title (WordUtils/capitalizeFully title)]
     {:title title
