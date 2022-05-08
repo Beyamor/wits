@@ -25,7 +25,7 @@ awk '$NF > 1000 { print }' request.log
 ```
 
 # Pairing Patterns
-Another neat awk feature we didn't touch on last time is that you can match a _range_ of records by combining two patterns with a `,`. awk will match the records _between_ the two records, effectively "turning on" matching with the first and "turning off" with the second.
+Another neat awk feature we didn't touch on last time is that you can match a _range_ of records by combining two patterns with a `,`. awk will match the records _between_ the two patterns, effectively "turning on" matching with the first and "turning off" with the second.
 
 Think of it like a delicious textual sandwich, with your tasty content sitting between the two patterns. Okay, maybe this analogy isn't exactly the greatest thing since sliced bread.
 
