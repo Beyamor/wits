@@ -28,3 +28,12 @@ pre {
 .blog-list-entry .date {
     margin-left: 10px;
 }
+
+#content {
+    display: flex;
+    flex-direction: column;
+}
+
+#content > img {
+    align-self: center;
+}
