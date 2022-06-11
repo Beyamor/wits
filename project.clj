@@ -11,7 +11,8 @@
                  [enlive "1.1.1"]
                  [markdown-clj "0.9.21"]
                  [lonocloud/synthread "1.0.4"]
-                 [org.apache.commons/commons-text "1.9"]]
+                 [org.apache.commons/commons-text "1.9"]
+                 [org.jsoup/jsoup "1.15.1"]]
   :aliases {"build-site" ["exec" "-ep" "(require 'wits.generate) (wits.generate/generate!)"]}
   :auto {"build-site" {:paths ["src"
                                "blogs"

@@ -1,5 +1,6 @@
 (ns wits.core
-  (:require [hiccup.core :as hic]))
+  (:require [hiccup.core :as hic])
+  (:import [org.jsoup Jsoup]))
 
 (def output-root (clojure.java.io/file "target/site"))
 (def css-files ["shades-of-purple.min.css"
@@ -20,9 +21,17 @@
    (for [[text link] [["Blog" "/blog"]]]
      [:a {:href link} text])])
 
+(defn ->html
+  [e]
+  (let [raw-html (hic/html e)
+        doc (doto (Jsoup/parse raw-html)
+              (-> .outputSettings (doto
+                                    (.prettyPrint true))))]
+    (str doc)))
+
 (defn ->page
   [{:keys [title body]}]
-  (hic/html
+  (->html
     [:html
      [:head
       [:meta {:charset "utf-8"}]
