@@ -114,15 +114,14 @@
                                  (clojure.string/trim text)
                                  text)]]))))
 
-(defn unwrap-images
+(defn wrap-images
   [content]
   (wits.html/transform-tag
     content :p
     (fn [attr [img :as body]]
       (if (= :img (first img))
-        img
+        [:div.img-container img]
         (apply vector :p attr body)))))
-
 
 (defn blog->page
   [{:keys [title content] :as blog}]
@@ -133,7 +132,7 @@
                     capitalize-headings
                     identify-headings
                     syntaxhighlight->highlight
-                    unwrap-images)
+                    wrap-images)
         title (WordUtils/capitalizeFully title)]
     {:title title
      :body [:div#blog
