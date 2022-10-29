@@ -1,5 +1,6 @@
 title: wherefore combinator
 date: 11-03-2016
+tags: code, fp
 
 Like them [devout numbers](/blog/entries/church-numerals-review), the Y combinator is a right of passage for any would-be functional programmer.
 

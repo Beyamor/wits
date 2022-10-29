@@ -1,5 +1,6 @@
 title: component proponent
 date: 09-19-2011
+tags: code, gamedev
 
 Yesterday, my dear imaginary reader, we covered the conception of the component architecture at play. However, and this realization has irked me like a hook in a fish since I woke up, we discussed much of the *how* and very little of the *why*. Let's see if I can do a better job in that regard.
 

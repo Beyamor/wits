@@ -1,5 +1,6 @@
 title: church numerals review
 date: 12-05-2013
+tags: code
 
 I'm reading through a bit of [SICP](http://mitpress.mit.edu/sicp/full-text/book/book-Z-H-4.html#%_toc_start) right now and came across an example problem which casually throws [Church Numerals](http://en.wikipedia.org/wiki/Church_numeral) in your face.
 

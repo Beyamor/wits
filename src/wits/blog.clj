@@ -20,6 +20,13 @@
       (catch Exception e
         (LocalDate/parse s formatter2)))))
 
+(defn parse-tags
+  [s]
+  (-> s
+      (clojure.string/split #",")
+      (->>(map clojure.string/trim))
+      (->> (into #{}))))
+
 (let [formatter (DateTimeFormatter/ofPattern "MMM dd, yyyy" Locale/ENGLISH)]
   (defn format-date
     [d]
@@ -40,6 +47,7 @@
         val (string/trim val)
         val (case prop
               :date (parse-date val)
+              :tags (parse-tags val)
               val)]
     [prop val]))
 
@@ -151,22 +159,72 @@
       (merge {:file ["blog" "entries" (blog->file-name blog)]}
              (blog->page blog)))))
 
+(def tag->description
+  {"code" "Programming"
+   "c" "C Programming Language"
+   "cpp" "C++"
+   "clojure" "Clojure"
+   "java" "Java"
+   "js" "JavaScript"
+   "python" "Python"
+   "procgen" "Procedural Generation"
+   "gamedev" "Game Development"
+   "langdev" "Programming Language Development"
+   "fp" "Functional Programming"})
+
+(defn tag-element
+  [tag rel-freq]
+  (let [adj (case rel-freq
+              :few "smaller"
+              :many "larger"
+              nil)]
+    [:a.tag
+     {:title (tag->description tag)
+      :href (str "/blog/tags/" tag)
+      :style (when adj
+               (str "font-size: " adj))}
+     tag]))
+
 (defn generate-list!
-  [blogs]
+  [file blogs tag-cloud]
   (wits.core/generate-page!
     {:title "Blogs"
-     :file ["blog" "index.html"]
-     :body (for [blog (reverse (sort-by :date blogs))]
-             [:div.blog-list-entry
-              [:a {:href (blog->link blog)}
-               (WordUtils/capitalizeFully (:title blog))]
-              [:span.date (format-date (:date blog))]])}))
+     :file (conj file "index.html")
+     :body [:div
+            [:div.tag-cloud
+             (let [sorted-tags (sort (keys tag-cloud))
+                   sorted-freqs (sort (vals tag-cloud))]
+               (for [tag sorted-tags
+                     :let [freq (get tag-cloud tag)
+                           idx (.indexOf sorted-freqs freq)
+                           rel-freq (cond
+                                      (< (/ idx (count sorted-freqs)) 1/3) :few
+                                      (>= (/ idx (count sorted-freqs)) 2/3) :many
+                                      :else :some)]]
+                 (tag-element tag rel-freq)))]
+            [:div.blog-list
+             (for [blog (reverse (sort-by :date blogs))]
+               [:div.blog-list-entry
+                [:a {:href (blog->link blog)}
+                 (WordUtils/capitalizeFully (:title blog))]
+                [:span.date (format-date (:date blog))]])]]}))
+
+(defn get-tag-cloud
+  [blogs]
+  (->> blogs
+       (map :tags)
+       (apply concat)
+       frequencies))
 
 (defn generate!
   []
   (let [blogs (->> blog-source-dir
                    file-seq
                    (filter is-blog-file?)
-                   (map parse-blog-file))]
+                   (map parse-blog-file))
+        tag-cloud (get-tag-cloud blogs)]
     (generate-blogs! blogs)
-    (generate-list! blogs)))
+    (generate-list! ["blog"] blogs tag-cloud)
+    (doseq [tag (keys tag-cloud)
+            :let [blogs (filter #(contains? (:tags %) tag) blogs)]]
+      (generate-list! ["blog" "tags" tag] blogs tag-cloud))))

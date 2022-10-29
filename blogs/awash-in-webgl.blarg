@@ -1,5 +1,6 @@
 title: awash in webgl
 date: 01-29-2014
+tags: code, gamedev
 
 Recently, I took it into my head to poke around with [WebGL](http://en.wikipedia.org/wiki/WebGL), the HTML5 API for in-browser 3D rendering. Okay, I actually used [three.js](http://threejs.org/), a handy library on top of it, but hey, you say tomato, I say ketchup. For real though, you have to be some kind of nutjob to get down and dirty with anything that looks like OpenGL.
 

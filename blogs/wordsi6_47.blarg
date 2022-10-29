@@ -1,5 +1,6 @@
 title: really terrifying type info
 date: 06-23-2012
+tags: code, cpp
 
 Let's spend some time staring into the black abyss of metaprogramming in C++. Today, we're gunna cover variadic templates.
 

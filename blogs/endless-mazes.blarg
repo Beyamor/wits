@@ -1,5 +1,6 @@
 title: endless mazes
 date: 05-23-2013
+tags: code, gamedev, procgen
 
 The other day, game designer/Martleteer/shaman king [William Workman](http://martlet.ca/author/wilw/) talked to me about a cool project he was working on involving an infinite maze. Now, I'm selling his work short here - there's a hell of a lot more to it than corridors - but naturally, my buzzing robot brain really latched onto that idea. So, let's do it - infinite mazes.
 

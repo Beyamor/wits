@@ -1,5 +1,6 @@
 title: effecting a functional game
 date: 02-26-2014
+tags: code, gamedev, clojure
 
 The intersection between game development and functional programming is a wild place. See, while we're pretty good at making games in OOP world, in FP, it's all still a bit of a mystery. Sure, people are tossing around stuff like functional reactive programming, but on the whole, it's a relatively unexplored area and one that's sparking a lot of creative thought.
 

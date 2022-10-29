@@ -1,5 +1,6 @@
 title: delegetter
 date: 01-20-2014
+tags: code, langdev
 
 It's pretty common in the OO world for one object to delegate stuff down to another object. For example, in [Jinn](https://github.com/Beyamor/jinn?source=cc), I'm [decorating](http://en.wikipedia.org/wiki/Decorator_pattern) cameras. Though each camera decorator has its own behaviour - say, staying within some bounds - it'll delegate to the camera it decorates for things like the position and the viewing dimensions.
 

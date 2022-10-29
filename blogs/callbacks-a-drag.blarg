@@ -1,5 +1,6 @@
 title: callback's a drag
 date: 09-16-2013
+tags: code, clojure
 
 A few months ago, the Clojure/core team came out with [core.async](http://clojure.com/blog/2013/06/28/clojure-core-async-channels.html), a library designed to make asynchronous programming simpler. By making use of channels and smart syntax, the library provides a ladder out of callback hell. This is a particular godsend in world of browser programming where GUI events and AJAX requests make any program a labyrinthine mess. 
 

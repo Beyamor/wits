@@ -1,5 +1,6 @@
 title: really decent parser
 date: 06-29-2013
+tags: code, langdev
 
 Let's write a parser. A [recursive descent parser](http://en.wikipedia.org/wiki/Recursive_descent_parser), if you really want to get specific. Doesn't matter, really. We're gunna parse something somehow, dangit.
 

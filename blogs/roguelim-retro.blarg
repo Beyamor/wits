@@ -1,5 +1,6 @@
 title: roguelim retro
 date: 11-29-2013
+tags: code, gamedev, procgen
 
 Over the last couple of days, I crunch-jammed out (the functional, but not complete) *[roguelim](https://github.com/Beyamor/roguelim)*. *roguelim* is a tiny roguelike played through [Twitter](https://twitter.com/RogueLim).
 

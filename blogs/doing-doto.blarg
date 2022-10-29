@@ -1,5 +1,6 @@
 title: doing doto
 date: 04-24-2014
+tags: code
 
 Hey yo hey. So, over in the world of mutable objects, it's pretty common to bash away on some poor, abused piece of data by calling a bunch of (non-referentially transparent) methods on it. I mean, it's kind of the only way anything gets done, right? That being the case, you'd think there'd be better way to do it.
 

@@ -1,5 +1,6 @@
 title: slice 'em and stuff 'em
 date: 11-06-2013
+tags: code, gamedev, procgen
 
 There comes a point in every young programmer's life when said programmer needs to procedurally generate some dungeons. Consider it a rite of passage. We learn to type; we grok pointers; we write some truly god-awful C++; we make some dungeons.
 
