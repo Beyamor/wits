@@ -131,33 +131,6 @@
         [:div.img-container img]
         (apply vector :p attr body)))))
 
-(defn blog->page
-  [{:keys [title content] :as blog}]
-  (let [content (-> content
-                    md/md-to-html-string
-                    hik/parse
-                    hik/as-hiccup
-                    capitalize-headings
-                    identify-headings
-                    syntaxhighlight->highlight
-                    wrap-images)
-        title (WordUtils/capitalizeFully title)]
-    {:title title
-     :body [:div#blog
-            [:h1.title title]
-            (when (:date blog)
-              [:span.date (format-date (:date blog))])
-            [:div#content
-             content]
-            [:script {:type "text/javascript"}
-             "hljs.highlightAll();"]]}))
-
-(defn generate-blogs!
-  [blogs]
-  (doseq [blog blogs]
-    (wits.core/generate-page!
-      (merge {:file ["blog" "entries" (blog->file-name blog)]}
-             (blog->page blog)))))
 
 (def tag->description
   {"code" "Programming"
@@ -184,6 +157,37 @@
       :style (when adj
                (str "font-size: " adj))}
      tag]))
+
+(defn blog->page
+  [{:keys [title content tags] :as blog}]
+  (let [content (-> content
+                    md/md-to-html-string
+                    hik/parse
+                    hik/as-hiccup
+                    capitalize-headings
+                    identify-headings
+                    syntaxhighlight->highlight
+                    wrap-images)
+        title (WordUtils/capitalizeFully title)
+        tags (sort tags)]
+    {:title title
+     :body [:div#blog
+            [:h1.title title]
+            (when (:date blog)
+              [:div.date (format-date (:date blog))])
+            [:div.tags
+             (map #(tag-element % nil) tags)]
+            [:div#content
+             content]
+            [:script {:type "text/javascript"}
+             "hljs.highlightAll();"]]}))
+
+(defn generate-blogs!
+  [blogs]
+  (doseq [blog blogs]
+    (wits.core/generate-page!
+      (merge {:file ["blog" "entries" (blog->file-name blog)]}
+             (blog->page blog)))))
 
 (defn generate-list!
   [file blogs tag-cloud]

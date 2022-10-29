@@ -48,8 +48,16 @@ pre {
     margin-right: auto;
 }
 
-.tag {
+.tag-cloud .tag {
     padding-left: 5px;
     padding-right: 5px;
     align-self: center;
+}
+
+#blog .tags {
+    font-size: smaller;
+}
+
+#blog .tag + .tag {
+    padding-left: 5px;
 }
