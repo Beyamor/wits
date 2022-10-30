@@ -152,11 +152,13 @@
               :many "larger"
               nil)]
     [:a.tag
-     {:title (tag->description tag)
-      :href (str "/blog/tags/" tag)
-      :style (when adj
-               (str "font-size: " adj))}
-     tag]))
+     (merge
+       {:href (str "/blog/tags/" tag)}
+       (when-let [description (tag->description tag)]
+         {:title description})
+       (when adj
+         {:style (str "font-size: " adj)}))
+     (str "#" tag)]))
 
 (defn blog->page
   [{:keys [title content tags] :as blog}]
