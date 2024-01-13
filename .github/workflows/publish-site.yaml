@@ -10,6 +10,10 @@ jobs:
           run: ls
     build-site:
       runs-on: ubuntu-latest
-      container: clojure:lein
+      container:
+        image: clojure:lein
+        volumes:
+          - .:/project
       steps:
-        - run: ls
+        - name: build
+          run: (cd /project && ls)
