@@ -1,0 +1,7 @@
+name: publish site
+on: [push]
+jobs:
+    publish-site:
+      runs-on: ubuntu-latest
+      steps:
+        - run: echo "hello world"
