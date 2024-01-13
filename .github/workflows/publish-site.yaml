@@ -5,7 +5,7 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - name: checkout
-          uses: actions/checkout@4
+          uses: actions/checkout@v4
         - name: step
           run: ls
     build-site:
