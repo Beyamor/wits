@@ -16,4 +16,4 @@ jobs:
           - .:/project
       steps:
         - name: build
-          run: (cd /project && ls)
+          run: ls /project
