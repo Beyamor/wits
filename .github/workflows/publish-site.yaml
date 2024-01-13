@@ -4,7 +4,10 @@ jobs:
     prepare:
       runs-on: ubuntu-latest
       steps:
-        - run: ls
+        - name: checkout
+          uses: actions/checkout@4
+        - name: step
+          run: ls
     build-site:
       runs-on: ubuntu-latest
       container: clojure:lein
