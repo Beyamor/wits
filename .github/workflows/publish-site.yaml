@@ -1,7 +1,12 @@
 name: publish site
 on: [push]
 jobs:
-    publish-site:
+    prepare:
       runs-on: ubuntu-latest
       steps:
-        - run: echo "hello world"
+        - run: ls
+    build-site:
+      runs-on: ubuntu-latest
+      container: clojure:lein
+      steps:
+        - run: ls
