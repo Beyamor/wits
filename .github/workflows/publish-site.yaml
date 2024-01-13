@@ -13,7 +13,7 @@ jobs:
       container:
         image: clojure:lein
         volumes:
-          - .:/project
+          - ${{ github.workspace }}:/project
       steps:
         - name: build
           run: ls /project
