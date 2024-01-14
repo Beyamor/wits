@@ -16,6 +16,9 @@ jobs:
     build-site:
       runs-on: ubuntu-latest
       container: clojure:lein
+      permissions:
+        pages: write
+        id-token: write
       steps:
         - name: checkout
           uses: actions/checkout@v4
