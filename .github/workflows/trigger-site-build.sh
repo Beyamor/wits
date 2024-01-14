@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-echo $TEST
-
 if [[ -z "$PUBLISH_GITHUB_WEBSITE_TOKEN" ]]; then
   echo "No token specified"
   exit 1;
