@@ -17,4 +17,4 @@ jobs:
         - name: checkout
           uses: actions/checkout@v4
         - name: build
-          run: ls
+          run: lein build-site
