@@ -1,19 +1,20 @@
 name: publish site
 on: [push]
 jobs:
-    prepare:
+    #prepare:
+    #  runs-on: ubuntu-latest
+    #  steps:
+    #    - name: checkout
+    #      uses: actions/checkout@v4
+    #    - name: test1
+    #      run: ls
+    #    - name: test2
+    #      run: pwd
+    build-site:
       runs-on: ubuntu-latest
+      container: clojure:lein
       steps:
         - name: checkout
           uses: actions/checkout@v4
-        - name: step
-          run: ls
-    build-site:
-      runs-on: ubuntu-latest
-      container:
-        image: clojure:lein
-        volumes:
-          - ${{ github.workspace }}:/project
-      steps:
         - name: build
-          run: ls /project
+          run: ls
