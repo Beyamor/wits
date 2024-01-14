@@ -12,4 +12,4 @@ curl -L \
   -H 'X-GitHub-Api-Version: 2022-11-28' \
   -H "Authorization: Bearer $PUBLISH_GITHUB_WEBSITE_TOKEN" \
   'https://api.github.com/repos/Beyamor/beyamor.github.io/dispatches' \
-  -d '{"event_type": "test"}'
+  -d '{"event_type": "publish-website"}'
