@@ -1,5 +1,5 @@
 name: Shaving the Octocat
-date: 14-01-14
+date: 14-01-2024
 tags: code
 
 [A while back](https://beyamor.github.io/blog/entries/regenerating-the-site/), I reworked this website to be plain html hosted on [GitHub Pages](https://pages.github.com/). I've been pretty happy with that - it's refreshingly easy to barf out a bunch of static files.
