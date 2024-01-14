@@ -1,0 +1,180 @@
+name: Shaving the Octocat
+date: 14-01-14
+tags: code
+
+[A while back](https://beyamor.github.io/blog/entries/regenerating-the-site/), I reworked this website to be plain html hosted on [GitHub Pages](https://pages.github.com/). I've been pretty happy with that - it's refreshingly easy to barf out a bunch of static files.
+
+When I reworked the site, I removed a bunch of projects because, at the time, I didn't want to bother figuring out how to host them. Years later, I still haven't got around to it!
+
+Ideally, I'd like to keep things more-or-less self-contained though. The easiest answer would be using Git LFS to include the compiled artifacts in the repo itself. Not great, but fine for my needs. Only one problem - Git LFS doens't work with GitHub Pages static contents.
+
+Oh well, can't be that hard to fix, right?
+
+# Selecting A Source
+From reading [this answer](https://github.com/orgs/community/discussions/50337), there is a different method of publishing that would support LFS. Okay, great.
+
+GitHub Pages offers two different avenues for publishing pages. The one I've been using so far is the simplest. You chuck some static files in a repo and they serve it up.
+
+That's worked great for me. My workflow has been pretty stupid, but functional. I generate the site locally from my `wits` repo, then manually copy the generated static files over into `beyamor.github.io`. There's some extra work involved - I need to commit changes to both repositories - but I don't really care for my rinky-dink website.
+
+However, to use LFS, we'd need to use the second method: publishing via GitHub actions.
+
+Actions are GitHub's answer for CI/CD. You can create workflows composed of actions that are triggered by things like commits and perform whatever task you need. In our case, we'll have to create an action that builds and publishes our website.
+
+When an action builds a site, it _can_ include Git LFS content, so we should be able to bundle in the artifacts we'd want to host.
+
+# Attemping an Action
+GitHub's actions are agreeably easy to set up! It's basically just a YAML file describing the steps in the build process. You can even use pre-built actions to make it easier.
+
+The [docs for publishing Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site#creating-a-custom-github-actions-workflow-to-publish-your-site) cover it pretty well. Basically, just:
+1. Check out the repo.
+2. Build the site.
+3. Upload the site.
+4. Publish it.
+
+The handy-wavy part is "Build the site" since that'll depend on how exactly the static files are generated. In our case, it's a [Leiningen](https://leiningen.org/) command, so we need to run `lein build-site` using a Docker image that supports it.
+
+Initially, I just did this in the `wits` repo directly. The workflow was something like:
+
+```yaml
+name: publish site
+on:
+  # We'll build and publish the site every time we push
+  push:
+    # but only on the statis-site branch
+    branches:
+      - static-site
+jobs:
+    build-site:
+      runs-on: ubuntu-latest
+      # We need to run a lein command, so we'll use a Docker image with Clojure
+      container: clojure:lein
+      # The deploy action requires some additional permissions
+      permissions:
+        pages: write
+        id-token: write
+      # Then, we perform the actual actions in four steps:
+      steps:
+        # We check out the wits repository
+        - name: checkout
+          uses: actions/checkout@v4
+        # Build it with Clojure
+        - name: build
+          run: lein build-site
+        # Upload the artifact
+        - name: upload
+          uses: actions/upload-pages-artifact@v3
+          with:
+            path: "target/site"
+        # And deploy it to Pages
+        - name: deploy
+          uses: actions/deploy-pages@v4
+```
+
+And this actually worked! Super easy, exactly as outlined, four simple steps.
+
+Now we could push up a blog entry to the `wits` repo and it would automatically be published to GitHub pages. Done and done!
+
+# Picking the Path
+Well, worked, with one fatal flaw.
+
+As I understand them, GitHub pages are mainly geared for documenting individual projects, not general site hosting. Consequently, with one exception, pages from each repo are prefixed by the repo's name.
+
+So, because of this, the pages published from the `wits` repo had that prefix. Rather than `/blog`, it was `/wits/blog`. How unsightly! Surely that's worth spending several hours to fix, right?
+
+The one exception to the prefixing is pages published from the `$username.github.io` repo. These _do not_ get prefixed. That's what I'd been doing so far - tossing static files into `beyamor.github.io` with the exact page layout I wanted. Unfortunately, that's not possible from the `wits` repo.
+
+At this point, I had a few options. The most tempting, of course, was giving up, going outside, and remembering what it was like to enjoy life. If I gave into that siren song though, I wouldn't be much of a programmer.
+
+What I elected to do instead is set up `beyamor.github.io` as a sort of "shell" repo that pulls the content from the main `wits` repo, builds the site, and publishes it there. Notably, because I'm an idiot, I didn't take the much easier approach of just renaming the `wits` repo.
+
+Anyway, back to the action!
+
+# Digging into Dispatching
+So, the basic flow I wanted was to push up a blog in the `wits` repo, then trigger the build and deployment in the `beyamor.github.io` repo.
+
+GitHub offers [repository dispatches](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#repository_dispatch) to trigger workflows from a request. After registering the workflow to listen for the dispatch, you can trigger it by hitting the API endpoint. This enables workflows to be initiated programmatically by external processes or, in our case, from another workflow.
+
+(I'm sure there's a more direct way to do this!)
+
+The endpoint requires authentication, so I generated an [access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) which I could then use to issue the requests:
+
+```shell
+curl -L \
+  -X POST \
+  -H 'Accept: application/vnd.github+json' \
+  -H 'X-GitHub-Api-Version: 2022-11-28' \
+  -H "Authorization: Bearer $PUBLISH_GITHUB_WEBSITE_TOKEN" \
+  'https://api.github.com/repos/Beyamor/beyamor.github.io/dispatches' \
+  -d '{"event_type": "publish-website"}'
+```
+
+This issues the dispatch, so all we need to do  is listen for it.
+
+(hey, note to future self - the access token expires! you'll need to regenerate it later)
+
+# Double the Action
+Okay, easy peasy. I split the process into two different parts.
+
+In the `wits` repo, I changed the workflow to just issue the dispatch. I chucked that into the `trigger-site-build.sh` script here:
+
+```yaml
+name: publish site
+on:
+  push:
+    branches:
+      - static-site
+jobs:
+    trigger-site-build:
+      runs-on: ubuntu-latest
+      env:
+        PUBLISH_GITHUB_WEBSITE_TOKEN: ${{ secrets.PUBLISH_GITHUB_WEBSITE_TOKEN }}
+      steps:
+        - name: checkout
+          uses: actions/checkout@v4
+        - name: trigger
+          run: .github/workflows/trigger-site-build.sh
+```
+
+Now, every time we push a commit to `wits`, it'll make the call to dispatch to `beyamor.github.io`.
+
+Then we listen for this in the `beyamor.github.io` repo and rebuild the site when it comes in. Basically the same as before, but we're checking out the `wits` repo:
+
+```yaml
+name: publish-website
+on:
+  repository_dispatch:
+    types: [publish-website]
+jobs:
+  build-site:
+    runs-on: ubuntu-latest
+    container: clojure:lein
+    environment: github-pages
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        # Important difference here!
+        # This time we're in the beyamor.github.io repo,
+        # so we're explicitly checking out the wits repo instead
+        # Otherwise, same as before
+        with:
+          repository: "beyamor/wits"
+          ref: "static-site"
+      - name: build
+        run: lein build-site
+      - name: upload
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "target/site"
+      - name: deploy
+        uses: actions/deploy-pages@v4
+```
+
+And hey, this does the thing! Now, whenever I push up to `wits`, the site builds and deploys from `beyamor.github.io`, foisting my terrible nonsense on the world wide web!
+
+This feels pretty duct-tape-y. In a perfect world, we wouldn't have the two-repo setup and could just do everything in one place. That said, if it works, it works.
+
+This took some elbow grease and I actually haven't got around to seeing if it does, in fact, work with Git LFS yet, so this might all be a colossal waste of time, but we did get a blog out of it! And hey, it has actually made publishing the blog a lot easier, so not a totaly waste!
