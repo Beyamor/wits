@@ -22,7 +22,7 @@ jobs:
         - name: build
           run: lein build-site
         - name: package
-          run: tar -xczf github-pages -C target/site
+          run: tar -vczf github-pages -C target/site
         - name: check
           run: ls
         - name: upload
