@@ -22,10 +22,8 @@ jobs:
         - name: build
           run: lein build-site
         - name: package
-          run: tar -cvzf github-pages -C target/site
-        - name: check
-          run: ls
-        #- name: upload
-        #  uses: actions/upload-pages-artifact@v3
-        #  with:
-        #    path: "."
+          run: tar -cvzf github-pages -C target/site .
+        - name: upload
+          uses: actions/upload-pages-artifact@v3
+          with:
+            path: "."
