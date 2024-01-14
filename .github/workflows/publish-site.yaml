@@ -21,10 +21,10 @@ jobs:
           uses: actions/checkout@v4
         - name: build
           run: lein build-site
-        - name: package
-          run: tar -vczf github-pages -C target/site
         - name: check
           run: ls
+        - name: package
+          run: tar -vczf github-pages -C target/site
         - name: upload
           uses: actions/upload-pages-artifact@v3
           with:
