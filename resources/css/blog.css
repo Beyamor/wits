@@ -69,3 +69,8 @@ pre {
     border: none;
     margin: 30px;
 }
+
+p code {
+    background-color: #eee;
+    padding: 1px;
+}
