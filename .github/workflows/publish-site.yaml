@@ -27,4 +27,5 @@ jobs:
           run: ls
         - name: upload
           uses: actions/upload-pages-artifact@v3
-          path: "."
+          with:
+            path: "."
