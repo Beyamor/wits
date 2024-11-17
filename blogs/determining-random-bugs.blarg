@@ -1,0 +1,68 @@
+title: Determining Random Bugs
+date: 16-11-2024
+tags: code
+
+After pushing out a big release, a client complained that they were getting random auth errors. At the same time, our monitor intermittently started flagging the service.
+
+It was a weird one. The code changes look fine and the symptoms made no sense - the failures kind of looked like we weren't reading request information, even though it was being sent properly by the client.
+
+The team added some logging, pushed to prod, and we took a look together. The logs lined up with what I smelled from the failures - for some reason, even though the request looked okay, occasionally the parameters were empty in the logs. Huh.
+
+Random. Intermittent. Occasional. If that sounds like your bug, one thing's for sure - buddy, you got a concurrency problem.
+
+---
+
+On the one hand, these problems are notoriously difficult to debug since reproducing the problem isn't straightforward. On the other hand, there's a large swathe that boils down to the same cause - something getting shared unsafely across threads.
+
+It's really valuable to develop that intuition for this class of problems because otherwise, they're very difficult to discern. You can spend all day poking around in your IDEA, but if you're not thinking about threads, you'll never come close to even triggering the problem, let alone resolving it.
+
+So, again - when you see random behaviour, you should think about concurrency problems. And if you're thinking about threading problems, a big one to consider is sharing something across threads.
+
+---
+
+I skimmed through the release diff. The code looked fine, but knowing the common cause - something shared across threads - I had a pretty good instinct for what kind of change I was digging for.
+
+I noticed a pretty straightforward change - some refactoring had moved a request handler up to an instance variable.
+
+In effect, changing from something like:
+
+```java
+@Controller
+public class MyController {
+    @Get("/api")
+    public String response(HttpServletRequest request) {
+        Builder builder = new Builder();
+        builder.setRequest(request);
+        return builder.build();
+    }
+}
+```
+
+to:
+
+```java
+@Controller
+public class MyController {
+    Builder builder = new Builder();
+    
+    @Get("/api")
+    public String response(HttpServletRequest request) {
+        builder.setRequest(request);
+        return builder.build();
+    }
+}
+```
+
+See the difference? The singleton `MyController` now uses the same stateful `Builder` for all requests. 
+
+I blasted a bunch of parallel requests at the server and reproduced the empty parameter issue. Then I reverted the change and repeated the experiment - suddenly, no parameter problems. Bingo!
+
+I don't know exactly _how_ this produced the weird behaviour - why were the request parameters empty? Probably the stateful request parsing getting mucked up across threads. Dunno, I'm no mathemagician.
+
+The point is though, it doesn't matter _how_ - debugging a problem like this, it can be enough to recognize what a concurrency bug looks like and what's likely to cause it. If there's a _potential_ threading problem, pretty good odds it needs to be fixed.
+
+---
+
+The team made the simple change to remove the instance variables. We all crossed our fingers, said our prayers to Brian Goetz, and pushed to prod. Success! No more random auth failures and the monitors gave the all clear.
+
+Concurrency bugs are hard, but you don't need to be a genius to fix them. Recognize when the problem involves random, inconsistent behaviour and take a look for any shared, mutable state. Easy peasy, right?
