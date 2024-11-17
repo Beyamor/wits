@@ -10,7 +10,7 @@ The team added some logging, pushed to prod, and we took a look together. The lo
 
 Random. Intermittent. Occasional. If that sounds like your bug, one thing's for sure - buddy, you got a concurrency problem.
 
----
+***
 
 On the one hand, these problems are notoriously difficult to debug since reproducing the problem isn't straightforward. On the other hand, there's a large swathe that boils down to the same cause - something getting shared unsafely across threads.
 
@@ -18,7 +18,7 @@ It's really valuable to develop that intuition for this class of problems becaus
 
 So, again - when you see random behaviour, you should think about concurrency problems. And if you're thinking about threading problems, a big one to consider is sharing something across threads.
 
----
+***
 
 I skimmed through the release diff. The code looked fine, but knowing the common cause - something shared across threads - I had a pretty good instinct for what kind of change I was digging for.
 
@@ -61,7 +61,7 @@ I don't know exactly _how_ this produced the weird behaviour - why were the requ
 
 The point is though, it doesn't matter _how_ - debugging a problem like this, it can be enough to recognize what a concurrency bug looks like and what's likely to cause it. If there's a _potential_ threading problem, pretty good odds it needs to be fixed.
 
----
+***
 
 The team made the simple change to remove the instance variables. We all crossed our fingers, said our prayers to Brian Goetz, and pushed to prod. Success! No more random auth failures and the monitors gave the all clear.
 
