@@ -2,7 +2,8 @@
   (:require [hiccup.core :as hic])
   (:import [org.jsoup Jsoup]))
 
-(def output-root (clojure.java.io/file "target/site"))
+(def output-root-name "target/site")
+(def output-root (clojure.java.io/file output-root-name))
 (def css-files ["shades-of-purple.min.css"
                 "common.css"
                 "blog.css"])

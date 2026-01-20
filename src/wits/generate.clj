@@ -1,16 +1,22 @@
 (ns wits.generate
-  (:require wits.core
-            wits.blog
-            wits.home))
+  (:require [wits.blog]
+            [wits.core]
+            [wits.home])
+  (:import (java.nio.file Paths)))
 
 (defn copy-resources!
   []
-  (doseq [file-type ["js" "css"]
-          input (file-seq (clojure.java.io/file "resources" file-type))
-          :when (clojure.string/ends-with? (.getName input) (str "." file-type))
-          :let [output (clojure.java.io/file wits.core/output-root file-type (.getName input))]]
-    (clojure.java.io/make-parents output)
-    (clojure.java.io/copy input output)))
+  (let [input-root-path (Paths/get "resources" (into-array String []))
+        output-root-path (Paths/get wits.core/output-root-name (into-array String []))]
+    (doseq [[dir ext] [["js" "js"] ["css" "css"] ["images" "png"]]
+            input-file (file-seq (clojure.java.io/file "resources" dir))
+            :when (clojure.string/ends-with? (.getName input-file) (str "." ext))
+            :let [input-path (.toPath input-file)
+                  relative-path (.relativize input-root-path input-path)
+                  output-path (.resolve output-root-path relative-path)
+                  output (.toFile output-path)]]
+      (clojure.java.io/make-parents output)
+      (clojure.java.io/copy input-file output))))
 
 (defn generate!
   []
