@@ -8,14 +8,6 @@
     font-size: small;
 }
 
-#content h1 {
-    font-size: 18pt;
-}
-
-#content h1:not(:first-child) {
-    margin-top: 50px;
-}
-
 pre {
     font-size: 12pt;
 }
@@ -62,12 +54,35 @@ pre {
     padding-left: 5px;
 }
 
+#content {
+    display: flex;
+    flex-direction: column;
+}
+
+#content h1 {
+    font-size: 18pt;
+}
+
+#content h1:not(:first-child) {
+    margin-top: 50px;
+}
+
 #content hr {
     color: #eee;
     background-color: #eee;
     height: 1px;
     border: none;
     margin: 30px;
+}
+
+#content p {
+    margin: 10px;
+}
+
+#content img {
+    object-fit: contain;
+    padding: 20px;
+    border-radius: 30px;
 }
 
 p code {
