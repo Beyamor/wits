@@ -1,0 +1,50 @@
+title: A Site for Sore Images
+date: 20-01-2026
+tags: code
+
+A few years back, [I rejiggered the site](https://beyamor.github.io/blog/entries/regenerating-the-site/) to use [GitHub Actions](https://docs.github.com/en/actions) specifically so I could include media and binary files in the repo.
+
+With [the recent cube post](https://beyamor.github.io/blog/entries/winter-2025-cube-drafts/), I finally got around to plugging in some pictures. Surprise surprise, the software I never actually tested was broken. Who could've seen that coming?
+
+Two quick(ish) addenda to the hosting process.
+
+# Missing Media
+On first push, all I saw was broken placeholders for the images. Okay, my MTGO screenshots aren't exactly Monet, but they should look better than that!
+
+I popped open the console and confirmed from the network that we were downloading _something_, so the files were there in some fashion, but whatever that fashion was, it wasn't an image.
+
+Git LFS basically replaces the media with file links in the repo. I had a hunch that we were trying to display these links, rather than following them home. Hm.
+
+Turns out [the checkout action](https://github.com/actions/checkout) does exactly that. By default, it won't actually pull in the files themselves:
+
+```yaml
+ # Whether to download Git-LFS files
+ # Default: false
+ lfs: ''
+```
+
+Simply setting that to true should do the trick, right?
+
+# Looking for LFS
+Well, close. With that set, the job errored out:
+
+```
+Unable to locate executable file: git. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also check the file mode to verify the file is executable.
+```
+
+Thankfully, [somebody else as clueless as me](https://github.com/git-lfs/git-lfs/issues/4346) ran into the same issue. Straightforward enough; no `git-lfs` installed, no way to pull the media.
+
+As I mentioned in the original blog, we're using the Clojure-enabled container `clojure:lein` so we can run the build. Presumably, this doesn't natively come with `git-lfs` installed.
+
+There're a couple ways to skin this coding cat. I don't _think_ we can set a container on a per-step basis, but we should be able to per-job. If we did that, we could pass the checked-out repo across jobs, e.g. [as an artifact](https://docs.github.com/en/actions/tutorials/store-and-share-data). That takes some tweaking and testing though and it's just about dinner time for me.
+
+Instead, I took the blunt approach: I'm just installing `git-lfs` in the image and moving on:
+
+```yaml
+- name: setup
+  run: "apt-get update && apt-get -y install git-lfs"
+```
+
+This isn't the most elegant, but with that in place, the job can perform the LFS checkout. Suddenly, images appear!
+
+So, two lessons: first, make sure the GitHub Actions actually work end-to-end. Second, hire a good QA!
