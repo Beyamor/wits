@@ -18,9 +18,9 @@ Git LFS basically replaces the media with file links in the repo. I had a hunch 
 Turns out [the checkout action](https://github.com/actions/checkout) does exactly that. By default, it won't actually pull in the files themselves:
 
 ```yaml
- # Whether to download Git-LFS files
- # Default: false
- lfs: ''
+# Whether to download Git-LFS files
+# Default: false
+lfs: ''
 ```
 
 Simply setting that to true should do the trick, right?

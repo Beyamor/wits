@@ -115,8 +115,9 @@
   (wits.html/transform-tag
     content :pre
     (fn [attr [text]]
-      (let [class (some-> attr :class
-                          (clojure.string/replace "brush: " "language-"))]
+      (let [class (or (some-> attr :class
+                          (clojure.string/replace "brush: " "language-"))
+                      "language-text")]
         [:pre
          [:code {:class class} (if (string? text)
                                  (clojure.string/trim text)
@@ -166,11 +167,10 @@
                     md/md-to-html-string
                     hik/parse
                     hik/as-hiccup
-                    capitalize-headings
+                    ;capitalize-headings
                     identify-headings
                     syntaxhighlight->highlight
                     wrap-images)
-        title (WordUtils/capitalizeFully title)
         tags (sort tags)]
     {:title title
      :body [:div#blog
