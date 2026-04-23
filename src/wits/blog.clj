@@ -129,7 +129,7 @@
     content :p
     (fn [attr [img :as body]]
       (if (= :img (first img))
-        [:div.img-container img]
+        img
         (apply vector :p attr body)))))
 
 
