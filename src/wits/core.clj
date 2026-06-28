@@ -7,9 +7,10 @@
 (def css-files ["shades-of-purple.min.css"
                 "common.css"
                 "blog.css"])
-(def js-files ["highlight.min.js"])
+(def js-files [])
 
-(def resources-html
+(defn resources-html
+  [css-files js-files]
   (concat
     (for [css css-files]
       [:link {:rel "stylesheet" :href (str "/css/" css)}])
@@ -31,23 +32,26 @@
     (str doc)))
 
 (defn ->page
-  [{:keys [title body]}]
+  [{:keys [title body js css]}]
   (->html
     [:html
      [:head
       [:meta {:charset "utf-8"}]
       (when title
         [:title title])
-      wits.core/resources-html]
+      (wits.core/resources-html (or css css-files)
+                                (or js js-files))]
      [:body
       header
       [:div#content
        body]]]))
 
 (defn generate-page!
-  [{:keys [title body file]}]
+  [{:keys [title body file css js]}]
   (let [html (->page {:title title
-                      :body body})
+                      :body body
+                      :css css
+                      :js js})
         output-file (if (coll? file)
                       (reduce clojure.java.io/file output-root (flatten file))
                       (clojure.java.io/file output-root file))]

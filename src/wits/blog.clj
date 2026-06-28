@@ -11,6 +11,9 @@
 
 (def blog-source-dir (clojure.java.io/file "blogs"))
 
+(def js-files ["highlight.min.js"
+               "blog.js"])
+
 (let [formatter1 (DateTimeFormatter/ofPattern "dd-MM-yyyy")
       formatter2 (DateTimeFormatter/ofPattern "MM-dd-yyyy")]
   (defn parse-date
@@ -174,6 +177,7 @@
         tags (sort tags)]
     {:title title
      :body [:div#blog
+            [:div#fullpage-image]
             [:h1.title title]
             (when (:date blog)
               [:div.date (format-date (:date blog))])
@@ -188,7 +192,8 @@
   [blogs]
   (doseq [blog blogs]
     (wits.core/generate-page!
-      (merge {:file ["blog" "entries" (blog->file-name blog)]}
+      (merge {:file ["blog" "entries" (blog->file-name blog)]
+              :js js-files}
              (blog->page blog)))))
 
 (defn generate-list!
