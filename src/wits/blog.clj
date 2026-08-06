@@ -183,7 +183,7 @@
               [:div.date (format-date (:date blog))])
             [:div.tags
              (map #(tag-element % nil) tags)]
-            [:div#content
+            [:div.content
              content]
             [:script {:type "text/javascript"}
              "hljs.highlightAll();"]]}))

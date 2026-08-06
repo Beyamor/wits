@@ -1,6 +1,6 @@
 body {
     font-family: Helvitca, Sans-Serif;
-    font-size: 14pt;
+    font-size: 16pt;
     margin-bottom: 80px;
 }
 
@@ -19,6 +19,6 @@ a {
 }
 
 #content {
-    width: 650px;
     margin: auto;
+    max-width: 800px;
 }
