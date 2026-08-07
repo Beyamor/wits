@@ -29,7 +29,9 @@
         doc (doto (Jsoup/parse raw-html)
               (-> .outputSettings (doto
                                     (.prettyPrint true))))]
-    (str doc)))
+    (str
+      "<!DOCTYPE html>\n"
+      doc)))
 
 (defn ->page
   [{:keys [title body js css]}]
